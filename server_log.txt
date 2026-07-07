@@ -1,0 +1,5 @@
+
+> nexusos@2.0.6 dev
+> tsx server.ts
+
+sh: 1: tsx: not found
