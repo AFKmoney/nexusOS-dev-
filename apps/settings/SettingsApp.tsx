@@ -213,11 +213,13 @@ export default function SettingsApp() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                  <div className="text-[10px] text-zinc-500 uppercase font-black mb-2 tracking-widest">Active Model</div>
-                  <div className="text-sm font-bold text-accent">{kernelRules.activeLocalModel || 'Llama-3.2-1B'}</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                {kernelRules.activeLocalModel ? (
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <div className="text-[10px] text-zinc-500 uppercase font-black mb-2 tracking-widest">Active Model</div>
+                    <div className="text-sm font-bold text-accent">{kernelRules.activeLocalModel}</div>
+                  </div>
+                ) : null}
+                <div className={`p-4 rounded-2xl bg-white/[0.02] border border-white/5 ${!kernelRules.activeLocalModel ? 'col-span-2' : ''}`}>
                   <div className="text-[10px] text-zinc-500 uppercase font-black mb-2 tracking-widest">Privileges</div>
                   <div className="text-sm font-bold text-white">SYSTEM_ADMIN</div>
                 </div>

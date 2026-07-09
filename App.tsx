@@ -442,7 +442,6 @@ export default function App() {
       <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
       <DesktopWidgets />
-      <NeuralThoughtStream />
 
       <div
         className="absolute inset-0 z-10 overflow-hidden"
