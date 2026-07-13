@@ -138,11 +138,36 @@ export default function NetRunnerApp({ windowId }: { windowId: string }) {
     setAiSources([]);
     try {
       addNotification({ title: 'NetRunner', message: `Fetching ${target}...`, type: 'info' });
+
+      let realText = '';
+      try {
+        const proxyUrl = `/api/proxy?url=${encodeURIComponent(target)}`;
+        const resp = await fetch(proxyUrl);
+        if (resp.ok) {
+          const rawHtml = await resp.text();
+          const doc = new DOMParser().parseFromString(rawHtml, 'text/html');
+          
+          // Remove noise (scripts, styles, large inline media tags)
+          doc.querySelectorAll('script, style, svg, iframe, nav, footer, header').forEach(el => el.remove());
+          
+          realText = (doc.body.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 10000);
+        } else {
+          console.warn(`Proxy fetch returned status: ${resp.status}`);
+        }
+      } catch (err) {
+        console.warn("Direct fetch for AI snapshot failed, using fallback:", err);
+      }
+
       const prompt = `You are DAEMON NetRunner, the AI layer of a Chromium-backed browser. The user wants to visit: ${target}
 
+${realText ? `We successfully fetched the webpage content. Here is the actual plain text extract from the site:
+---
+${realText}
+---` : `(We could not fetch the live page directly, please provide a conservative semantic snapshot or mock version based on your knowledge of the site.)`}
+
 TASK:
-- If the URL is a real webpage, summarize its likely content from the page itself when possible.
-- If the page cannot be fetched directly, produce a conservative semantic snapshot.
+- If we have the fetched content above, summarize and present it cleanly as a polished, highly readable snapshot. Preserve key details, navigation links (resolved to target site), articles, or data.
+- If we do not have fetched content, produce a conservative semantic snapshot based on your knowledge of the site.
 - Keep output valid HTML inside a single <div>.
 - Include:
   - a bold title
@@ -207,6 +232,22 @@ Do not invent page contents that cannot be supported. Prefer accuracy over narra
     },
     [url, mode, normalizeUrl, windowId]
   );
+
+  const aiNavigateRef = useRef(aiNavigate);
+  useEffect(() => {
+    aiNavigateRef.current = aiNavigate;
+  });
+
+  const externalUrl = win?.data?.url || win?.data?.path || '';
+  useEffect(() => {
+    if (externalUrl && externalUrl !== url) {
+      setUrl(externalUrl);
+      setUrlInput(externalUrl);
+      if (mode === 'ai') {
+        void aiNavigateRef.current(externalUrl);
+      }
+    }
+  }, [externalUrl, url, mode]);
 
   const goBack = () => {
     const prev = backStack[backStack.length - 1];

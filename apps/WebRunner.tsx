@@ -26,6 +26,7 @@ import { browserBridge, type BrowserCommand, type BrowserExtractResult, type Bro
  */
 
 const CORS_PROXIES = [
+  '/api/proxy?url=',
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
 ];
@@ -206,9 +207,12 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
     }
   }, [resolvedInitial]);
 
+
+
   const normalizeUrl = (input: string): string => {
     const trimmed = input.trim();
     if (!trimmed) return '';
+    if (/^(about|javascript|data):/i.test(trimmed)) return trimmed;
     if (/^https?:\/\//i.test(trimmed)) return trimmed;
     if (/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(trimmed)) return `https://${trimmed}`;
     return `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
@@ -265,8 +269,18 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
     // Proxy a URL for cross-origin resource loading
     const proxyUrl = (href: string): string => {
       const absolute = resolveUrl(href);
-      if (absolute.startsWith('data:') || absolute.startsWith('blob:') || absolute.startsWith('#')) return absolute;
-      return `${proxy}${encodeURIComponent(absolute)}`;
+      if (absolute.startsWith('data:') || absolute.startsWith('blob:') || absolute.startsWith('#') || absolute.startsWith('javascript:')) {
+        return absolute;
+      }
+      try {
+        const u = new URL(absolute);
+        const protocol = u.protocol.replace(':', '');
+        const host = u.host;
+        const pathAndQuery = u.pathname + u.search + u.hash;
+        return `${window.location.origin}/api/proxy/${protocol}/${host}${pathAndQuery}`;
+      } catch {
+        return `${window.location.origin}/api/proxy?url=${encodeURIComponent(absolute)}`;
+      }
     };
 
     // Rewrite link[href], img[src], script[src] to go through proxy
@@ -305,14 +319,57 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
     // Minimal iframe-safe overrides (just ensure images are responsive, don't nuke site styles)
     const styleOverride = `<style>img { max-width: 100%; height: auto; }</style>`;
 
+    // Intercept clicks and form submissions inside the iframe to load them via proxy
+    const iframeInterceptors = `<script>
+      (function() {
+        document.addEventListener('click', function(e) {
+          var target = e.target;
+          while (target && target.tagName !== 'A') {
+            target = target.parentNode;
+          }
+          if (target && target.href) {
+            var hrefAttr = target.getAttribute('href');
+            if (hrefAttr && (hrefAttr.startsWith('#') || hrefAttr.startsWith('javascript:') || hrefAttr.startsWith('data:') || hrefAttr.startsWith('about:'))) return;
+            if (target.href.startsWith('about:') || target.href.startsWith('javascript:') || target.href.startsWith('data:') || target.href.indexOf('about:srcdoc') !== -1) return;
+            e.preventDefault();
+            window.parent.postMessage({ type: 'webrunner-navigate', url: target.href }, '*');
+          }
+        }, true);
+
+        document.addEventListener('submit', function(e) {
+          var target = e.target;
+          if (target && target.action) {
+            var actionAttr = target.getAttribute('action');
+            if (actionAttr && (actionAttr.startsWith('javascript:') || actionAttr.startsWith('data:') || actionAttr.startsWith('about:'))) return;
+            if (target.action.startsWith('about:') || target.action.startsWith('javascript:') || target.action.startsWith('data:') || target.action.indexOf('about:srcdoc') !== -1) return;
+            e.preventDefault();
+            var method = (target.method || 'get').toLowerCase();
+            var actionUrl = target.action;
+            if (method === 'get') {
+              var formData = new FormData(target);
+              var params = new URLSearchParams();
+              for (var pair of formData.entries()) {
+                params.append(pair[0], pair[1]);
+              }
+              var separator = actionUrl.indexOf('?') !== -1 ? '&' : '?';
+              actionUrl = actionUrl + separator + params.toString();
+            }
+            window.parent.postMessage({ type: 'webrunner-navigate', url: actionUrl }, '*');
+          }
+        }, true);
+      })();
+    </script>`;
+
+    const headInjection = baseTag + styleOverride + iframeInterceptors;
+
     if (processed.includes('<head>')) {
-      return processed.replace('<head>', `<head>${baseTag}${styleOverride}`);
+      return processed.replace('<head>', `<head>${headInjection}`);
     } else if (processed.includes('<head ')) {
-      return processed.replace(/<head\s/, `<head>${baseTag}${styleOverride}</head><head `);
+      return processed.replace(/<head\s/, `<head>${headInjection}</head><head `);
     } else if (processed.includes('<html')) {
-      return processed.replace(/<html[^>]*>/, `$&<head>${baseTag}${styleOverride}</head>`);
+      return processed.replace(/<html[^>]*>/, `$&<head>${headInjection}</head>`);
     }
-    return `<html><head>${baseTag}${styleOverride}</head><body>${processed}</body></html>`;
+    return `<html><head>${headInjection}</head><body>${processed}</body></html>`;
   };
 
   const loadPage = async (url: string) => {
@@ -321,6 +378,17 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
     setPageHtml('');
 
     try {
+      // Check if it is a special scheme
+      if (/^(about|javascript|data):/i.test(url)) {
+        if (url.toLowerCase().startsWith('about:blank')) {
+          setPageHtml('<html><body></body></html>');
+        } else {
+          setPageHtml(`<html><body style="font-family: sans-serif; padding: 20px; background: #0f172a; color: #cbd5e1;"><h3>Internal Frame Navigation</h3><p>Blocked browser navigation to: <code>${url}</code></p></body></html>`);
+        }
+        setIsLoading(false);
+        return;
+      }
+
       // Check if it's a local VFS path
       if (url.startsWith('/') || url.startsWith('/home/') || url.startsWith('/system/')) {
         const content = vfs.readFile(url, SYSTEM_VFS_APP_ID);
@@ -363,6 +431,21 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
 
     loadPage(finalUrl);
   };
+
+  const navigateRef = useRef(navigate);
+  useEffect(() => {
+    navigateRef.current = navigate;
+  });
+
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'webrunner-navigate' && e.data.url) {
+        navigateRef.current(e.data.url);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const goBack = () => {
     const prev = backStack[backStack.length - 1];

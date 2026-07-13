@@ -14,6 +14,103 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // General Web Proxy for WebRunner (bypasses CORS & X-Frame-Options)
+  app.get("/api/proxy", async (req, res) => {
+    try {
+      const targetUrl = req.query.url as string;
+      if (!targetUrl) {
+        return res.status(400).send("Missing 'url' parameter.");
+      }
+
+      let finalUrl = targetUrl.trim();
+      if (!/^https?:\/\//i.test(finalUrl)) {
+        finalUrl = "https://" + finalUrl;
+      }
+
+      console.log(`[Proxy] Fetching target: ${finalUrl}`);
+
+      const response = await fetch(finalUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9,fr;q=0.8",
+        },
+      });
+
+      const contentType = response.headers.get("content-type") || "text/html";
+      res.setHeader("Content-Type", contentType);
+
+      // Disable X-Frame-Options and Content-Security-Policy to allow loading in iframes safely
+      res.removeHeader("X-Frame-Options");
+      res.removeHeader("Content-Security-Policy");
+
+      if (
+        !contentType.includes("text/html") &&
+        !contentType.includes("application/json") &&
+        !contentType.includes("text/plain") &&
+        !contentType.includes("application/javascript") &&
+        !contentType.includes("text/css")
+      ) {
+        // Binary stream (images, favicon, audio, video, etc.)
+        const arrayBuffer = await response.arrayBuffer();
+        return res.send(Buffer.from(arrayBuffer));
+      }
+
+      const text = await response.text();
+      res.send(text);
+    } catch (err: any) {
+      console.error("[Proxy] error:", err);
+      res.status(500).send(`Proxy failed to fetch the target URL: ${err.message}`);
+    }
+  });
+
+  // Wildcard path-based proxy for resolving relative web resources correctly
+  app.get("/api/proxy/:protocol/:host/*", async (req, res) => {
+    try {
+      const { protocol, host } = req.params;
+      const pathSuffix = req.params[0] || "";
+      const queryStr = req.url.includes("?") ? req.url.substring(req.url.indexOf("?")) : "";
+
+      // Reconstruct target URL
+      const finalUrl = `${protocol}://${host}/${pathSuffix}${queryStr}`;
+
+      console.log(`[Path-Proxy] Fetching: ${finalUrl}`);
+
+      const response = await fetch(finalUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "*/*",
+          "Accept-Language": "en-US,en;q=0.9,fr;q=0.8",
+        },
+      });
+
+      const contentType = response.headers.get("content-type") || "application/octet-stream";
+      res.setHeader("Content-Type", contentType);
+
+      // Disable security headers that prevent iframe loads
+      res.removeHeader("X-Frame-Options");
+      res.removeHeader("Content-Security-Policy");
+
+      if (
+        !contentType.includes("text/html") &&
+        !contentType.includes("application/json") &&
+        !contentType.includes("text/plain") &&
+        !contentType.includes("application/javascript") &&
+        !contentType.includes("text/css")
+      ) {
+        // Binary stream
+        const arrayBuffer = await response.arrayBuffer();
+        return res.send(Buffer.from(arrayBuffer));
+      }
+
+      const text = await response.text();
+      res.send(text);
+    } catch (err: any) {
+      console.error("[Path-Proxy] error:", err);
+      res.status(500).send(`Path Proxy failed to fetch: ${err.message}`);
+    }
+  });
+
   // Proxy for Gemini API
   app.post("/api/gemini/models/:modelId", async (req, res) => {
     try {
