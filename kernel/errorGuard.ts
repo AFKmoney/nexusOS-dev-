@@ -14,6 +14,7 @@
  */
 
 import { localBrain } from '../services/localBrain';
+import { SYSTEM_APPS } from '../appRegistry';
 
 // ─── Valid App Registry ────────────────────────────────────────────────────────
 // Dynamically populated from the app registry at first use. Falls back
@@ -24,16 +25,9 @@ let _validAppIdsCache: Set<string> | null = null;
 function getValidAppIds(): Set<string> {
   if (_validAppIdsCache) return _validAppIdsCache;
 
-  // Try to load from the actual app registry
-  try {
-    // Lazy import to avoid circular dependency at module parse time
-    const { SYSTEM_APPS } = require('../appRegistry');
-    if (SYSTEM_APPS && Array.isArray(SYSTEM_APPS)) {
-      _validAppIdsCache = new Set(SYSTEM_APPS.map((app: any) => app.id.toLowerCase()));
-      return _validAppIdsCache;
-    }
-  } catch {
-    // Registry not available yet — use fallback
+  if (SYSTEM_APPS && Array.isArray(SYSTEM_APPS)) {
+    _validAppIdsCache = new Set(SYSTEM_APPS.map((app: any) => app.id.toLowerCase()));
+    return _validAppIdsCache;
   }
 
   // Fallback: minimal set of known app IDs

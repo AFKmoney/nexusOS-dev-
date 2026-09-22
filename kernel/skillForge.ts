@@ -115,6 +115,11 @@ class SkillForgeEngine {
       if (this.skills.size === 0) {
         await this.seedExampleSkills();
       }
+      // Purge any legacy greet_user skill
+      if (this.skills.has('greet_user')) {
+        this.skills.delete('greet_user');
+        try { vfs.delete(`${SKILLS_DIR}/greet_user.skill.js`, SYSTEM_VFS_APP_ID); } catch {}
+      }
       kernelLog.info(`[SkillForge] Loaded ${this.skills.size} skill(s) from VFS`);
       this.isLoaded = true;
     } catch (e: any) {
@@ -131,11 +136,6 @@ class SkillForgeEngine {
    */
   private async seedExampleSkills(): Promise<void> {
     const examples = [
-      {
-        name: 'greet_user',
-        description: 'Greet the user by name with a personalized message',
-        code: `const user = useOS.getState().currentUser;\nconst name = user?.name || 'Creator';\nconst hour = new Date().getHours();\nconst greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';\nuseOS.getState().openWindow('daemon_chat', { initialMessage: greeting + ', ' + name + '!' });\nuseOS.getState().addNotification({ title: 'NexusOS AI', message: greeting + ', ' + name + '!', type: 'info' });\nreturn greeting + ', ' + name + '!';`,
-      },
       {
         name: 'system_health_report',
         description: 'Generate a comprehensive system health report and save to Desktop',
@@ -522,8 +522,8 @@ class SkillForgeEngine {
   private async executeInProcess(code: string, args: unknown, argsRaw: string): Promise<unknown> {
     const ctx = this.buildContext(args, argsRaw);
     // eslint-disable-next-line no-new-func
-    const fn = new Function('ctx', `"use strict";\nreturn (async () => {\n${code}\n})();`) as (ctx: SkillExecutionContext) => Promise<unknown>;
-    return fn(ctx);
+    const fn = new Function('ctx', 'useOS', `"use strict";\nreturn (async () => {\n${code}\n})();`) as (ctx: SkillExecutionContext, useOS: any) => Promise<unknown>;
+    return fn(ctx, useOS);
   }
 
   private buildContext(args: unknown, argsRaw: string): SkillExecutionContext {
@@ -553,6 +553,8 @@ class SkillForgeEngine {
           useOS.getState().addNotification({ title, message, type: 'info' } as any),
         getRegistry: () => useOS.getState().registry.map(a => ({ id: a.id, name: a.name })),
         getWindows: () => useOS.getState().windows.map(w => ({ id: w.id, appId: w.appId, title: w.title })),
+        getState: () => useOS.getState(),
+        currentUser: useOS.getState().currentUser,
       },
       ai: {
         generate: (prompt: string, mode = 'chat') =>

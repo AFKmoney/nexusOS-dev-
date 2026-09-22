@@ -50,7 +50,7 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
     AppComponent = CustomAppRunner;
   }
 
-  if (windowState.isMinimized) return null;
+  const isMinimized = !!windowState.isMinimized;
 
   // Window drag bounds — keep title bar visible (top 40px) and within
   // the desktop area (above the taskbar).
@@ -86,18 +86,19 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
       }}
       onDragStart={() => focusWindow(windowState.id)}
       onResizeStart={() => focusWindow(windowState.id)}
-      disableDragging={windowState.isMaximized}
-      enableResizing={!windowState.isMaximized}
+      disableDragging={windowState.isMaximized || isMinimized}
+      enableResizing={!windowState.isMaximized && !isMinimized}
       minWidth={320}
       minHeight={200}
       bounds="parent"
       dragHandleClassName="window-title-bar"
       style={{
         zIndex: alwaysOnTop ? 9999 : windowState.zIndex,
-        display: 'flex',
-        pointerEvents: 'auto',
+        display: isMinimized ? 'none' : 'flex',
+        pointerEvents: isMinimized ? 'none' : 'auto',
+        visibility: isMinimized ? 'hidden' : 'visible',
       }}
-      className={`window-frame transition-opacity duration-200 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100'}`}
+      className={`window-frame transition-opacity duration-200 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100'} ${isMinimized ? 'hidden' : ''}`}
     >
       <div
         className={`flex flex-col w-full h-full overflow-hidden relative

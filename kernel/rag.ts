@@ -438,10 +438,14 @@ class RagModule {
 
       // NVIDIA embeddings
       if (provider.id === 'nvidia') {
-        const resp = await fetch('https://integrate.api.nvidia.com/v1/embeddings', {
+        const resp = await fetch('/api/ai/proxy', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-          body: JSON.stringify({ model: 'nvidia/nv-embed-v1', input: [text.slice(0, 8000)], input_type: 'query' }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: 'https://integrate.api.nvidia.com/v1/embeddings',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
+            body: { model: 'nvidia/llama-3.2-nv-embedqa-1b-v1', input: [text.slice(0, 8000)], input_type: 'query' },
+          }),
           signal: AbortSignal.timeout(10000),
         });
         if (resp.ok) {

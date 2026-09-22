@@ -99,26 +99,23 @@ export const PROVIDER_PRESETS: Omit<AIProvider, 'apiKey' | 'enabled'>[] = [
     name: 'NVIDIA NIM',
     type: 'openai-compatible',
     baseUrl: 'https://integrate.api.nvidia.com/v1',
-    defaultModel: 'meta/llama-3.3-70b-instruct',
+    defaultModel: 'z-ai/glm-5.3',
     models: [
-      'meta/llama-3.3-70b-instruct',
-      'meta/llama-3.1-405b-instruct',
-      'meta/llama-3.1-70b-instruct',
-      'meta/llama-3.1-8b-instruct',
-      'deepseek-ai/deepseek-r1',
-      'deepseek-ai/deepseek-v3',
+      'z-ai/glm-5.3',
       'nvidia/llama-3.1-nemotron-70b-instruct',
-      'nvidia/llama-3.3-nemotron-super-49b-v1',
+      'meta/llama-3.3-70b-instruct',
+      'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+      'nvidia/nemotron-4-340b-instruct',
       'mistralai/mistral-large-2-instruct',
-      'mistralai/mixtral-8x22b-instruct-v0.1',
-      'qwen/qwen2.5-coder-32b-instruct',
-      'qwen/qwen2.5-7b-instruct',
-      'google/gemma-2-27b-it',
-      'google/gemma-2-9b-it',
-      'microsoft/phi-3.5-mini-instruct',
-      'microsoft/phi-3-medium-128k-instruct',
+      'mistralai/mistral-7b-instruct-v0.3',
+      'meta/llama-3.2-90b-vision-instruct',
+      'meta/llama-3.2-11b-vision-instruct',
+      'deepseek-ai/deepseek-v4-flash-0731',
+      'deepseek-ai/deepseek-coder-6.7b-instruct',
+      'google/gemma-4-31b-it',
+      'google/gemma-3-12b-it',
       'ibm/granite-3.0-8b-instruct',
-      'nv-mistralai/mistral-nemo-12b-instruct',
+      'mistralai/codestral-22b-instruct-v0.1',
       '01-ai/yi-large',
     ],
     maxTokens: 16384,
@@ -350,6 +347,11 @@ export function isTransientProviderError(err: unknown): boolean {
   return false;
 }
 
+function getProxyUrl(path: string = '/api/ai/proxy'): string {
+  if (typeof window !== 'undefined') return path;
+  return `http://localhost:3000${path}`;
+}
+
 export class AIProviderGateway {
   private static instance: AIProviderGateway;
   private providers: AIProvider[] = [];
@@ -360,6 +362,10 @@ export class AIProviderGateway {
     this.loadProviders();
   }
 
+  private serverEnvChecked = false;
+  private hasServerNvidiaKey = false;
+  private hasServerGeminiKey = false;
+
   public static getInstance(): AIProviderGateway {
     if (!AIProviderGateway.instance) {
       AIProviderGateway.instance = new AIProviderGateway();
@@ -367,12 +373,83 @@ export class AIProviderGateway {
     return AIProviderGateway.instance;
   }
 
+  public async syncWithServerEnv(): Promise<{ hasNvidiaKey: boolean; hasGeminiKey: boolean; hasOpenaiKey: boolean }> {
+    try {
+      const url = getProxyUrl('/api/ai/env-status');
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        this.serverEnvChecked = true;
+        this.hasServerNvidiaKey = Boolean(data.hasNvidiaKey);
+        this.hasServerGeminiKey = Boolean(data.hasGeminiKey);
+
+        if (this.hasServerGeminiKey) {
+          const google = this.providers.find(p => p.id === 'google');
+          if (google) {
+            if (!google.apiKey || google.apiKey === '(Server Key Configured)') {
+              google.apiKey = '(Server Key Configured)';
+              google.enabled = true;
+            }
+          }
+        }
+
+        if (this.hasServerNvidiaKey) {
+          const nvidia = this.providers.find(p => p.id === 'nvidia');
+          if (nvidia) {
+            if (!nvidia.apiKey || nvidia.apiKey === '(Server Key Configured)') {
+              nvidia.apiKey = '(Server Key Configured)';
+              nvidia.enabled = true;
+            }
+          }
+        }
+
+        // Active provider resolution:
+        // Prioritize NVIDIA NIM when server key is available, or preserve valid user selection
+        const currentActive = this.providers.find(p => p.id === this.activeProviderId);
+        const currentActiveUsable = currentActive && currentActive.enabled && (
+          (currentActive.apiKey && currentActive.apiKey.trim().length > 0) ||
+          (currentActive.id === 'nvidia' && this.hasServerNvidiaKey) ||
+          (currentActive.id === 'google' && this.hasServerGeminiKey) ||
+          currentActive.id === 'lmstudio' ||
+          currentActive.id === 'ollama'
+        );
+
+        if (!currentActiveUsable || this.activeProviderId === 'lmstudio' || this.activeProviderId === 'ollama') {
+          if (this.hasServerNvidiaKey) {
+            this.activeProviderId = 'nvidia';
+          } else if (this.hasServerGeminiKey) {
+            this.activeProviderId = 'google';
+          }
+        }
+
+        this.saveProviders();
+        return data;
+      }
+    } catch {}
+    return { hasNvidiaKey: false, hasGeminiKey: false, hasOpenaiKey: false };
+  }
+
   // ─── Storage ───────────────────────────────────────────────
   private loadProviders() {
     try {
-      const raw = localStorage.getItem(PROVIDERS_STORAGE_KEY);
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(PROVIDERS_STORAGE_KEY) : null;
       if (raw) {
         this.providers = JSON.parse(raw);
+
+        // Ensure NVIDIA NIM provider is updated with valid endpoint & active model
+        const nvidia = this.providers.find(p => p.id === 'nvidia');
+        if (nvidia) {
+          nvidia.baseUrl = 'https://integrate.api.nvidia.com/v1';
+          if (!nvidia.defaultModel || nvidia.defaultModel.includes('llama-3.3-70b') || nvidia.defaultModel.includes('llama-3.1-405b') || nvidia.defaultModel.includes('nv-embed-v1')) {
+            nvidia.defaultModel = 'z-ai/glm-5.3';
+          }
+          const preset = PROVIDER_PRESETS.find(p => p.id === 'nvidia');
+          if (preset?.models) {
+            nvidia.models = preset.models;
+          }
+          this.saveProviders();
+        }
+
         // Ensure google provider is always present
         if (!this.providers.find(p => p.id === 'google')) {
           const google = PROVIDER_PRESETS.find(p => p.id === 'google');
@@ -394,7 +471,7 @@ export class AIProviderGateway {
         this.activeProviderId = 'google';
         this.saveProviders();
       }
-      const active = localStorage.getItem(ACTIVE_PROVIDER_KEY);
+      const active = typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_PROVIDER_KEY) : null;
       if (active) this.activeProviderId = active;
       
       // Fallback: If the active provider is not enabled, default to google
@@ -417,10 +494,15 @@ export class AIProviderGateway {
       }));
       this.activeProviderId = 'google';
     }
+
+    if (typeof window !== 'undefined') {
+      setTimeout(() => this.syncWithServerEnv(), 50);
+    }
   }
 
   private saveProviders() {
     try {
+      if (typeof localStorage === 'undefined') return;
       const data = JSON.stringify(this.providers);
       localStorage.setItem(PROVIDERS_STORAGE_KEY, data);
       localStorage.setItem(ACTIVE_PROVIDER_KEY, this.activeProviderId);
@@ -470,10 +552,11 @@ export class AIProviderGateway {
   }
 
   public updateProviderKey(id: string, apiKey: string) {
+    const cleanKey = apiKey.trim().replace(/^Bearer\s+/i, '');
     const idx = this.providers.findIndex(p => p.id === id);
     if (idx >= 0) {
       // Create a new object instead of mutating — ensures React sees the change
-      this.providers[idx] = { ...this.providers[idx]!, apiKey, enabled: apiKey.length > 0 };
+      this.providers[idx] = { ...this.providers[idx]!, apiKey: cleanKey, enabled: cleanKey.length > 0 };
       this.saveProviders();
     }
   }
@@ -579,14 +662,27 @@ export class AIProviderGateway {
       headers['X-Title'] = 'NexusOS';
     }
 
-    const url = `${provider.baseUrl}/chat/completions`;
+    // Normalize base URL to prevent 404s from trailing slashes or duplicate paths
+    let cleanBase = (provider.baseUrl || '').trim().replace(/\/+$/, '');
+    if (provider.id === 'nvidia') {
+      cleanBase = 'https://integrate.api.nvidia.com/v1';
+    }
+    const url = cleanBase.endsWith('/chat/completions') ? cleanBase : `${cleanBase}/chat/completions`;
+
     // Build the request body. When `tools` is provided, we enable native
     // function calling by sending the OpenAI tool schema and `tool_choice: 'auto'`.
+    const isNvidia = provider.id === 'nvidia';
+    const isGlm = (model || provider.defaultModel || '').includes('glm');
+    const temperature = isNvidia ? 0.5 : 0.7;
+    const top_p = 1;
+    const resolvedMaxTokens = Math.max(maxTokens || provider.maxTokens || 4096, (isGlm || isNvidia) ? 1024 : 256);
+
     const bodyObj: Record<string, unknown> = {
-      model: model || provider.defaultModel,
+      model: model || provider.defaultModel || (isNvidia ? 'z-ai/glm-5.3' : undefined),
       messages,
-      temperature: 0.7,
-      max_tokens: maxTokens || provider.maxTokens || 4096,
+      temperature,
+      top_p,
+      max_tokens: resolvedMaxTokens,
       stream,
     };
     const hasTools = !!(tools && tools.length > 0);
@@ -604,11 +700,15 @@ export class AIProviderGateway {
     const bodyStr = JSON.stringify(bodyObj);
 
     // Local parser: extracts text and (if hasTools) tool_calls from an
-    // OpenAI-format response. `arguments` is a JSON string in the API
-    // response — we parse it into a structured object for the caller.
+    // OpenAI-format response. Supports reasoning_content for thinking models.
     const parseOpenAIResponse = (data: any): string | AIToolCallResult => {
       const msg = data?.choices?.[0]?.message;
-      const text = (msg && typeof msg.content === 'string' && msg.content) || '';
+      let content = (msg && typeof msg.content === 'string' && msg.content) || '';
+      const reasoning = (msg && typeof msg.reasoning_content === 'string' && msg.reasoning_content) || '';
+
+      // Clean response: use primary content, fallback to reasoning only if content is empty
+      let text = content || reasoning || '';
+
       if (!hasTools) return text;
       const rawToolCalls = (msg && Array.isArray(msg.tool_calls)) ? msg.tool_calls : [];
       const toolCalls: AIToolCall[] = rawToolCalls.map((tc: any): AIToolCall => {
@@ -657,24 +757,62 @@ export class AIProviderGateway {
       }
     }
 
-    // Browser mode CORS proxy fallback — for providers that don't send
-    // CORS headers. Anthropic and Google already work in browser mode.
-    const needsCorsProxy = !hasElectron && provider.type === 'openai-compatible'
-      && provider.id !== 'lmstudio' && provider.id !== 'ollama';
-    const fetchUrl = needsCorsProxy
-      ? `https://corsproxy.io/?url=${encodeURIComponent(url)}`
-      : url;
+    // Use server-side proxy in browser mode for external cloud endpoints to bypass CORS and avoid third-party blocks
+    const isLocalEndpoint = provider.baseUrl.includes('localhost') || provider.baseUrl.includes('127.0.0.1');
+    const useServerProxy = !hasElectron && !isLocalEndpoint;
 
-    // Direct fetch (works in browser mode for CORS-friendly APIs, or as fallback)
-    const res = await fetch(fetchUrl, {
-      method: 'POST',
-      headers,
-      body: bodyStr,
-    });
+    let res: Response;
+    const controller = new AbortController();
+    const timeoutMs = stream ? 120000 : 90000;
+    const timeoutTimer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      if (useServerProxy) {
+        res = await fetch(getProxyUrl('/api/ai/proxy'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            url,
+            headers,
+            body: bodyObj,
+          }),
+        });
+      } else {
+        res = await fetch(url, {
+          method: 'POST',
+          headers,
+          signal: controller.signal,
+          body: bodyStr,
+        });
+      }
+    } catch (fetchErr: any) {
+      if (fetchErr.name === 'AbortError') {
+        throw new Error(`${provider.name} connection timed out after ${timeoutMs / 1000}s. The endpoint may be slow, queuing, or unreachable.`);
+      }
+      throw fetchErr;
+    } finally {
+      clearTimeout(timeoutTimer);
+    }
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => '');
-      throw new Error(`${provider.name} API Error ${res.status}: ${errBody.slice(0, 200)}`);
+      let errMsg = errBody;
+      try {
+        const parsed = JSON.parse(errBody);
+        errMsg = (typeof parsed.error === 'string' ? parsed.error : parsed.error?.message)
+          || parsed.detail
+          || parsed.message
+          || parsed.title
+          || errBody;
+      } catch {}
+      
+      // Specifically handle NVIDIA NVCF function access / account permission errors
+      if (errMsg.includes('Function') && errMsg.includes('Not found for account')) {
+        errMsg = `Model '${bodyObj.model || provider.defaultModel}' is not authorized for your NVIDIA account/key. On build.nvidia.com, visit the model page to accept terms or select a standard model like 'nvidia/llama-3.1-nemotron-70b-instruct'. Original: ${errMsg}`;
+      }
+
+      throw new Error(`${provider.name} API Error ${res.status}: ${errMsg}`);
     }
 
     if (stream) {
@@ -770,11 +908,32 @@ export class AIProviderGateway {
       }
     }
 
-    const res = await fetch(url, { method: 'POST', headers, body: bodyStr });
+    const isLocalEndpoint = provider.baseUrl.includes('localhost') || provider.baseUrl.includes('127.0.0.1');
+    const useServerProxy = !hasElectron && !isLocalEndpoint;
+
+    let res: Response;
+    if (useServerProxy) {
+      res = await fetch(getProxyUrl('/api/ai/proxy'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url,
+          headers,
+          body: bodyObj,
+        }),
+      });
+    } else {
+      res = await fetch(url, { method: 'POST', headers, body: bodyStr });
+    }
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => '');
-      throw new Error(`Anthropic API Error ${res.status}: ${errBody.slice(0, 200)}`);
+      let errMsg = errBody;
+      try {
+        const parsed = JSON.parse(errBody);
+        errMsg = parsed.error?.message || parsed.detail || parsed.message || errBody;
+      } catch {}
+      throw new Error(`Anthropic API Error ${res.status}: ${errMsg.slice(0, 200)}`);
     }
 
     if (stream) {
@@ -795,7 +954,10 @@ export class AIProviderGateway {
   ): Promise<string | ReadableStream<Uint8Array> | AIToolCallResult> {
     const modelId = model || provider.defaultModel;
     const endpoint = stream ? 'streamGenerateContent' : 'generateContent';
-    const url = `${provider.baseUrl}/models/${modelId}:${endpoint}`;
+    let url = `${provider.baseUrl}/models/${modelId}:${endpoint}`;
+    if (stream) {
+      url += '?alt=sse';
+    }
 
     const systemInstruction = messages.find(m => m.role === 'system')?.content;
     const contents = messages.filter(m => m.role !== 'system').map(m => ({
@@ -819,7 +981,10 @@ export class AIProviderGateway {
       }];
     }
 
-    const headers = { 'Content-Type': 'application/json', 'x-goog-api-key': provider.apiKey };
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': provider.apiKey || '',
+    };
     const bodyStr = JSON.stringify(body);
 
     // Local parser: Gemini returns parts that may contain either `text`
@@ -871,11 +1036,31 @@ export class AIProviderGateway {
       }
     }
 
-    const res = await fetch(url, { method: 'POST', headers, body: bodyStr });
+    // In web browser, proxy through /api/ai/proxy to handle CORS and inject GEMINI_API_KEY
+    const useServerProxy = !hasElectron;
+    let res: Response;
+    if (useServerProxy) {
+      res = await fetch(getProxyUrl('/api/ai/proxy'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url,
+          headers,
+          body,
+        }),
+      });
+    } else {
+      res = await fetch(url, { method: 'POST', headers, body: bodyStr });
+    }
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => '');
-      throw new Error(`Gemini API Error ${res.status}: ${errBody.slice(0, 200)}`);
+      let errMsg = errBody;
+      try {
+        const parsed = JSON.parse(errBody);
+        errMsg = parsed.error?.message || parsed.detail || parsed.message || errBody;
+      } catch {}
+      throw new Error(`Gemini API Error ${res.status}: ${errMsg.slice(0, 200)}`);
     }
 
     if (stream) {
@@ -1152,22 +1337,26 @@ ${suffix}`;
 
       // Handle different stream formats
       if (provider.type === 'google') {
-        // Gemini streams as JSON array chunks
-        try {
-          // Try to parse complete JSON objects from buffer
-          const jsonMatch = buffer.match(/\{[^{}]*"text"\s*:\s*"[^"]*"[^{}]*\}/g);
-          if (jsonMatch) {
-            for (const match of jsonMatch) {
-              try {
-                const obj = JSON.parse(match);
-                const text = obj.candidates?.[0]?.content?.parts?.[0]?.text || obj.text;
-                if (text) onToken(text);
-              } catch {}
-            }
-            const lastIdx = buffer.lastIndexOf('}');
-            if (lastIdx >= 0) buffer = buffer.slice(lastIdx + 1);
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            const payload = trimmed.slice(6);
+            if (payload === '[DONE]') continue;
+            try {
+              const data = JSON.parse(payload);
+              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) onToken(text);
+            } catch {}
+          } else if (trimmed.startsWith('{')) {
+            try {
+              const data = JSON.parse(trimmed);
+              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) onToken(text);
+            } catch {}
           }
-        } catch {}
+        }
       } else if (provider.type === 'anthropic') {
         // Anthropic SSE format
         const lines = buffer.split('\n');
@@ -1195,8 +1384,12 @@ ${suffix}`;
           if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
             try {
               const data = JSON.parse(trimmed.slice(6));
-              const text = data.choices?.[0]?.delta?.content || '';
-              if (text) onToken(text);
+              const delta = data.choices?.[0]?.delta;
+              const content = delta?.content || '';
+              // Stream fluid content directly — internal reasoning stays internal
+              if (content) {
+                onToken(content);
+              }
             } catch {}
           }
         }
@@ -1209,15 +1402,37 @@ ${suffix}`;
     const provider = this.providers.find(p => p.id === id);
     if (!provider) return { success: false, message: 'Provider not found', latencyMs: 0 };
 
+    const isLocal = provider.id === 'lmstudio' || provider.id === 'ollama';
+    const isNvidiaServerKey = provider.id === 'nvidia' && (this.hasServerNvidiaKey || provider.apiKey === '(Server Key Configured)');
+    const isGeminiServerKey = provider.id === 'google' && (this.hasServerGeminiKey || provider.apiKey === '(Server Key Configured)');
+    if (!isLocal && !isNvidiaServerKey && !isGeminiServerKey && !provider.apiKey?.trim()) {
+      return { success: false, message: 'Please enter an API Key first before testing', latencyMs: 0 };
+    }
+
     const start = performance.now();
     try {
-      // Use generateOnce directly instead of the hacky .call() approach
-      const result = await this.generateOnce(provider, '', 'Reply with exactly: OK', undefined, 10);
+      // Allow up to 90s for cloud endpoints, cold-starts, or models with reasoning phases
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Connection timed out after 90s. The remote AI model may be queued or taking too long.')), 90000)
+      );
+
+      const targetModel = provider.defaultModel || (provider.models && provider.models[0]) || (provider.id === 'nvidia' ? 'z-ai/glm-5.3' : undefined);
+      const result = await Promise.race([
+        this.generateOnce(
+          provider,
+          'You are the AI engine of NexusOS.',
+          'Respond with: NEXUS_CONNECTED',
+          targetModel,
+          1024
+        ),
+        timeoutPromise,
+      ]);
       const latency = Math.round(performance.now() - start);
-      return { success: true, message: `Connected: "${result.trim().slice(0, 50)}"`, latencyMs: latency };
+      const cleanResult = result.replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim() || result.trim();
+      return { success: true, message: `Connected: "${cleanResult.slice(0, 80)}"`, latencyMs: latency };
     } catch (e: any) {
       const latency = Math.round(performance.now() - start);
-      return { success: false, message: e.message?.slice(0, 100) || 'Connection failed', latencyMs: latency };
+      return { success: false, message: e.message || 'Connection failed', latencyMs: latency };
     }
   }
 }

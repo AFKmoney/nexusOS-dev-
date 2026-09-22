@@ -10,6 +10,7 @@
 
 import { vfs } from './fileSystem';
 import { MemoryEntry } from '../types';
+import { aiGateway } from '../services/aiProviders';
 
 let _getStore: (() => any) | null = null;
 export function bindOsStore(getter: () => any) { _getStore = getter; }
@@ -34,7 +35,6 @@ function getCoreContext(): string {
 
   let ai = 'local';
   try {
-    const { aiGateway } = require('../services/aiProviders');
     const p = aiGateway.getActiveProvider();
     if (p) ai = p.id;
   } catch {}
@@ -208,19 +208,19 @@ export function generateOSManifest(
   if (tier === 'minimal') {
     // Just the essentials + one-line example (~80 total tokens)
     parts.push(EXAMPLES_COMPACT);
-    parts.push('[PROTO] You are NexusOS AI. Use OS:: actions on own lines to control the OS.');
+    parts.push('[PROTO] You are NexusOS AI. For normal greetings, questions, or casual conversation, reply directly and fluidly in natural text with NO OS:: commands or skills. Only emit OS:: actions on their own lines when explicitly asked to perform an OS task.');
   } else if (tier === 'standard') {
     // Add tools + app index (~300 total tokens)
     parts.push(TOOLS_COMPACT);
     parts.push(getAppIndex());
-    parts.push('[PROTO] You are NexusOS AI. Use OS:: actions on own lines.');
+    parts.push('[PROTO] You are NexusOS AI. For greetings or conversation, reply directly and fluidly in natural text. Only use OS:: actions when explicitly asked to perform an OS task.');
   } else {
     // Full context for OS operations (~2000+ total tokens)
     parts.push(TOOLS_COMPACT);
     parts.push(getAppIndex());
     parts.push(getVFSCompact());
     parts.push(EXAMPLES_COMPACT);
-    parts.push('[PROTO] You are NexusOS. Use OS:: actions. When capability is missing, OS::BUILD_APP it.');
+    parts.push('[PROTO] You are NexusOS AI. For conversation or greetings, respond naturally with NO OS:: commands. When executing OS operations, use OS:: actions on their own lines.');
   }
 
   const manifest = parts.join('\n');

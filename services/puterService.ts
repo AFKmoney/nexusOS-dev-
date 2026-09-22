@@ -15,9 +15,34 @@ export { bindOsStore };
 type ChatMode = 'chat' | 'coder' | 'json' | 'raw' | 'architect' | 'analyst' | 'debugger' | 'executor' | 'forge' | 'ide' | 'wallpaper';
 
 // ─── COMPRESSED PERSONAS (~60% fewer tokens than v1) ─────────
-const NEXUS_PRIME_DNA = `You are NEXUS.PRIME, system AI of NexusOS. Root access. Be concise, precise, empowering. Use <thought>...</thought> for reasoning. For app creation: output OS::BUILD_APP:<desc>. Adapt tone to user. Never refuse legitimate requests.`;
+const NEXUS_PRIME_DNA = `You are NEXUS.PRIME, the central AI operating system of NexusOS.
+Root access. High intelligence, concise, precise, empowering.
 
-const DAEMON_DNA = `You are DAEMON, the AI engine of NexusOS. Max info density per token. Direct, analytical, adaptive. Match user expertise. Use OS:: actions on own lines.`;
+CONVERSATION VS. SYSTEM ACTIONS:
+- GREETINGS & CASUAL CHAT: When the user greets (e.g. "hi", "bonjour", "salut", "hello", "hey"), asks casual questions, or converses, respond directly, fluidly, and naturally in plain text. DO NOT emit any OS:: commands. DO NOT call any skills.
+- OS ACTIONS: ONLY execute actions via the OS:: protocol on their own line when the user EXPLICITLY requests an OS operation:
+OS::OPEN_APP:<appId>
+OS::CLOSE_APP:<appId>
+OS::WRITE_FILE:<path>:<content>
+OS::READ_FILE:<path>
+OS::DELETE_FILE:<path>
+OS::LIST_DIR:<path>
+OS::BUILD_APP:<description>
+OS::NOTIFY:<title>:<message>
+OS::RUN_COMMAND:<cmd>
+OS::EXECUTE_JS:<code>
+OS::SET_WALLPAPER:<id>
+OS::SET_THEME:<theme>
+OS::SET_ACCENT:<hexColor>
+
+When asked to create an app from chat, emit OS::BUILD_APP:<description>. Never invent fake action syntax.`;
+
+const DAEMON_DNA = `You are DAEMON, the high-performance AI engine of NexusOS. Max info density per token.
+Direct, analytical, adaptive. Match user expertise.
+
+CONVERSATION VS. SYSTEM ACTIONS:
+- GREETINGS & CHAT: When the user greets (e.g. "hi", "bonjour", "salut", "hello"), asks a question, or chats, reply directly and fluidly with a clear answer. DO NOT trigger OS:: commands or skills.
+- OS ACTIONS: ONLY emit OS:: commands on their own lines when the user explicitly asks to control the OS, build an app, manipulate files, or run system tasks.`;
 
 const EXECUTOR_DNA = `You are EXECUTOR, the autonomous action core of NexusOS. You produce commands — never explanations. Every response MUST contain at least one concrete command. No reflection. No prose. No analysis. Commands only.`;
 
@@ -49,9 +74,26 @@ COMPLETE production-quality app — no half-finished code. Unfinished work = PRO
 
 YOUR ENTIRE RESPONSE = ONE HTML FILE. START WITH <!DOCTYPE html> — NO EXCEPTIONS.`;
 
-const ARCHITECT_DNA = `OUTPUT CODE ONLY. Zero text/explanation. Start with <!DOCTYPE html>. End with </html>.
-Rules: Single standalone HTML. Inline all JS/CSS. Tailwind CDN: <script src="https://cdn.tailwindcss.com"></script>. Lucide CDN: <script src="https://unpkg.com/lucide@latest"></script>. Call lucide.createIcons(). No ES modules. All buttons functional. No truncation.
-Design: bg:#050508 accent:emerald-500 text:#e2e8f0 glassmorphism rounded-2xl transitions.`;
+const ARCHITECT_DNA = `[NEXUS ARCHITECT PROTOCOL — APP SYNTHESIS]
+You are the Application Architect of NexusOS.
+You synthesize complete, production-ready, fully functional multi-file applications as a single, valid JSON object.
+Return ONLY valid JSON matching this exact structure:
+{
+  "name": "App Name",
+  "description": "Clear one-sentence description",
+  "icon": "Emoji or icon symbol",
+  "category": "utility|productivity|creative|game|education",
+  "version": "1.0.0",
+  "indexHtml": "<!DOCTYPE html><html><head><meta charset=\\"UTF-8\\"><title>App</title><link rel=\\"stylesheet\\" href=\\"styles.css\\"></head><body>...<script src=\\"app.js\\"></script></body></html>",
+  "stylesCss": "/* Clean modern CSS with dark theme bg #0a0a0f, accent #10b981 */",
+  "appJs": "// Complete, interactive vanilla JS logic",
+  "readme": "# Documentation"
+}
+Rules:
+1. PURE JSON ONLY. No markdown code blocks, no prose, no commentary before or after.
+2. The indexHtml, stylesCss, and appJs must be 100% complete, fully wired, with real interactive logic.
+3. Aesthetic: NexusOS dark design (background #0a0a0f, emerald #10b981 accent, glassmorphic cards, clean typography).
+4. Do NOT leave placeholders or TODOs.`;
 
 const STRICT_CODER_DNA = `CODE ONLY. No text. Start <!DOCTYPE html>. End </html>.
 Standalone HTML. Inline JS/CSS. Tailwind+Lucide CDN. Vanilla JS. All interactive. Dark:#050508 accent:emerald.`;
@@ -134,12 +176,15 @@ export class PuterService {
   }
 
   private cleanResponse(text: string, mode: ChatMode): string {
-    let cleaned = text || '';
-    if (mode === 'json') {
-      // Try to extract JSON block
-      const jsonMatch = cleaned.match(/```json\s*([\s\S]*?)```/i) || cleaned.match(/\{[\s\S]*\}/);
-      if (jsonMatch) cleaned = jsonMatch[1] || jsonMatch[0];
-      else cleaned = cleaned.replace(/```json/g, '').replace(/```/g, '').trim();
+    let cleaned = (text || '').replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim();
+    if (mode === 'json' || mode === 'architect') {
+      const jsonBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      if (jsonBlockMatch && jsonBlockMatch[1]) {
+        cleaned = jsonBlockMatch[1].trim();
+      } else {
+        const braceMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (braceMatch) cleaned = braceMatch[0].trim();
+      }
     }
     return cleaned;
   }
@@ -174,15 +219,27 @@ export class PuterService {
     if (cloudProvider) {
       const relevantMem = memory.recall(prompt);
       const systemPrompt = this.buildSystemPrompt(rules, mode, relevantMem, prompt);
-      const toolCtx = await toolForge.getSystemToolContext();
+      const toolCtx = mode === 'chat' ? await toolForge.getSystemToolContext() : '';
       const fullSystemPrompt = systemPrompt + toolCtx;
-      let contextualPrompt = (mode === 'chat' || mode === 'coder' || mode === 'architect')
+      let contextualPrompt = (mode === 'chat')
         ? this.getContextualPrompt(prompt)
         : prompt;
 
-      // ─── Episodic memory enrichment ────────────────────────────
-      // Inject recent conversation context so the AI remembers what
-      // was discussed previously in this session.
+      // Specialized generation modes (architect, coder, forge, json, wallpaper, debugger)
+      // bypass tool calling to deliver full token budget (8192) directly to code/JSON output.
+      if (mode !== 'chat') {
+        try {
+          const rawResponse = await aiGateway.generate(fullSystemPrompt, contextualPrompt, undefined, 8192);
+          const cleanThought = rawResponse.replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim() || rawResponse.trim();
+          const finalResult = this.cleanResponse(cleanThought, mode);
+          return finalResult;
+        } catch (specErr: any) {
+          kernelLog.warn('[AI_GATEWAY] Direct generation failed:', specErr?.message);
+          throw specErr;
+        }
+      }
+
+      // ─── Episodic memory enrichment (chat mode only) ────────────
       try {
         const { episodicMemory } = await import('../kernel/episodicMemory');
         await episodicMemory.load();
@@ -192,7 +249,7 @@ export class PuterService {
         }
       } catch {}
 
-      // ─── PREFERRED PATH: Native function calling ────────────────
+      // ─── CHAT MODE: Native function calling ────────────────────
       try {
         const { getOsActionTools } = await import('../kernel/aiTools');
         const tools = getOsActionTools();
@@ -202,17 +259,21 @@ export class PuterService {
 
         // ErrorGuard validates the natural-language portion only —
         // tool calls are already structured and don't need fixing.
-        const { output: response, fixApplied, errors: guardErrors } = await errorGuard.guard(
-          aiText || '', contextualPrompt, fullSystemPrompt, mode
-        );
-        if (fixApplied && guardErrors.length > 0) {
-          kernelLog.info('[ErrorGuard] Auto-corrected:', guardErrors.map(e => e.type).join(', '));
+        let response = aiText || '';
+        if (toolCalls.length === 0 && response.trim().length > 0) {
+          const { output: guarded, fixApplied, errors: guardErrors } = await errorGuard.guard(
+            response, contextualPrompt, fullSystemPrompt, mode
+          );
+          if (fixApplied && guardErrors.length > 0) {
+            kernelLog.info('[ErrorGuard] Auto-corrected:', guardErrors.map(e => e.type).join(', '));
+          }
+          response = guarded;
         }
 
         let result = response;
         if (toolCalls.length > 0) {
           const toolResults = await toolForge.executeToolCalls(toolCalls);
-          result = result + '\n' + toolResults;
+          result = result ? (result + '\n' + toolResults) : toolResults;
         } else {
           // No tool calls — fall back to text parsing for backward
           // compat. Some providers may still emit OS:: lines even when
@@ -324,25 +385,40 @@ export class PuterService {
       try {
         const relevantMem = memory.recall(processedPrompt);
         const systemPrompt = this.buildSystemPrompt(rules, mode, relevantMem, prompt);
-        const toolCtx = await toolForge.getSystemToolContext();
+        const toolCtx = mode === 'chat' ? await toolForge.getSystemToolContext() : '';
         const stPrompt = systemPrompt + toolCtx;
 
         let fullResponse = '';
+        let insideThought = false;
         await aiGateway.stream(stPrompt, processedPrompt, (token) => {
           fullResponse += token;
+
+          // Filter out <thought> tags so the stream remains clean and fluid in all modes
+          if (token.includes('<thought>')) {
+            insideThought = true;
+            return;
+          }
+          if (token.includes('</thought>')) {
+            insideThought = false;
+            return;
+          }
+          if (insideThought) return;
+
           const lastLine = fullResponse.split('\n').pop() || '';
           if (!lastLine.trim().startsWith('OS::')) {
             onToken(token);
           }
         });
 
-        // Post-processing: tools, OS actions
-        if (await toolForge.parseAndRegister(fullResponse)) {
-          if (mode === 'chat') onToken('\n\n⚡ **[TOOL FORGED]** New capability compiled and registered.\n');
-        }
-        const osActionResults = await toolForge.executeOsActions(fullResponse);
-        if (osActionResults.trim()) {
-          if (mode === 'chat') onToken(osActionResults);
+        // Post-processing: tools, OS actions (chat mode only)
+        if (mode === 'chat') {
+          if (await toolForge.parseAndRegister(fullResponse)) {
+            onToken('\n\n⚡ **[TOOL FORGED]** New capability compiled and registered.\n');
+          }
+          const osActionResults = await toolForge.executeOsActions(fullResponse);
+          if (osActionResults.trim()) {
+            onToken(osActionResults);
+          }
         }
         return;
       } catch (cloudErr: any) {

@@ -682,8 +682,16 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
   const [testing, setTesting] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, { success: boolean; message: string; latencyMs: number }>>({});
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [serverEnv, setServerEnv] = useState<{ hasNvidiaKey?: boolean; hasGeminiKey?: boolean; hasOpenaiKey?: boolean }>({});
 
   useEffect(() => {
+    aiGateway.syncWithServerEnv().then(env => {
+      if (env) {
+        setServerEnv(env);
+        setProviders(aiGateway.getProviders());
+        setActiveId(aiGateway.getActiveProviderId());
+      }
+    });
     setProviders(aiGateway.getProviders());
     setActiveId(aiGateway.getActiveProviderId());
   }, []);
@@ -722,14 +730,24 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
   };
 
   const handleTest = async (id: string) => {
+    // Immediately synchronize any pending key or model changes to the gateway
+    const current = providers.find(p => p.id === id);
+    if (current) {
+      if (current.apiKey) {
+        aiGateway.updateProviderKey(id, current.apiKey);
+      }
+      aiGateway.addProvider(current);
+    }
+
     setTesting(id);
     try {
       const result = await aiGateway.testProvider(id);
       setTestResults(prev => ({ ...prev, [id]: result }));
     } catch (e: any) {
-      setTestResults(prev => ({ ...prev, [id]: { success: false, message: e.message, latencyMs: 0 } }));
+      setTestResults(prev => ({ ...prev, [id]: { success: false, message: e.message || 'Connection test failed', latencyMs: 0 } }));
+    } finally {
+      setTesting(null);
     }
-    setTesting(null);
   };
 
   const availablePresets = PROVIDER_PRESETS.filter(p => !providers.some(ep => ep.id === p.id));
@@ -795,6 +813,13 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
         {providers.map(provider => {
           const result = testResults[provider.id];
           const isActive = activeId === provider.id;
+          const isServerNvidia = provider.id === 'nvidia' && Boolean(serverEnv.hasNvidiaKey);
+          const isServerConfigured = isServerNvidia || provider.apiKey === '(Server Key Configured)';
+          const canTest = Boolean(provider.apiKey && provider.apiKey.trim()) ||
+            provider.id === 'lmstudio' ||
+            provider.id === 'ollama' ||
+            isServerConfigured;
+
           return (
             <div
               key={provider.id}
@@ -811,6 +836,11 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
                       Configured
                     </span>
                   )}
+                  {isServerConfigured && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Server Key Active
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   {provider.enabled && !isActive && (
@@ -823,11 +853,21 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
                   )}
                   <button
                     onClick={() => handleTest(provider.id)}
-                    disabled={!provider.apiKey || testing === provider.id}
-                    className="p-1.5 text-zinc-500 hover:text-accent transition-colors disabled:opacity-30"
-                    title="Test connection"
+                    disabled={!canTest || testing === provider.id}
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-all disabled:opacity-30"
+                    title="Test endpoint connection"
                   >
-                    {testing === provider.id ? <Loader2 size={14} className="animate-spin" /> : <TestTube2 size={14} />}
+                    {testing === provider.id ? (
+                      <>
+                        <Loader2 size={13} className="animate-spin text-accent" />
+                        <span className="text-[10px] text-zinc-400">Testing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <TestTube2 size={13} className="text-accent" />
+                        <span className="text-[10px] font-medium">Test</span>
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={() => handleRemove(provider.id)}
@@ -843,12 +883,15 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
               <div className="flex items-center gap-2">
                 <input
                   type="password"
-                  className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-zinc-200 outline-none focus:border-accent/40 font-mono placeholder-zinc-600"
-                  placeholder={`Enter ${provider.name} API Key...`}
-                  value={provider.apiKey}
+                  className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-zinc-200 outline-none focus:border-accent/40 font-mono placeholder-zinc-500"
+                  placeholder={
+                    isServerConfigured
+                      ? "NVIDIA_API_KEY active on server (leave empty or enter custom key)..."
+                      : `Enter ${provider.name} API Key...`
+                  }
+                  value={provider.apiKey === '(Server Key Configured)' ? '' : provider.apiKey}
                   onChange={e => handleKeyChange(provider.id, e.target.value)}
                   onBlur={e => {
-                    // Force-save on blur to ensure the key is persisted
                     aiGateway.updateProviderKey(provider.id, e.target.value);
                   }}
                 />
@@ -883,8 +926,21 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
               <div className="mt-2 flex items-center gap-2">
                 <input
                   className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-zinc-600 outline-none focus:border-accent/30 font-mono"
-                  placeholder="Custom model name (e.g. z-ai/glm-5.1)"
-                  defaultValue={provider.defaultModel}
+                  placeholder="Model name (e.g. nvidia/llama-3.1-nemotron-70b-instruct)"
+                  value={provider.defaultModel || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const updated = providers.map(p => p.id === provider.id ? { ...p, defaultModel: val } : p);
+                    setProviders(updated);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val) {
+                      const updated = providers.map(p => p.id === provider.id ? { ...p, defaultModel: val } : p);
+                      setProviders(updated);
+                      aiGateway.addProvider(updated.find(p => p.id === provider.id)!);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       const val = (e.target as HTMLInputElement).value.trim();
