@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Nexus GBA Core</title>
+  <style>
+    html, body { margin: 0; background: #000; overflow: hidden; }
+    canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+  </style>
+</head>
+<body>
+  <canvas id="gba" width="240" height="160"></canvas>
+  <script>
+    const CDN = 'https://cdn.jsdelivr.net/gh/taisel/IodineGBA@master/';
+    const CORE = [
+      'IodineGBA/includes/TypedArrayShim.js',
+      'IodineGBA/core/Cartridge.js',
+      'IodineGBA/core/DMA.js',
+      'IodineGBA/core/Emulator.js',
+      'IodineGBA/core/Graphics.js',
+      'IodineGBA/core/RunLoop.js',
+      'IodineGBA/core/Memory.js',
+      'IodineGBA/core/IRQ.js',
+      'IodineGBA/core/JoyPad.js',
+      'IodineGBA/core/Serial.js',
+      'IodineGBA/core/Sound.js',
+      'IodineGBA/core/Timer.js',
+      'IodineGBA/core/Wait.js',
+      'IodineGBA/core/CPU.js',
+      'IodineGBA/core/Saves.js',
+      'IodineGBA/core/sound/FIFO.js',
+      'IodineGBA/core/sound/Channel1.js',
+      'IodineGBA/core/sound/Channel2.js',
+      'IodineGBA/core/sound/Channel3.js',
+      'IodineGBA/core/sound/Channel4.js',
+      'IodineGBA/core/CPU/ARM.js',
+      'IodineGBA/core/CPU/THUMB.js',
+      'IodineGBA/core/CPU/CPSR.js',
+      'IodineGBA/core/graphics/Renderer.js',
+      'IodineGBA/core/graphics/RendererShim.js',
+      'IodineGBA/core/graphics/RendererProxy.js',
+      'IodineGBA/core/graphics/BGTEXT.js',
+      'IodineGBA/core/graphics/BG2FrameBuffer.js',
+      'IodineGBA/core/graphics/BGMatrix.js',
+      'IodineGBA/core/graphics/AffineBG.js',
+      'IodineGBA/core/graphics/ColorEffects.js',
+      'IodineGBA/core/graphics/Mosaic.js',
+      'IodineGBA/core/graphics/OBJ.js',
+      'IodineGBA/core/graphics/OBJWindow.js',
+      'IodineGBA/core/graphics/Window.js',
+      'IodineGBA/core/graphics/Compositor.js',
+      'IodineGBA/core/memory/DMA0.js',
+      'IodineGBA/core/memory/DMA1.js',
+      'IodineGBA/core/memory/DMA2.js',
+      'IodineGBA/core/memory/DMA3.js',
+      'IodineGBA/core/cartridge/SaveDeterminer.js',
+      'IodineGBA/core/cartridge/SRAM.js',
+      'IodineGBA/core/cartridge/FLASH.js',
+      'IodineGBA/core/cartridge/EEPROM.js',
+      'IodineGBA/core/cartridge/GPIO.js',
+      'user_scripts/GfxGlueCode.js'
+    ];
+    const KEY = { A: 0, B: 1, SELECT: 2, START: 3, Rgt: 4, Lft: 5, U: 6, D: 7, R: 8, L: 9 };
+    let emu = null;
+    const canvas = document.getElementById('gba');
+    function post(kind, extra) {
+      parent.postMessage(Object.assign({ __nexusGba: true, kind: kind }, extra || {}), '*');
+    }
+    function loadScript(src) {
+      return new Promise(function (resolve, reject) {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = function () { reject(new Error(src)); };
+        document.body.appendChild(s);
+      });
+    }
+    function attachGfx(instance) {
+      try {
+        if (typeof GfxGlueCode === 'function') {
+          const blit = new GfxGlueCode(240, 160);
+          blit.attachCanvas(canvas);
+          instance.attachGraphicsFrameHandler(blit);
+        }
+      } catch (e) {}
+    }
+    async function bootCore() {
+      for (var i = 0; i < CORE.length; i++) {
+        await loadScript(CDN + CORE[i]);
+      }
+      if (typeof GameBoyAdvanceEmulator !== 'function') {
+        throw new Error('GameBoyAdvanceEmulator missing');
+      }
+      emu = new GameBoyAdvanceEmulator();
+      attachGfx(emu);
+      post('ready');
+    }
+    function toU8(data) {
+      if (data instanceof ArrayBuffer) return new Uint8Array(data);
+      if (data && data.buffer) return new Uint8Array(data.buffer);
+      if (Array.isArray(data)) return new Uint8Array(data);
+      return new Uint8Array(0);
+    }
+    window.addEventListener('message', function (ev) {
+      var d = ev.data;
+      if (!d || d.__nexusGba !== true) return;
+      if (!emu && d.cmd !== 'ping') return;
+      try {
+        if (d.cmd === 'bios') {
+          emu.attachBIOS(toU8(d.bytes));
+          post('bios', { ok: true, size: toU8(d.bytes).length });
+        }
+        if (d.cmd === 'rom') {
+          emu.attachROM(toU8(d.bytes));
+          post('rom', { ok: true, size: toU8(d.bytes).length, name: d.name || '' });
+        }
+        if (d.cmd === 'play') emu.play();
+        if (d.cmd === 'pause') emu.pause();
+        if (d.cmd === 'stop') emu.stop();
+        if (d.cmd === 'down') {
+          var k = KEY[d.key];
+          if (k !== undefined) emu.keyDown(k);
+        }
+        if (d.cmd === 'up') {
+          var k2 = KEY[d.key];
+          if (k2 !== undefined) emu.keyUp(k2);
+        }
+      } catch (err) {
+        post('error', { message: String(err && err.message ? err.message : err) });
+      }
+    });
+    bootCore().catch(function (err) {
+      post('error', { message: String(err && err.message ? err.message : err) });
+    });
+  </script>
+</body>
+</html>
