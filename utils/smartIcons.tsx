@@ -1,6 +1,7 @@
 import React from 'react';
-import { Trash2, Folder, File, FileCode, FileJson, FileText, Globe, Image, Music, Video, Database, Settings, FileArchive, AppWindow } from 'lucide-react';
+import { Trash2, Folder, File, FileCode, FileJson, FileText, Globe, Image, Music, Video, Database, Settings, FileArchive, AppWindow, Box } from 'lucide-react';
 import { SYSTEM_VFS_APP_ID,  vfs } from '../kernel/fileSystem';
+import { useOS } from '../store/osStore';
 
 
 export function getSmartIcon(path: string, size: number = 24, className: string = "") {
@@ -19,7 +20,18 @@ export function getSmartIcon(path: string, size: number = 24, className: string 
   const ext = fileName.split('.').pop()?.toLowerCase();
 
   // 1. Extension Check
-  if (ext === 'lnk') return <AppWindow size={size} className={`text-accent ${className}`} />;
+  if (ext === 'lnk') {
+    const content = vfs.readFile(path, SYSTEM_VFS_APP_ID);
+    if (content && content.startsWith('NEXUSOS_APP_SHORTCUT:')) {
+      const appId = content.slice('NEXUSOS_APP_SHORTCUT:'.length);
+      const app = useOS.getState().registry.find(a => a.id === appId);
+      if (app && app.icon) {
+        const IconComponent = app.icon;
+        return <IconComponent size={size} className={`text-accent ${className}`} />;
+      }
+    }
+    return <AppWindow size={size} className={`text-accent ${className}`} />;
+  }
   if (ext === 'html' || ext === 'htm') return <Globe size={size} className={`text-orange-500 ${className}`} />;
   if (ext === 'json') return <FileJson size={size} className={`text-yellow-500 ${className}`} />;
   if (ext === 'js' || ext === 'ts' || ext === 'tsx' || ext === 'jsx' || ext === 'css') return <FileCode size={size} className={`text-accent ${className}`} />;

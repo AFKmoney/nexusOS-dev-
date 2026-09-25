@@ -1,10 +1,11 @@
 import React, { Suspense, useEffect, useState, type ComponentType } from 'react';
 import { Rnd } from 'react-rnd';
-import { X, Minus, Square, Minimize2, Box, Pin, PinOff, Droplet } from 'lucide-react';
+import { X, Minus, Square, Minimize2, Box, Pin, PinOff, Droplet, ChevronLeft } from 'lucide-react';
 import { useOS } from '../store/osStore';
 import { sounds } from '../kernel/sounds';
 import { ErrorBoundary } from './ErrorBoundary';
 import CustomAppRunner from '../apps/CustomAppRunner';
+import { useMobileDetection } from '../hooks/useMobileDetection';
 
 export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => {
   const {
@@ -15,8 +16,13 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
     updateWindow,
     activeWindowId,
     openContextMenu,
-    registry
+    registry,
+    mobileMode,
+    isMobileView: storeIsMobileView
   } = useOS();
+
+  const { isMobile: detectedMobile } = useMobileDetection(mobileMode);
+  const isMobile = storeIsMobileView || detectedMobile;
 
   const [isOpening, setIsOpening] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
@@ -45,8 +51,8 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
   const IconComponent = app?.icon || Box;
   let AppComponent = app?.component as ComponentType<{ windowId: string }> | undefined;
 
-  // Fallback for custom forged apps
-  if (!AppComponent && app?.isCustom && app?.sourcePath) {
+  // Fallback for custom forged and generated apps
+  if (!AppComponent && (app?.isCustom || windowState.appId?.startsWith('gen_') || app?.sourcePath)) {
     AppComponent = CustomAppRunner;
   }
 
@@ -57,27 +63,30 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
   const dragBounds = {
     top: 0,
     left: -windowState.width + 100, // allow partial off-screen left, keep 100px visible
-    right: window.innerWidth - 100,  // same for right
-    bottom: window.innerHeight - 48, // keep above taskbar area
+    right: typeof window !== 'undefined' ? window.innerWidth - 100 : 1000,
+    bottom: typeof window !== 'undefined' ? window.innerHeight - 48 : 700,
   };
+
+  const effectiveMaximized = isMobile || !!windowState.isMaximized;
 
   return (
     <Rnd
       size={{
-        width: windowState.isMaximized ? '100%' : windowState.width,
-        height: windowState.isMaximized ? '100%' : windowState.height,
+        width: effectiveMaximized ? '100%' : windowState.width,
+        height: effectiveMaximized ? '100%' : windowState.height,
       }}
       position={{
-        x: windowState.isMaximized ? 0 : windowState.x,
-        y: windowState.isMaximized ? 0 : windowState.y,
+        x: effectiveMaximized ? 0 : windowState.x,
+        y: effectiveMaximized ? 0 : windowState.y,
       }}
       onDragStop={(e, d) => {
-        // Clamp position so the title bar stays accessible
+        if (effectiveMaximized) return;
         const clampedX = Math.max(dragBounds.left, Math.min(dragBounds.right, d.x));
         const clampedY = Math.max(dragBounds.top, Math.min(dragBounds.bottom, d.y));
         updateWindow(windowState.id, { x: clampedX, y: clampedY });
       }}
       onResizeStop={(e, direction, ref, delta, position) => {
+        if (effectiveMaximized) return;
         updateWindow(windowState.id, {
           width: ref.offsetWidth,
           height: ref.offsetHeight,
@@ -86,10 +95,10 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
       }}
       onDragStart={() => focusWindow(windowState.id)}
       onResizeStart={() => focusWindow(windowState.id)}
-      disableDragging={windowState.isMaximized || isMinimized}
-      enableResizing={!windowState.isMaximized && !isMinimized}
-      minWidth={320}
-      minHeight={200}
+      disableDragging={effectiveMaximized || isMinimized}
+      enableResizing={!effectiveMaximized && !isMinimized}
+      minWidth={isMobile ? 260 : 320}
+      minHeight={isMobile ? 180 : 200}
       bounds="parent"
       dragHandleClassName="window-title-bar"
       style={{
@@ -98,11 +107,11 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
         pointerEvents: isMinimized ? 'none' : 'auto',
         visibility: isMinimized ? 'hidden' : 'visible',
       }}
-      className={`window-frame transition-opacity duration-200 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100'} ${isMinimized ? 'hidden' : ''}`}
+      className={`window-frame transition-opacity duration-200 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100'} ${isMinimized ? 'hidden' : ''} ${isMobile ? '!absolute !inset-0 !w-full !h-full !transform-none' : ''}`}
     >
       <div
         className={`flex flex-col w-full h-full overflow-hidden relative
-          ${windowState.isMaximized ? 'rounded-none' : 'rounded-xl'}
+          ${effectiveMaximized ? 'rounded-none' : 'rounded-xl'}
           ${isActive
             ? 'shadow-[0_20px_60px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.12)] ring-1 ring-accent/20'
             : 'shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
@@ -111,71 +120,95 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
         `}
         style={{
           opacity,
-          transform: isOpening ? 'scale(0.96) translateY(10px)' : 'scale(1) translateY(0)',
-          transition: isOpening ? 'transform 0.2s ease-out, opacity 0.2s ease-out' : 'none',
+          transform: isOpening && !isMobile ? 'scale(0.96) translateY(10px)' : 'scale(1) translateY(0)',
+          transition: isOpening && !isMobile ? 'transform 0.2s ease-out, opacity 0.2s ease-out' : 'none',
         }}
       >
-        {/* Title Bar */}
+        {/* Title Bar - mobile optimized height & touch targets */}
         <div
           onContextMenu={handleContextMenu}
-          onDoubleClick={() => toggleMaximizeWindow(windowState.id)}
-          className="window-title-bar h-11 flex items-center justify-between px-4 cursor-default select-none border-b border-white/5 bg-gradient-to-b from-white/[0.04] to-transparent relative z-10 shrink-0"
+          onDoubleClick={() => !isMobile && toggleMaximizeWindow(windowState.id)}
+          className={`window-title-bar ${isMobile ? 'h-11 px-2.5 bg-zinc-950/95 border-b border-white/10' : 'h-11 px-4 border-b border-white/5 bg-gradient-to-b from-white/[0.04] to-transparent'} flex items-center justify-between cursor-default select-none relative z-10 shrink-0`}
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`p-1.5 rounded-lg border border-white/10 transition-colors shrink-0 ${isActive ? 'bg-accent/10 text-accent' : 'bg-black/20 text-zinc-500'}`}>
-              <IconComponent size={14} className={isActive ? 'drop-shadow-accent' : ''} />
+          <div className="flex items-center gap-2 min-w-0">
+            {isMobile && (
+              <button
+                onClick={() => minimizeWindow(windowState.id)}
+                className="flex items-center gap-0.5 py-1 px-2 rounded-xl bg-white/10 active:bg-white/20 text-zinc-100 text-[11px] font-bold shrink-0 transition-all shadow-sm"
+                title="Retour à l'accueil"
+                aria-label="Retour à l'accueil"
+              >
+                <ChevronLeft size={16} className="text-accent" />
+                <span>Accueil</span>
+              </button>
+            )}
+            <div className={`p-1.5 rounded-lg border border-white/10 transition-colors shrink-0 ${isActive ? 'bg-accent/15 text-accent' : 'bg-black/20 text-zinc-500'}`}>
+              <IconComponent size={isMobile ? 15 : 14} className={isActive ? 'drop-shadow-accent' : ''} />
             </div>
-            <span className={`text-xs font-bold tracking-wide transition-colors truncate max-w-[260px] ${isActive ? 'text-zinc-100' : 'text-zinc-500'}`}>
+            <span className={`font-bold tracking-wide transition-colors truncate ${isMobile ? 'text-xs max-w-[130px] sm:max-w-[200px]' : 'text-xs max-w-[260px]'} ${isActive ? 'text-zinc-100' : 'text-zinc-400'}`}>
               {windowState.title}
             </span>
           </div>
 
           <div className="flex items-center gap-1 shrink-0" onMouseDown={(e) => e.stopPropagation()}>
-            {/* Window controls — Windows-style */}
-            <button
-              onClick={() => setOpacity(o => o === 1 ? 0.7 : o === 0.7 ? 0.4 : 1)}
-              className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
-              title="Opacity"
-            >
-              <Droplet size={13} />
-            </button>
-            <button
-              onClick={() => setAlwaysOnTop(!alwaysOnTop)}
-              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${alwaysOnTop ? 'bg-accent/15 text-accent' : 'hover:bg-white/10 text-zinc-500 hover:text-white'}`}
-              title="Always on top"
-            >
-              {alwaysOnTop ? <Pin size={13} /> : <PinOff size={13} />}
-            </button>
+            {/* Desktop only opacity & always-on-top toggles */}
+            {!isMobile && (
+              <>
+                <button
+                  onClick={() => setOpacity(o => o === 1 ? 0.7 : o === 0.7 ? 0.4 : 1)}
+                  className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
+                  title="Opacity"
+                >
+                  <Droplet size={13} />
+                </button>
+                <button
+                  onClick={() => setAlwaysOnTop(!alwaysOnTop)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${alwaysOnTop ? 'bg-accent/15 text-accent' : 'hover:bg-white/10 text-zinc-500 hover:text-white'}`}
+                  title="Always on top"
+                >
+                  {alwaysOnTop ? <Pin size={13} /> : <PinOff size={13} />}
+                </button>
+                <div className="w-px h-5 bg-white/10 mx-1" />
+              </>
+            )}
 
-            <div className="w-px h-5 bg-white/10 mx-1" />
-
+            {/* Minimize */}
             <button
               onClick={() => minimizeWindow(windowState.id)}
-              className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
+              className={`${isMobile ? 'w-9 h-9 active:bg-white/15' : 'w-8 h-8 hover:bg-white/10'} flex items-center justify-center rounded-lg text-zinc-400 hover:text-white transition-colors`}
               title="Minimize"
+              aria-label="Minimize Window"
             >
-              <Minus size={16} />
+              <Minus size={isMobile ? 18 : 16} />
             </button>
-            <button
-              onClick={() => toggleMaximizeWindow(windowState.id)}
-              className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
-              title={windowState.isMaximized ? 'Restore' : 'Maximize'}
-            >
-              {windowState.isMaximized ? <Minimize2 size={14} /> : <Square size={12} />}
-            </button>
+
+            {/* Maximize / Restore (Desktop only) */}
+            {!isMobile && (
+              <button
+                onClick={() => toggleMaximizeWindow(windowState.id)}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                title={windowState.isMaximized ? 'Restore' : 'Maximize'}
+                aria-label="Toggle Maximize"
+              >
+                {windowState.isMaximized ? <Minimize2 size={14} /> : <Square size={12} />}
+              </button>
+            )}
+
+            {/* Close */}
             <button
               onClick={handleClose}
-              className="w-8 h-8 flex items-center justify-center hover:bg-red-500 text-zinc-400 hover:text-white rounded-lg transition-colors"
+              className={`${isMobile ? 'w-9 h-9 bg-red-500/10 active:bg-red-500 text-red-400' : 'w-8 h-8 hover:bg-red-500 text-zinc-400'} flex items-center justify-center hover:text-white rounded-lg transition-colors`}
               title="Close"
+              aria-label="Close Window"
             >
-              <X size={16} />
+              <X size={isMobile ? 18 : 16} />
             </button>
           </div>
         </div>
 
         {/* Content Area */}
         <div
-          className="flex-1 overflow-auto relative bg-transparent min-h-0"
+          className="flex-1 overflow-auto relative bg-transparent min-h-0 custom-scrollbar overscroll-contain"
           onContextMenu={(e) => {
             if (!(e.target as HTMLElement).closest('textarea, input, [contenteditable], .custom-context')) {
               e.preventDefault();
@@ -204,9 +237,10 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
             </div>
           )}
 
-          {!isActive && <div className="absolute inset-0 bg-black/5 pointer-events-none" />}
+          {!isActive && !isMobile && <div className="absolute inset-0 bg-black/5 pointer-events-none" />}
         </div>
       </div>
     </Rnd>
   );
 };
+

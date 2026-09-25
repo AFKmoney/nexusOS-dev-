@@ -35,19 +35,19 @@ function makeTaskId(prefix: string) {
 function summariseAction(action: AIAction) {
   switch (action.type) {
     case 'ANSWER':
-      return `Réponse IA: ${action.prompt}`;
+      return `AI Response: ${action.prompt}`;
     case 'OPEN_APP':
-      return `Ouvrir l'app ${action.appId}`;
+      return `Open app ${action.appId}`;
     case 'CLOSE_APP':
-      return `Fermer l'app ${action.appId}`;
+      return `Close app ${action.appId}`;
     case 'CODE':
-      return `Coder ${action.files.join(', ')}`;
+      return `Code ${action.files.join(', ')}`;
     case 'INSPECT':
-      return `Inspecter ${action.target}`;
+      return `Inspect ${action.target}`;
     case 'MULTITASK':
-      return `${action.tasks.length} tâches parallèles`;
+      return `${action.tasks.length} parallel tasks`;
     default:
-      return 'Tâche IA';
+      return 'AI Task';
   }
 }
 

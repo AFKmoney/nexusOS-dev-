@@ -68,16 +68,16 @@ export default function MonitorApp() {
   };
 
   return (
-    <div className="h-full bg-[#050505] p-6 text-zinc-300 font-mono text-base overflow-hidden flex flex-col selection:bg-cyan-900/30">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className={`p-5 rounded-xl border transition-all flex flex-col justify-between ${kernelRules.autonomyEnabled ? 'bg-emerald-950/10 border-accent/30 shadow-accent' : 'bg-zinc-900/30 border-zinc-800'}`}>
+    <div className="h-full bg-[#050505] p-3 sm:p-6 text-zinc-300 font-mono text-base overflow-y-auto custom-scrollbar flex flex-col selection:bg-cyan-900/30">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6 shrink-0">
+          <div className={`p-4 sm:p-5 rounded-xl border transition-all flex flex-col justify-between ${kernelRules.autonomyEnabled ? 'bg-emerald-950/10 border-accent/30 shadow-accent' : 'bg-zinc-900/30 border-zinc-800'}`}>
              <div>
-                <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
+                <div className="flex justify-between items-start mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2.5">
                         <Brain className={kernelRules.autonomyEnabled ? "text-accent animate-pulse" : "text-zinc-600"} size={20} />
                         <div>
-                            <div className="font-bold text-white tracking-widest uppercase text-sm">NEXUS.AUTONOMY</div>
-                            <div className="text-xs text-zinc-500 uppercase tracking-widest mt-1">
+                            <div className="font-bold text-white tracking-widest uppercase text-xs sm:text-sm">NEXUS.AUTONOMY</div>
+                            <div className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-0.5">
                                 MODE: <span className={
                                     autonomyState === 'ANALYZING' ? "text-accent animate-pulse" :
                                     autonomyState === 'PROMPTING' ? "text-purple-400 animate-pulse" :
@@ -93,59 +93,59 @@ export default function MonitorApp() {
                 
                 {kernelRules.autonomyEnabled ? (
                     <div className="space-y-2">
-                        <div className="bg-black/40 p-3 rounded border border-emerald-900/30 text-sm relative overflow-hidden">
+                        <div className="bg-black/40 p-2.5 rounded border border-emerald-900/30 text-xs sm:text-sm relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
-                            <div className="font-bold text-emerald-700 uppercase text-xs mb-1 flex items-center gap-1">
-                                <Target size={14} /> Neural Objective
+                            <div className="font-bold text-emerald-700 uppercase text-[10px] sm:text-xs mb-0.5 flex items-center gap-1">
+                                <Target size={13} /> Neural Objective
                             </div>
-                            <div className="text-emerald-100 truncate">{currentObjective}</div>
+                            <div className="text-emerald-100 truncate text-xs">{currentObjective}</div>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-zinc-600 font-bold uppercase">
-                            <ShieldCheck size={14} className="text-accent" /> System Self-Modification Enabled
+                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-zinc-600 font-bold uppercase truncate">
+                            <ShieldCheck size={13} className="text-accent shrink-0" /> System Self-Modification Enabled
                         </div>
                     </div>
                 ) : (
-                    <div className="text-sm text-zinc-600 italic py-2">Neural Engine standby.</div>
+                    <div className="text-xs sm:text-sm text-zinc-600 italic py-2">Neural Engine standby.</div>
                 )}
              </div>
-             <div className="text-xs text-zinc-600 pt-2 border-t border-zinc-800/50 mt-2">
+             <div className="text-[10px] sm:text-xs text-zinc-600 pt-2 border-t border-zinc-800/50 mt-2">
                  Kernel Integration: v2.0.6 // Active-Loop: 25s
              </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-              <div className="bg-zinc-900/30 border border-zinc-800 p-3 rounded-lg flex flex-col justify-between h-28 relative overflow-hidden group hover:border-accent/30 transition-colors">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <div className="bg-zinc-900/30 border border-zinc-800 p-2.5 sm:p-3 rounded-lg flex flex-col justify-between h-24 sm:h-28 relative overflow-hidden group hover:border-accent/30 transition-colors">
                   <div className="flex justify-between items-start z-10">
-                      <div className="flex items-center gap-2 text-zinc-500 text-sm font-bold uppercase"><Cpu size={18} /> CPU</div>
-                      <span className="text-xl font-bold text-white">{stats.cpu}%</span>
+                      <div className="flex items-center gap-1.5 text-zinc-500 text-xs sm:text-sm font-bold uppercase"><Cpu size={16} /> CPU</div>
+                      <span className="text-lg sm:text-xl font-bold text-white">{stats.cpu}%</span>
                   </div>
                   <Sparkline data={history.cpu} color="bg-accent" />
               </div>
 
-              <div className="bg-zinc-900/30 border border-zinc-800 p-3 rounded-lg flex flex-col justify-between h-28 relative overflow-hidden group hover:border-pink-500/30 transition-colors">
+              <div className="bg-zinc-900/30 border border-zinc-800 p-2.5 sm:p-3 rounded-lg flex flex-col justify-between h-24 sm:h-28 relative overflow-hidden group hover:border-pink-500/30 transition-colors">
                   <div className="flex justify-between items-start z-10">
-                      <div className="flex items-center gap-2 text-zinc-500 text-sm font-bold uppercase"><Zap size={18} /> RAM</div>
-                      <span className="text-xl font-bold text-white">{stats.mem}%</span>
+                      <div className="flex items-center gap-1.5 text-zinc-500 text-xs sm:text-sm font-bold uppercase"><Zap size={16} /> RAM</div>
+                      <span className="text-lg sm:text-xl font-bold text-white">{stats.mem}%</span>
                   </div>
                   <Sparkline data={history.mem} color="bg-pink-500" />
               </div>
 
-              <div className="bg-zinc-900/30 border border-zinc-800 p-3 rounded-lg flex flex-col justify-between h-28 relative overflow-hidden group hover:border-accent/30 transition-colors">
+              <div className="bg-zinc-900/30 border border-zinc-800 p-2.5 sm:p-3 rounded-lg flex flex-col justify-between h-24 sm:h-28 relative overflow-hidden group hover:border-accent/30 transition-colors">
                   <div className="flex justify-between items-start z-10">
-                      <div className="flex items-center gap-2 text-zinc-500 text-sm font-bold uppercase"><Wifi size={18} /> NET</div>
+                      <div className="flex items-center gap-1.5 text-zinc-500 text-xs sm:text-sm font-bold uppercase"><Wifi size={16} /> NET</div>
                       <div className="text-right">
-                          <div className="text-sm text-zinc-400 flex items-center gap-1 justify-end"><ArrowDown size={14}/> {stats.netDown}</div>
+                          <div className="text-xs sm:text-sm text-zinc-400 flex items-center gap-1 justify-end"><ArrowDown size={12}/> {stats.netDown}</div>
                       </div>
                   </div>
                   <Sparkline data={history.net} color="bg-accent" />
               </div>
 
-              <div className="bg-zinc-900/30 border border-zinc-800 p-3 rounded-lg flex flex-col justify-between h-28 relative overflow-hidden group hover:border-purple-500/30 transition-colors">
+              <div className="bg-zinc-900/30 border border-zinc-800 p-2.5 sm:p-3 rounded-lg flex flex-col justify-between h-24 sm:h-28 relative overflow-hidden group hover:border-purple-500/30 transition-colors">
                   <div className="flex justify-between items-start z-10">
-                      <div className="flex items-center gap-2 text-zinc-500 text-sm font-bold uppercase"><HardDrive size={18} /> VFS</div>
-                      <span className="text-xl font-bold text-white">14%</span>
+                      <div className="flex items-center gap-1.5 text-zinc-500 text-xs sm:text-sm font-bold uppercase"><HardDrive size={16} /> VFS</div>
+                      <span className="text-lg sm:text-xl font-bold text-white">14%</span>
                   </div>
-                  <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden mt-4">
+                  <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden mt-3">
                       <div className="h-full bg-purple-500 w-[14%]" />
                   </div>
               </div>

@@ -40,8 +40,8 @@ export default function TaskSwitcher() {
   if (!isOpen || windows.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-md flex items-center justify-center pointer-events-none animate-in fade-in duration-150">
-      <div className="bg-zinc-900/90 border border-white/10 rounded-2xl p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] max-w-3xl flex gap-4 overflow-x-auto items-center justify-center">
+    <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
+      <div className="bg-zinc-900/95 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] max-w-full sm:max-w-3xl flex gap-3 sm:gap-4 overflow-x-auto items-center justify-start sm:justify-center no-scrollbar">
         {windows.map((win, i) => {
           const app = registry.find(a => a.id === win.appId);
           const Icon = app?.icon || Box;
@@ -50,15 +50,19 @@ export default function TaskSwitcher() {
           return (
             <div 
               key={win.id}
-              className={`flex flex-col items-center justify-center w-32 h-32 rounded-xl transition-all duration-200 ${
-                isSelected ? 'bg-white/10 border border-white/20 scale-110 shadow-xl' : 'opacity-60 scale-95 border border-transparent'
+              onClick={() => {
+                focusWindow(win.id);
+                setIsOpen(false);
+              }}
+              className={`flex flex-col items-center justify-center w-24 h-28 sm:w-32 sm:h-32 shrink-0 rounded-xl transition-all duration-200 cursor-pointer ${
+                isSelected ? 'bg-white/10 border border-accent/40 scale-105 shadow-xl ring-1 ring-accent/30' : 'opacity-65 scale-95 border border-white/5 hover:opacity-90'
               }`}
             >
-              <Icon size={48} className={isSelected ? 'text-accent drop-shadow-accent' : 'text-zinc-500'} />
-              <div className={`mt-4 text-xs font-bold text-center truncate w-full px-2 ${isSelected ? 'text-white' : 'text-zinc-500'}`}>
+              <Icon size={36} className={`sm:w-12 sm:h-12 ${isSelected ? 'text-accent drop-shadow-accent' : 'text-zinc-500'}`} />
+              <div className={`mt-2.5 sm:mt-4 text-xs font-bold text-center truncate w-full px-1.5 ${isSelected ? 'text-white' : 'text-zinc-400'}`}>
                 {app?.name}
               </div>
-              <div className="text-[9px] text-zinc-600 truncate w-full px-2 text-center mt-1">
+              <div className="text-[9px] text-zinc-500 truncate w-full px-1.5 text-center mt-0.5">
                 {win.title}
               </div>
             </div>

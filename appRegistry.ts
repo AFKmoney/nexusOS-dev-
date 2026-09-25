@@ -58,6 +58,7 @@ const MusicPlayerApp = lazy(() => import('./apps/MusicPlayer'));
 const RichEditorApp = lazy(() => import('./apps/RichEditor'));
 const GovernanceDashboardApp = lazy(() => import('./apps/GovernanceDashboard'));
 const PluginMarketApp = lazy(() => import('./apps/PluginMarket'));
+const AutonomousBusinessEngineApp = lazy(() => import('./apps/AutonomousBusinessEngine'));
 
 import {
   Terminal, FileText, Activity, Grid, Image, Cpu, FolderOpen, Globe,
@@ -66,7 +67,7 @@ import {
   Clipboard, Bell, StickyNote, Calculator, Calendar, Music, Pen,
   Search, MonitorDot, Trash2, Server, FileArchive,
   Palette, Video, Cloud, Info, FileCode, Users, Timer, LayoutGrid, 
-  Key, Mic, Rss, Accessibility, Target, Camera, Package
+  Key, Mic, Rss, Accessibility, Target, Camera, Package, Rocket
 } from 'lucide-react';
 
 export const CORE_APP_IDS = ['welcome', 'dashboard', 'explorer', 'terminal', 'notepad', 'settings', 'netrunner'] as const;
@@ -130,6 +131,15 @@ export const SYSTEM_APPS: AppManifest[] = [
   },
 
   // ── AI & Intelligence ─────────────────────────────────────────────────────
+  {
+    id: 'business_autonomy',
+    name: 'Goal & Business Autonomy',
+    icon: Rocket,
+    component: AutonomousBusinessEngineApp,
+    permissions: ['vfs.read', 'vfs.write', 'network', 'kernel.modify'],
+    defaultSize: { width: 960, height: 680 },
+    description: 'Autonomous OODA loop agent for launching online businesses, coding software, and passive revenue.'
+  },
   {
     id: 'daemon_chat',
     name: 'DAEMON Core',

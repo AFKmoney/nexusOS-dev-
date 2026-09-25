@@ -1,881 +1,988 @@
 export const DESKTOP_DIR_FALLBACK_USER = 'user';
 
 export const PROCEDURAL_WALLPAPERS: Record<string, string> = {
-  'nexus://procedural/aurora': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#010208"><canvas id="c"></canvas><script>
+  // 1. COSMIC NEBULA 3D - True Volumetric 3D Celestial Universe
+  'nexus://procedural/nebula': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#020208"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0,mx=0,my=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;window.onmousemove=e=>{mx=e.clientX;my=e.clientY};init();
-const bands=[{hue:160,speed:1,phase:0},{hue:200,speed:1.3,phase:2},{hue:280,speed:0.7,phase:4.5},{hue:140,speed:1.8,phase:1.2}];
-function draw(){
-  g.fillStyle='rgba(1,2,8,0.08)';g.fillRect(0,0,W,H);
-  t+=0.01;
-  bands.forEach(b=>{
-    g.beginPath();
-    for(let x=0;x<=W;x+=4){
-      const y=H*0.3+Math.sin(x*0.004+t*b.speed+b.phase)*H*0.12+Math.sin(x*0.009-t*b.speed*0.5)*H*0.06+(mx-W/2)*0.04+(my-H/2)*0.02;
-      x===0?g.moveTo(x,y):g.lineTo(x,y);
-    }
-    g.lineTo(W,H);g.lineTo(0,H);g.closePath();
-    const gg=g.createLinearGradient(0,H*0.2,0,H*0.7);
-    gg.addColorStop(0,'transparent');
-    gg.addColorStop(0.3,\`hsla(\${b.hue},100%,60%,0.06)\`);
-    gg.addColorStop(0.6,\`hsla(\${b.hue},100%,50%,0.12)\`);
-    gg.addColorStop(1,'transparent');
-    g.fillStyle=gg;g.fill();
-    g.strokeStyle=\`hsla(\${b.hue},100%,70%,0.4)\`;g.lineWidth=1.5;g.stroke();
-  });
-  for(let i=0;i<3;i++){const x=W*0.2+i*W*0.3+(mx-W/2)*0.1;const y=H*0.3+Math.sin(t+i*2)*H*0.1+(my-H/2)*0.05;const r=g.createRadialGradient(x,y,0,x,y,W*0.25);r.addColorStop(0,\`hsla(\${140+i*60},100%,70%,0.07)\`);r.addColorStop(1,'transparent');g.fillStyle=r;g.fillRect(0,0,W,H);}
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/matrix': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000300"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,cols,drops=[],speeds=[],bright=[];
-const ch="01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ∑∇⊕⊗#\$@";
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);cols=Math.floor(W/18);drops=[];speeds=[];bright=[];for(let i=0;i<cols;i++){drops.push(Math.random()*-80);speeds.push(0.3+Math.random()*0.8);bright.push(Math.random());}}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,3,0,0.07)';g.fillRect(0,0,W,H);
-  for(let i=0;i<cols;i++){
-    const y=drops[i]*18;const b=bright[i];
-    g.font=\`\${12+b*3}px monospace\`;
-    for(let j=0;j<Math.floor(8+b*14);j++){
-      const cy=y-j*18;if(cy<0||cy>H)continue;
-      const a=Math.max(0,(1-j/(8+b*14))*(0.4+b*0.5));
-      if(j===0&&b>0.7){g.fillStyle=\`rgba(180,255,200,0.95)\`;}
-      else g.fillStyle=\`rgba(0,\${Math.floor(150+b*80)},\${Math.floor(40+b*40)},\${a})\`;
-      if(Math.random()<0.1+b*0.1)g.fillText(ch[Math.floor(Math.random()*ch.length)],i*18,cy);
-    }
-    drops[i]+=speeds[i];
-    if(y>H&&Math.random()>0.975){drops[i]=0;bright[i]=Math.random();}
-  }
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/nebula': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#020108"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,mx=0,my=0,t=0,pts=[],stars=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);pts=[];for(let i=0;i<200;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*0.6,vy:(Math.random()-.5)*0.6,s:Math.random()*2.5+0.5,hue:Math.random()>0.5?160:220,a:Math.random()*0.6+0.2,drift:Math.random()*6});stars=[];for(let i=0;i<150;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1,a:Math.random()});}
-window.onresize=init;window.onmousemove=e=>{mx=e.clientX;my=e.clientY};init();
-function draw(){
-  g.fillStyle='rgba(2,1,8,0.1)';g.fillRect(0,0,W,H);
-  t+=0.008;
-  stars.forEach(s=>{g.beginPath();g.arc(s.x,s.y,s.r,0,7);g.fillStyle=\`rgba(255,255,255,\${s.a*(0.5+Math.sin(t*s.r*3)*0.5)})\`;g.fill();});
-  for(let i=0;i<3;i++){const rx=W*(0.2+i*0.3),ry=H*(0.3+Math.sin(t*0.4+i)*0.2);const rg=g.createRadialGradient(rx,ry,0,rx,ry,W*0.3);rg.addColorStop(0,\`hsla(\${160+i*80},100%,50%,0.06)\`);rg.addColorStop(1,'transparent');g.fillStyle=rg;g.fillRect(0,0,W,H);}
-  pts.forEach(p=>{
-    p.x+=p.vx+Math.sin(t+p.drift)*0.15+(mx-W/2)*0.0008;
-    p.y+=p.vy+Math.cos(t*0.7+p.drift)*0.15+(my-H/2)*0.0008;
-    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-    const grd=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.s*4);
-    grd.addColorStop(0,\`hsla(\${p.hue},100%,75%,\${p.a})\`);grd.addColorStop(1,'transparent');
-    g.fillStyle=grd;g.beginPath();g.arc(p.x,p.y,p.s*4,0,7);g.fill();
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/waves': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#050510"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(5,5,16,0.1)';g.fillRect(0,0,W,H);
-  t+=0.02;
-  for(let i=0;i<5;i++){
-    g.beginPath();
-    g.strokeStyle=\`hsla(\${180+i*20},100%,60%,0.5)\`;
-    g.lineWidth=2;
-    for(let x=0;x<W;x+=10){
-      let y=H/2+Math.sin(x*0.01+t+i)*100+Math.cos(x*0.02-t*0.5)*50;
-      if(x===0)g.moveTo(x,y);else g.lineTo(x,y);
-    }
-    g.stroke();
-  }
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/particles': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#111"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,pts=[],mx=0,my=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-pts=[];for(let i=0;i<100;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2});}
-window.onresize=init;window.onmousemove=e=>{mx=e.clientX;my=e.clientY};init();
-function draw(){
-  g.clearRect(0,0,W,H);
-  pts.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-    g.fillStyle='#0ff';g.beginPath();g.arc(p.x,p.y,2,0,7);g.fill();
-    pts.forEach(p2=>{
-      let d=Math.hypot(p.x-p2.x,p.y-p2.y);
-      if(d<100){g.strokeStyle=\`rgba(0,255,255,\${1-d/100})\`;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p2.x,p2.y);g.stroke();}
+let W,H,stars=[],nebulae=[],time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  stars=[];
+  for(let i=0;i<750;i++){
+    stars.push({
+      x:(Math.random()-0.5)*2600,
+      y:(Math.random()-0.5)*2000,
+      z:Math.random()*1500+80,
+      sz:Math.random()*1.8+0.5,
+      hue:Math.random()>0.6?195:(Math.random()>0.5?275:160),
+      blink:Math.random()*Math.PI*2
     });
-    let d=Math.hypot(p.x-mx,p.y-my);
-    if(d<150){g.strokeStyle=\`rgba(255,0,255,\${1-d/150})\`;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(mx,my);g.stroke();}
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/starlight': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,stars=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-stars=[];for(let i=0;i<400;i++)stars.push({x:Math.random()*2-1,y:Math.random()*2-1,z:Math.random()});}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,0.2)';g.fillRect(0,0,W,H);
-  g.translate(W/2,H/2);
-  stars.forEach(s=>{
-    s.z-=0.005;if(s.z<=0){s.z=1;s.x=Math.random()*2-1;s.y=Math.random()*2-1;}
-    let px=s.x/s.z*W/2,py=s.y/s.z*W/2;
-    g.fillStyle=\`rgba(255,255,255,\${1-s.z})\`;
-    g.fillRect(px,py,1.5-s.z,1.5-s.z);
-  });
-  g.resetTransform();
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/hexagons': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#1a1a2e"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function hex(x,y,r){
-  g.beginPath();
-  for(let i=0;i<6;i++){
-    let a=i*Math.PI/3;
-    if(i===0)g.moveTo(x+r*Math.cos(a),y+r*Math.sin(a));
-    else g.lineTo(x+r*Math.cos(a),y+r*Math.sin(a));
   }
-  g.closePath();g.stroke();
+  nebulae=[
+    {x:-280,y:-140,z:950,r:460,color:'rgba(16,185,129,',h:160},
+    {x:320,y:90,z:1100,r:520,color:'rgba(56,189,248,',h:200},
+    {x:40,y:240,z:850,r:420,color:'rgba(168,85,247,',h:280},
+    {x:-160,y:260,z:1250,r:390,color:'rgba(244,63,94,',h:340}
+  ];
 }
+window.onresize=init;
+init();
 function draw(){
-  g.clearRect(0,0,W,H);
-  t+=0.02;
-  let s=30, h=s*Math.sqrt(3);
-  g.lineWidth=2;
-  for(let x=-s;x<W+s;x+=s*1.5){
-    for(let y=-h;y<H+h;y+=h){
-      let cy=y+(Math.round(x/(s*1.5))%2?h/2:0);
-      let dist=Math.hypot(x-W/2,cy-H/2);
-      g.strokeStyle=\`hsla(\${(dist-t*50)%360},70%,60%,\${0.2+Math.sin(dist*0.01-t)*0.2})\`;
-      hex(x,cy,s*0.9);
+  time+=0.008;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const pitch=(-tiltY*0.5)*str;
+  const yaw=(tiltX*0.5)*str;
+  const cosP=Math.cos(pitch), sinP=Math.sin(pitch);
+  const cosY=Math.cos(yaw), sinY=Math.sin(yaw);
+  const fov=620*(1+imp*0.14);
+
+  g.fillStyle='#020209';g.fillRect(0,0,W,H);
+
+  nebulae.forEach(n=>{
+    let nx=n.x+Math.sin(time*0.4)*35;
+    let ny=n.y+Math.cos(time*0.35)*25;
+    let nz=n.z-imp*140;
+    let x1=nx*cosY-nz*sinY;
+    let z1=nx*sinY+nz*cosY;
+    let y1=ny*cosP-z1*sinP;
+    let z2=ny*sinP+z1*cosP;
+    if(z2>60){
+      let sx=W/2+(x1*fov)/z2;
+      let sy=H/2+(y1*fov)/z2;
+      let sr=(n.r*fov)/z2;
+      let grd=g.createRadialGradient(sx,sy,0,sx,sy,sr);
+      grd.addColorStop(0,n.color+'0.08)');
+      grd.addColorStop(0.5,n.color+'0.025)');
+      grd.addColorStop(1,'transparent');
+      g.fillStyle=grd;
+      g.fillRect(sx-sr,sy-sr,sr*2,sr*2);
+    }
+  });
+
+  for(let i=0;i<stars.length;i++){
+    const s=stars[i];
+    let sz=s.z-time*20-imp*160;
+    while(sz<80)sz+=1500;
+    while(sz>1580)sz-=1500;
+    let x1=s.x*cosY-sz*sinY;
+    let z1=s.x*sinY+sz*cosY;
+    let y1=s.y*cosP-z1*sinP;
+    let z2=y1*sinP+z1*cosP;
+    if(z2>50){
+      let sx=W/2+(x1*fov)/z2;
+      let sy=H/2+(y1*fov)/z2;
+      if(sx>=0&&sx<=W&&sy>=0&&sy<=H){
+        let alpha=(1-z2/1600)*(0.55+Math.sin(time*3+s.blink)*0.45);
+        let radius=Math.max(0.6,(s.sz*fov)/z2);
+        g.fillStyle='hsla('+s.hue+',85%,90%,'+alpha+')';
+        g.beginPath();g.arc(sx,sy,radius,0,Math.PI*2);g.fill();
+      }
     }
   }
   requestAnimationFrame(draw);
 }
 draw();
 </script></body></html>`,
-  'nexus://procedural/rain': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#0b0c10"><canvas id="c"></canvas><script>
+
+  // 2. NEON GRID HORIZON 3D - 80s Synthwave Infinite Wireframe Mountain Plain
+  'nexus://procedural/neon-grid': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#0d021a"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,drops=[],rips=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-for(let i=0;i<100;i++)drops.push({x:Math.random()*W,y:Math.random()*H,v:5+Math.random()*5,l:10+Math.random()*10});}
-window.onresize=init;init();
+let W,H,time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+}
+window.onresize=init;
+init();
 function draw(){
-  g.fillStyle='rgba(11,12,16,0.3)';g.fillRect(0,0,W,H);
-  g.strokeStyle='#45a29e';
-  drops.forEach(d=>{
-    g.beginPath();g.moveTo(d.x,d.y);g.lineTo(d.x,d.y+d.l);g.stroke();
-    d.y+=d.v;
-    if(d.y>H){
-      d.y=-d.l;d.x=Math.random()*W;
-      rips.push({x:d.x,y:H,r:0,a:1});
-    }
-  });
-  for(let i=rips.length-1;i>=0;i--){
-    let r=rips[i];
-    g.strokeStyle=\`rgba(102,252,241,\${r.a})\`;
-    g.beginPath();g.ellipse(r.x,r.y,r.r*2,r.r,0,0,7);g.stroke();
-    r.r+=2;r.a-=0.05;
-    if(r.a<=0)rips.splice(i,1);
+  time+=0.02;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const pitch=(-tiltY*0.45)*str;
+  const yaw=(tiltX*0.45)*str;
+  const fov=480*(1+imp*0.12);
+  const horizonY=H*0.46+pitch*H*0.4;
+  const camX=yaw*W*0.35;
+
+  g.fillStyle='#090114';g.fillRect(0,0,W,H);
+
+  // Glowing Synthwave Sun at vanishing point
+  const sunX=W/2-camX*0.3;
+  const sunY=horizonY-H*0.12;
+  const sRad=Math.min(W,H)*0.22;
+  const sGrad=g.createRadialGradient(sunX,sunY,0,sunX,sunY,sRad);
+  sGrad.addColorStop(0,'#ffe600');
+  sGrad.addColorStop(0.5,'#ff007f');
+  sGrad.addColorStop(1,'transparent');
+  g.fillStyle=sGrad;
+  g.fillRect(sunX-sRad,sunY-sRad,sRad*2,sRad*2);
+
+  // Sun horizontal scanline slats
+  g.fillStyle='#090114';
+  for(let y=sunY;y<sunY+sRad;y+=11){
+    const h=(y-sunY)*0.08+1.5;
+    g.fillRect(sunX-sRad,y,sRad*2,h);
   }
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/fireflies': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000200"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,flies=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-flies=[];for(let i=0;i<150;i++)flies.push({x:Math.random()*W,y:Math.random()*H,a:Math.random()*7,vx:Math.random()-.5,vy:Math.random()-.5});}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,2,0,0.1)';g.fillRect(0,0,W,H);
-  flies.forEach(f=>{
-    f.x+=f.vx+Math.sin(f.a)*0.5;f.y+=f.vy+Math.cos(f.a)*0.5;f.a+=0.05;
-    if(f.x<0||f.x>W)f.vx*=-1;if(f.y<0||f.y>H)f.vy*=-1;
-    let a=0.5+Math.sin(f.a*2)*0.5;
-    g.fillStyle=\`rgba(150,255,100,\${a})\`;
-    g.beginPath();g.arc(f.x,f.y,2,0,7);g.fill();
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/neon-grid': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#1a0b2e"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='#1a0b2e';g.fillRect(0,0,W,H);
-  t+=2;
-  g.translate(W/2,H*0.4);
-  g.strokeStyle='#f0f';
-  g.lineWidth=2;
-  for(let z=10;z<400;z+=20){
-    let p=z-(t%20);
-    if(p<=0)continue;
-    let w=W/(p*0.01), y=H/(p*0.01);
-    g.globalAlpha=1-p/400;
-    g.beginPath();g.moveTo(-w,y);g.lineTo(w,y);g.stroke();
+
+  // Neon Horizon haze
+  const hGrad=g.createLinearGradient(0,horizonY-30,0,horizonY+60);
+  hGrad.addColorStop(0,'transparent');
+  hGrad.addColorStop(0.4,'rgba(255,0,128,0.3)');
+  hGrad.addColorStop(1,'transparent');
+  g.fillStyle=hGrad;
+  g.fillRect(0,horizonY-30,W,90);
+
+  // 3D Perspective Ground Grid & Mountains
+  const groundY=130;
+  const speed=(time*180)%80;
+
+  // Transverse horizontal grid lines
+  g.strokeStyle='rgba(255,0,128,0.7)';
+  g.lineWidth=1.2;
+  for(let z=80;z<1600;z+=80){
+    let curZ=z-speed;
+    if(curZ<50)continue;
+    let sy=horizonY+(groundY*fov)/curZ;
+    let alpha=Math.max(0,1-curZ/1500);
+    g.strokeStyle='rgba(255,0,128,'+(alpha*0.8)+')';
+    g.beginPath();g.moveTo(0,sy);g.lineTo(W,sy);g.stroke();
   }
-  for(let x=-20;x<=20;x++){
-    g.beginPath();g.moveTo(x*50,H);g.lineTo(x*1000,10000);g.stroke();
-  }
-  g.globalAlpha=1;
-  let rad=g.createRadialGradient(0,-100,0,0,-100,150);
-  rad.addColorStop(0,'#ff0');rad.addColorStop(1,'transparent');
-  g.fillStyle=rad;g.fillRect(-W,-H,W*2,H*2);
-  g.resetTransform();
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/circuit': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#001"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,lines=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-lines=[];}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,17,0.05)';g.fillRect(0,0,W,H);
-  if(Math.random()<0.1)lines.push({x:Math.random()*W,y:Math.random()*H,d:Math.floor(Math.random()*4),l:0});
-  g.strokeStyle='#0f0';g.lineWidth=2;
-  for(let i=lines.length-1;i>=0;i--){
-    let l=lines[i];
-    g.beginPath();g.moveTo(l.x,l.y);
-    if(l.d===0)l.y-=5;else if(l.d===1)l.x+=5;else if(l.d===2)l.y+=5;else l.x-=5;
-    g.lineTo(l.x,l.y);g.stroke();
-    l.l++;
-    if(Math.random()<0.05)l.d=(l.d+(Math.random()<0.5?1:-1)+4)%4;
-    if(l.l>50){
-      g.fillStyle='#0f0';g.beginPath();g.arc(l.x,l.y,3,0,7);g.fill();
-      lines.splice(i,1);
-    }
-  }
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/bubbles': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#003"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,bubs=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-for(let i=0;i<50;i++)bubs.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*30+10,v:Math.random()*2+1,o:Math.random()*10});}
-window.onresize=init;init();
-function draw(){
-  let rad=g.createLinearGradient(0,0,0,H);rad.addColorStop(0,'#003');rad.addColorStop(1,'#008');
-  g.fillStyle=rad;g.fillRect(0,0,W,H);
-  bubs.forEach(b=>{
-    b.y-=b.v;b.x+=Math.sin(b.y*0.05+b.o);
-    if(b.y<-b.r){b.y=H+b.r;b.x=Math.random()*W;}
-    g.strokeStyle='rgba(255,255,255,0.4)';g.lineWidth=2;
-    g.beginPath();g.arc(b.x,b.y,b.r,0,7);g.stroke();
-    g.fillStyle='rgba(255,255,255,0.1)';g.fill();
-    g.fillStyle='rgba(255,255,255,0.6)';g.beginPath();g.arc(b.x-b.r*0.3,b.y-b.r*0.3,b.r*0.2,0,7);g.fill();
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/snow': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#0a192f"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,flakes=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-for(let i=0;i<200;i++)flakes.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*3+1,d:Math.random()*10});}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='#0a192f';g.fillRect(0,0,W,H);
-  g.fillStyle='#fff';
-  flakes.forEach(f=>{
-    g.beginPath();g.arc(f.x,f.y,f.r,0,7);g.fill();
-    f.y+=Math.pow(f.r,0.5);f.x+=Math.sin(f.d)*0.5;f.d+=0.01;
-    if(f.y>H){f.y=-f.r;f.x=Math.random()*W;}
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/laser': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,0.2)';g.fillRect(0,0,W,H);
-  t+=0.05;
-  g.globalCompositeOperation='lighter';
-  for(let i=0;i<3;i++){
-    let y=H/2+Math.sin(t+i*2)*H*0.4;
-    g.strokeStyle=\`hsla(\${i*120},100%,50%,0.8)\`;
-    g.lineWidth=10+Math.sin(t*2+i)*5;
-    g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
-    g.lineWidth=2;g.strokeStyle='#fff';
-    g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
-  }
-  g.globalCompositeOperation='source-over';
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/binary': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,cols=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-cols=[];for(let x=0;x<W;x+=20)cols.push({x,y:Math.random()*H,v:1+Math.random()*2});}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,0.1)';g.fillRect(0,0,W,H);
-  g.font='16px monospace';
-  cols.forEach(c=>{
-    g.fillStyle='#0f0';g.fillText(Math.random()>0.5?'1':'0',c.x,c.y);
-    c.y+=c.v;if(c.y>H)c.y=0;
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/kaleidoscope': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#111"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(17,17,17,0.1)';g.fillRect(0,0,W,H);
-  t+=0.02;
-  g.translate(W/2,H/2);
-  for(let i=0;i<8;i++){
-    g.rotate(Math.PI/4);
+
+  // Longitudinal lines extending into distance
+  g.strokeStyle='rgba(0,240,255,0.6)';
+  for(let x=-1400;x<=1400;x+=100){
     g.beginPath();
-    g.strokeStyle=\`hsla(\${t*50},100%,50%,0.5)\`;
-    g.lineWidth=4;
-    g.moveTo(0,0);
-    g.bezierCurveTo(Math.cos(t)*100,Math.sin(t)*100,Math.sin(t*0.5)*200,Math.cos(t*0.5)*200,300,0);
+    let first=true;
+    for(let z=60;z<1600;z+=120){
+      let px=x-camX;
+      // Add wireframe mountain ridges on edges
+      let distFromCenter=Math.abs(x);
+      let mHeight=0;
+      if(distFromCenter>300){
+        mHeight=Math.sin(x*0.015+z*0.01)*80+Math.cos(x*0.008)*120*(distFromCenter/800);
+      }
+      let sy=horizonY+((groundY-mHeight)*fov)/z;
+      let sx=W/2+(px*fov)/z;
+      if(first){g.moveTo(sx,sy);first=false;}
+      else g.lineTo(sx,sy);
+    }
     g.stroke();
   }
-  g.resetTransform();
+
   requestAnimationFrame(draw);
 }
 draw();
 </script></body></html>`,
-  'nexus://procedural/swirl': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
+
+  // 3. CYBER CITY 3D - 3D Perspective Skyscraper Avenue with Illuminated Facades
+  'nexus://procedural/cyber-city': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#03020c"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,0.1)';g.fillRect(0,0,W,H);
-  t+=0.05;
-  g.translate(W/2,H/2);
-  for(let i=0;i<300;i++){
-    let a=i*0.1+t;
-    let r=i*2;
-    let x=r*Math.cos(a), y=r*Math.sin(a);
-    g.fillStyle=\`hsla(\${i+t*20},100%,50%,1)\`;
-    g.beginPath();g.arc(x,y,2,0,7);g.fill();
+let W,H,time=0,buildings=[],traffic=[];
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  buildings=[];
+  // Layout buildings along left and right side of central avenue
+  for(let i=0;i<28;i++){
+    const side=i%2===0?-1:1;
+    const z=(Math.floor(i/2)+1)*140+Math.random()*40;
+    const x=side*(220+Math.random()*120);
+    const w=120+Math.random()*80;
+    const h=320+Math.random()*260;
+    const hue=i%3===0?185:(i%3===1?320:270);
+    buildings.push({x,w,h,z,side,hue,seed:Math.random()});
   }
-  g.resetTransform();
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/fire': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,parts=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-for(let i=0;i<300;i++)parts.push({x:Math.random()*W,y:H+Math.random()*100,s:Math.random()*20+10,v:Math.random()*3+1,h:Math.random()*40});}
-window.onresize=init;init();
-function draw(){
-  g.globalCompositeOperation='source-over';
-  g.fillStyle='rgba(0,0,0,0.2)';g.fillRect(0,0,W,H);
-  g.globalCompositeOperation='lighter';
-  parts.forEach(p=>{
-    p.y-=p.v;p.s*=0.97;
-    g.fillStyle=\`hsla(\${p.h},100%,50%,0.5)\`;
-    g.beginPath();g.arc(p.x,p.y,p.s,0,7);g.fill();
-    if(p.s<0.5){p.y=H;p.x=Math.random()*W;p.s=Math.random()*20+10;}
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/pulse': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#1a0033"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(26,0,51,0.1)';g.fillRect(0,0,W,H);
-  t-=1;
-  g.translate(W/2,H/2);
-  for(let i=0;i<10;i++){
-    let r=(i*50+t)%500;
-    if(r<0)r+=500;
-    g.strokeStyle=\`rgba(255,0,255,\${1-r/500})\`;
-    g.lineWidth=r/50;
-    g.beginPath();g.arc(0,0,r,0,7);g.stroke();
+  traffic=[];
+  for(let i=0;i<35;i++){
+    traffic.push({
+      x:(Math.random()-0.5)*180,
+      y:105,
+      z:Math.random()*2000+80,
+      speed:Math.random()*8+12,
+      side:Math.random()>0.5?1:-1,
+      color:Math.random()>0.5?'#00f0ff':'#ff0055'
+    });
   }
-  g.resetTransform();
-  requestAnimationFrame(draw);
 }
-draw();
-</script></body></html>`,
-  'nexus://procedural/crystal': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#05101a"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
+window.onresize=init;
+init();
 function draw(){
-  g.clearRect(0,0,W,H);
-  let grad=g.createLinearGradient(0,0,W,H);grad.addColorStop(0,'#05101a');grad.addColorStop(1,'#1a3a5a');
+  time+=0.016;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const pitch=(-tiltY*0.4)*str;
+  const yaw=(tiltX*0.45)*str;
+  const fov=520*(1+imp*0.14);
+  const camX=yaw*W*0.45;
+  const horizonY=H*0.48+pitch*H*0.35;
+
+  g.fillStyle='#020108';g.fillRect(0,0,W,H);
+
+  // Distant neon skyline glow
+  const grad=g.createRadialGradient(W/2-camX*0.2,horizonY,0,W/2-camX*0.2,horizonY,W*0.6);
+  grad.addColorStop(0,'rgba(168,85,247,0.22)');
+  grad.addColorStop(0.5,'rgba(0,240,255,0.08)');
+  grad.addColorStop(1,'transparent');
   g.fillStyle=grad;g.fillRect(0,0,W,H);
-  t+=0.01;
-  g.translate(W/2,H/2);
-  for(let i=0;i<5;i++){
-    g.rotate(t*0.5);
-    g.strokeStyle='rgba(100,200,255,0.5)';g.fillStyle='rgba(100,200,255,0.1)';
-    g.beginPath();g.moveTo(0,-200+i*20);g.lineTo(100-i*10,0);g.lineTo(0,200-i*20);g.lineTo(-100+i*10,0);g.closePath();
-    g.fill();g.stroke();
-  }
-  g.resetTransform();
+
+  // Sort 3D buildings back to front
+  buildings.sort((a,b)=>b.z-a.z);
+
+  buildings.forEach(b=>{
+    const z=b.z;
+    if(z<60)return;
+    const px=b.x-camX;
+    const sx=W/2+(px*fov)/z;
+    const sw=(b.w*fov)/z;
+    const groundY=110;
+    const sy=horizonY+(groundY*fov)/z;
+    const sh=(b.h*fov)/z;
+
+    const alpha=Math.max(0.2,1-z/2200);
+
+    // Dark building body
+    g.fillStyle='rgba(6,5,16,'+(0.85*alpha)+')';
+    g.fillRect(sx-sw/2,sy-sh,sw,sh);
+
+    // Neon edge lighting
+    g.strokeStyle='hsla('+b.hue+',100%,60%,'+(0.6*alpha)+')';
+    g.lineWidth=1.4;
+    g.strokeRect(sx-sw/2,sy-sh,sw,sh);
+
+    // Window grid
+    g.fillStyle='hsla('+b.hue+',100%,75%,'+(0.4*alpha)+')';
+    const rows=8, cols=4;
+    const winW=sw/cols*0.45, winH=sh/rows*0.35;
+    for(let r=1;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(Math.sin(b.seed*100+r*7+c*13)>0.1){
+          const wx=sx-sw/2+c*(sw/cols)+winW*0.5;
+          const wy=sy-sh+r*(sh/rows);
+          g.fillRect(wx,wy,winW,winH);
+        }
+      }
+    }
+  });
+
+  // 3D Flying Traffic Trails
+  traffic.forEach(t=>{
+    t.z-=t.speed;
+    if(t.z<50)t.z=2100;
+    const sx=W/2+((t.x-camX)*fov)/t.z;
+    const sy=horizonY+(t.y*fov)/t.z;
+    const len=Math.max(4,(60*fov)/t.z);
+    g.strokeStyle=t.color;
+    g.lineWidth=Math.max(1,(2.5*fov)/t.z);
+    g.beginPath();g.moveTo(sx,sy);g.lineTo(sx,sy-len*0.2);g.stroke();
+  });
+
   requestAnimationFrame(draw);
 }
 draw();
 </script></body></html>`,
-  'nexus://procedural/constellation': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#030014"><canvas id="c"></canvas><script>
+
+  // 4. MATRIX 3D - Volumetric 3D Digital Rain with True Z-Depth Projection
+  'nexus://procedural/matrix': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000400"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,pts=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-pts=[];for(let i=0;i<120;i++)pts.push({x:Math.random()*W,y:Math.random()*H,v:Math.random()*0.5});}
-window.onresize=init;init();
-function draw(){
-  g.clearRect(0,0,W,H);g.fillStyle='#030014';g.fillRect(0,0,W,H);
-  pts.forEach(p=>{
-    p.y-=p.v;if(p.y<0)p.y=H;
-    g.fillStyle='#fff';g.beginPath();g.arc(p.x,p.y,1.5,0,7);g.fill();
-    pts.forEach(p2=>{
-      let d=Math.hypot(p.x-p2.x,p.y-p2.y);
-      if(d<80){g.strokeStyle=\`rgba(150,200,255,\${1-d/80})\`;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p2.x,p2.y);g.stroke();}
+let W,H,time=0,columns=[];
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+const glyphs="01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンXYZ789";
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  columns=[];
+  for(let i=0;i<120;i++){
+    columns.push({
+      x:(Math.random()-0.5)*2200,
+      z:Math.random()*1200+80,
+      y:Math.random()*-1500,
+      speed:Math.random()*4+5,
+      chars:[],
+      len:Math.floor(Math.random()*16+10)
     });
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/cyber-city': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,b=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-b=[];for(let i=0;i<50;i++)b.push({x:Math.random()*W,w:Math.random()*50+20,h:Math.random()*H*0.6,s:Math.random()*2+1,c:Math.random()>0.5?'#0ff':'#f0f'});}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,0.1)';g.fillRect(0,0,W,H);
-  b.forEach(i=>{
-    i.x-=i.s;if(i.x+i.w<0){i.x=W;i.h=Math.random()*H*0.6;}
-    g.strokeStyle=i.c;g.lineWidth=2;
-    g.strokeRect(i.x,H-i.h,i.w,i.h);
-    g.fillStyle='rgba(20,20,20,0.8)';g.fillRect(i.x,H-i.h,i.w,i.h);
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/clock': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#eceff1"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.clearRect(0,0,W,H);
-  let d=new Date(), t=d.getTime()*0.001;
-  g.translate(W/2,H/2);
-  g.strokeStyle='#263238';g.lineCap='round';
-  for(let i=0;i<3;i++){
-    g.save();
-    g.rotate((t*(i===0?1:i===1?1/60:1/3600))*Math.PI*2);
-    g.lineWidth=10-i*2;
-    g.beginPath();g.moveTo(0,0);g.lineTo(0,-100-i*50);g.stroke();
-    g.restore();
-  }
-  g.fillStyle='#ff5252';g.beginPath();g.arc(0,0,8,0,7);g.fill();
-  g.resetTransform();
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/magnetic': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#222"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,mx=0,my=0,pts=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-pts=[];for(let x=0;x<W;x+=30)for(let y=0;y<H;y+=30)pts.push({x,y});}
-window.onresize=init;window.onmousemove=e=>{mx=e.clientX;my=e.clientY};init();
-function draw(){
-  g.clearRect(0,0,W,H);g.fillStyle='#222';g.fillRect(0,0,W,H);
-  g.strokeStyle='#aaa';g.lineWidth=2;
-  pts.forEach(p=>{
-    let a=Math.atan2(p.y-my,p.x-mx);
-    let d=Math.hypot(p.y-my,p.x-mx);
-    let l=Math.min(15,d*0.1);
-    g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x+Math.cos(a)*l,p.y+Math.sin(a)*l);g.stroke();
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/ink': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#eee"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,drops=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(238,238,238,0.05)';g.fillRect(0,0,W,H);
-  if(Math.random()<0.05)drops.push({x:Math.random()*W,y:Math.random()*H,r:0,max:Math.random()*100+50});
-  g.fillStyle='rgba(0,0,0,0.1)';
-  for(let i=drops.length-1;i>=0;i--){
-    let d=drops[i];
-    g.beginPath();g.arc(d.x,d.y,d.r,0,7);g.fill();
-    d.r+=0.5;if(d.r>d.max)drops.splice(i,1);
-  }
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/liquid': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,b=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-b=[];for(let i=0;i<10;i++)b.push({x:Math.random()*W,y:Math.random()*H,vx:Math.random()*4-2,vy:Math.random()*4-2});}
-window.onresize=init;init();
-function draw(){
-  g.clearRect(0,0,W,H);
-  b.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-  });
-  let d=g.getImageData(0,0,W,H),px=d.data;
-  for(let x=0;x<W;x+=5)for(let y=0;y<H;y+=5){
-    let sum=0;
-    b.forEach(p=>{sum+=10000/((x-p.x)**2+(y-p.y)**2);});
-    if(sum>1){g.fillStyle='#0af';g.fillRect(x,y,5,5);}
-  }
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/fractal-tree': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#1e1e1e"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function tree(x,y,len,ang){
-  if(len<4)return;
-  g.beginPath();g.moveTo(x,y);
-  let nx=x+Math.cos(ang)*len, ny=y+Math.sin(ang)*len;
-  g.lineTo(nx,ny);g.stroke();
-  tree(nx,ny,len*0.7,ang-Math.PI/4+Math.sin(t)*0.2);
-  tree(nx,ny,len*0.7,ang+Math.PI/4-Math.sin(t)*0.2);
-}
-function draw(){
-  g.clearRect(0,0,W,H);g.fillStyle='#1e1e1e';g.fillRect(0,0,W,H);
-  t+=0.02;
-  g.strokeStyle='#4caf50';g.lineWidth=2;
-  tree(W/2,H,150,-Math.PI/2);
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/triangles': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#2b2b2b"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,pts=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-pts=[];for(let i=0;i<50;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:Math.random()-.5,vy:Math.random()-.5});}
-window.onresize=init;init();
-function draw(){
-  g.clearRect(0,0,W,H);g.fillStyle='#2b2b2b';g.fillRect(0,0,W,H);
-  pts.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-  });
-  g.strokeStyle='rgba(255,255,255,0.1)';
-  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++)for(let k=j+1;k<pts.length;k++){
-    let p1=pts[i],p2=pts[j],p3=pts[k];
-    if(Math.hypot(p1.x-p2.x,p1.y-p2.y)<150&&Math.hypot(p2.x-p3.x,p2.y-p3.y)<150&&Math.hypot(p1.x-p3.x,p1.y-p3.y)<150){
-      g.fillStyle=\`rgba(0,150,255,\${0.2-Math.hypot(p1.x-p2.x,p1.y-p2.y)/150*0.2})\`;
-      g.beginPath();g.moveTo(p1.x,p1.y);g.lineTo(p2.x,p2.y);g.lineTo(p3.x,p3.y);g.closePath();g.fill();g.stroke();
+    for(let j=0;j<26;j++){
+      columns[i].chars.push(glyphs[Math.floor(Math.random()*glyphs.length)]);
     }
   }
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.016;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const pitch=(-tiltY*0.45)*str;
+  const yaw=(tiltX*0.45)*str;
+  const cosP=Math.cos(pitch), sinP=Math.sin(pitch);
+  const cosY=Math.cos(yaw), sinY=Math.sin(yaw);
+  const fov=560*(1+imp*0.15);
+
+  g.fillStyle='rgba(0,3,1,0.2)';g.fillRect(0,0,W,H);
+
+  columns.forEach(col=>{
+    col.y+=col.speed;
+    if(col.y>1200)col.y=-1200;
+
+    // Rotate with 3D camera
+    const cz=col.z-imp*100;
+    const x1=col.x*cosY-cz*sinY;
+    const z1=col.x*sinY+cz*cosY;
+    const y1=col.y*cosP-z1*sinP;
+    const z2=col.y*sinP+z1*cosP;
+
+    if(z2>50){
+      const scale=fov/z2;
+      const sx=W/2+x1*scale;
+      const sy=H/2+y1*scale;
+      const fontSize=Math.max(6,Math.floor(18*scale));
+      g.font=fontSize+'px monospace';
+
+      for(let j=0;j<col.len;j++){
+        const cy=sy-j*fontSize*1.15;
+        if(cy>=-20&&cy<=H+20){
+          if(j===0){
+            g.fillStyle='#ffffff';
+          } else {
+            const alpha=(1-j/col.len)*(1-z2/1400);
+            g.fillStyle='rgba(0,255,110,'+Math.max(0.05,alpha)+')';
+          }
+          const ch=col.chars[(j+Math.floor(time*5))%col.chars.length];
+          g.fillText(ch,sx,cy);
+        }
+      }
+    }
+  });
+
   requestAnimationFrame(draw);
 }
 draw();
 </script></body></html>`,
+
+  // 5. WARP TUNNEL 3D - Hyperspace Infinite Hexagonal Cyber Tunnel
   'nexus://procedural/tunnel': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,0.1)';g.fillRect(0,0,W,H);
-  t+=2;
-  g.translate(W/2,H/2);
-  g.strokeStyle='#0f0';
-  for(let i=10;i<200;i+=20){
-    let z=i-(t%20);if(z<=0)continue;
-    let r=5000/z;
-    g.globalAlpha=1-z/200;
-    g.beginPath();g.arc(0,0,r,0,7);g.stroke();
-  }
-  g.globalAlpha=1;
-  for(let a=0;a<Math.PI*2;a+=Math.PI/4){
-    g.beginPath();g.moveTo(Math.cos(a)*25,Math.sin(a)*25);g.lineTo(Math.cos(a)*500,Math.sin(a)*500);g.stroke();
-  }
-  g.resetTransform();
-  requestAnimationFrame(draw);
+let W,H,time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
 }
-draw();
-</script></body></html>`,
-  'nexus://procedural/galaxy': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
+window.onresize=init;
+init();
 function draw(){
-  g.fillStyle='rgba(0,0,0,0.1)';g.fillRect(0,0,W,H);
-  t+=0.01;
-  g.translate(W/2,H/2);
-  g.rotate(t);
-  for(let i=0;i<500;i++){
-    let a=i*0.1, r=i;
-    g.fillStyle=\`hsla(\${i%360},100%,70%,0.8)\`;
-    g.fillRect(Math.cos(a)*r,Math.sin(a)*r,2,2);
-    g.fillRect(Math.cos(a+Math.PI)*r,Math.sin(a+Math.PI)*r,2,2);
-  }
-  g.resetTransform();
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/dna': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#111"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.clearRect(0,0,W,H);g.fillStyle='#111';g.fillRect(0,0,W,H);
-  t+=0.05;
-  g.translate(W/2,0);
-  for(let y=0;y<H;y+=20){
-    let x1=Math.sin(y*0.02+t)*100, x2=Math.sin(y*0.02+t+Math.PI)*100;
-    g.strokeStyle='rgba(255,255,255,0.2)';g.beginPath();g.moveTo(x1,y);g.lineTo(x2,y);g.stroke();
-    g.fillStyle='#f05';g.beginPath();g.arc(x1,y,4,0,7);g.fill();
-    g.fillStyle='#05f';g.beginPath();g.arc(x2,y,4,0,7);g.fill();
-  }
-  g.resetTransform();
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/clouds': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#87ceeb"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,cl=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-cl=[];for(let i=0;i<20;i++)cl.push({x:Math.random()*W,y:Math.random()*H*0.5,s:Math.random()*50+50,v:Math.random()*0.5+0.1});}
-window.onresize=init;init();
-function draw(){
-  g.clearRect(0,0,W,H);g.fillStyle='#87ceeb';g.fillRect(0,0,W,H);
-  g.fillStyle='rgba(255,255,255,0.8)';
-  cl.forEach(c=>{
-    c.x+=c.v;if(c.x-c.s*2>W)c.x=-c.s*2;
-    g.beginPath();g.arc(c.x,c.y,c.s,0,7);
-    g.arc(c.x+c.s,c.y-c.s*0.5,c.s*0.8,0,7);
-    g.arc(c.x-c.s,c.y-c.s*0.3,c.s*0.7,0,7);
-    g.fill();
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/vawes-3d': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,1)';g.fillRect(0,0,W,H);
-  t+=0.05;
-  g.strokeStyle='#0f0';
-  for(let y=100;y<H;y+=20){
+  time+=0.02;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const fov=500*(1+imp*0.18);
+  const steerX=tiltX*str*W*0.35;
+  const steerY=-tiltY*str*H*0.35;
+
+  g.fillStyle='#010106';g.fillRect(0,0,W,H);
+
+  const sides=6;
+  const tunnelR=320;
+  const speed=(time*320)%120;
+
+  // Concentric tunnel rings flying toward viewer
+  for(let z=60;z<1600;z+=120){
+    const curZ=z-speed;
+    if(curZ<40)continue;
+    const r=(tunnelR*fov)/curZ;
+    // Curved tunnel trajectory
+    const cx=W/2+steerX*(1-curZ/1600);
+    const cy=H/2+steerY*(1-curZ/1600);
+    const rot=time*0.4+curZ*0.002;
+    const alpha=Math.max(0,1-curZ/1500);
+
+    g.strokeStyle='hsla('+(180+curZ*0.1)+',100%,65%,'+(alpha*0.85)+')';
+    g.lineWidth=Math.max(1,(2.5*fov)/curZ);
     g.beginPath();
-    for(let x=0;x<W;x+=20){
-      let z=Math.sin(x*0.01+t)*Math.cos(y*0.01+t)*50;
-      let px=x, py=y-z;
-      if(x===0)g.moveTo(px,py);else g.lineTo(px,py);
+    for(let s=0;s<=sides;s++){
+      const a=rot+(s/sides)*Math.PI*2;
+      const px=cx+Math.cos(a)*r;
+      const py=cy+Math.sin(a)*r;
+      s===0?g.moveTo(px,py):g.lineTo(px,py);
     }
     g.stroke();
   }
+
   requestAnimationFrame(draw);
 }
 draw();
 </script></body></html>`,
-  'nexus://procedural/hyperspace': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
+
+  // 6. SPIRAL GALAXY 3D - 3D Logarithmic Stellar Disk in Deep Space
+  'nexus://procedural/galaxy': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000005"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,stars=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-stars=[];for(let i=0;i<300;i++)stars.push({x:Math.random()*2-1,y:Math.random()*2-1,z:Math.random()});}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,0,0,0.3)';g.fillRect(0,0,W,H);
-  g.translate(W/2,H/2);
-  stars.forEach(s=>{
-    let px=s.x/s.z*W, py=s.y/s.z*H;
-    let ppx=s.x/(s.z+0.05)*W, ppy=s.y/(s.z+0.05)*H;
-    s.z-=0.05;if(s.z<=0){s.z=1;s.x=Math.random()*2-1;s.y=Math.random()*2-1;}
-    g.strokeStyle=\`hsla(\${s.z*360},100%,70%,\${1-s.z})\`;g.lineWidth=2;
-    g.beginPath();g.moveTo(ppx,ppy);g.lineTo(px,py);g.stroke();
-  });
-  g.resetTransform();
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/geometry': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#111"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(17,17,17,0.1)';g.fillRect(0,0,W,H);
-  t+=0.01;
-  g.translate(W/2,H/2);
-  for(let i=0;i<6;i++){
-    g.rotate(t+i);
-    g.strokeStyle=\`hsla(\${i*60+t*100},70%,50%,0.8)\`;
-    g.lineWidth=2;
-    g.strokeRect(-100,-100,200,200);
-    g.beginPath();g.arc(0,0,150,0,7);g.stroke();
+let W,H,stars=[],time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  stars=[];
+  const count=1600;
+  for(let i=0;i<count;i++){
+    const arm=i%2===0?0:Math.PI;
+    const dist=Math.pow(Math.random(),2)*750+20;
+    const angle=arm+dist*0.0065+(Math.random()-0.5)*0.55;
+    const x=Math.cos(angle)*dist;
+    const y=Math.sin(angle)*dist;
+    const z=(Math.random()-0.5)*75*(1-dist/850);
+    const hue=dist<180?45:(dist<420?190:280);
+    stars.push({x,y,z,hue,sz:Math.random()*1.4+0.5});
   }
-  g.resetTransform();
-  requestAnimationFrame(draw);
 }
-draw();
-</script></body></html>`,
-  'nexus://procedural/lava': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#200"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
+window.onresize=init;
+init();
 function draw(){
-  let rad=g.createLinearGradient(0,0,0,H);rad.addColorStop(0,'#400');rad.addColorStop(1,'#f40');
-  g.fillStyle=rad;g.fillRect(0,0,W,H);
-  t+=0.02;
-  g.fillStyle='rgba(255,100,0,0.5)';
-  for(let i=0;i<10;i++){
-    g.beginPath();
-    let cx=W/2+Math.sin(t+i)*W*0.3, cy=H-Math.cos(t*0.5+i)*H*0.5;
-    g.arc(cx,cy,50+Math.sin(t*2+i)*30,0,7);g.fill();
-  }
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/blocks': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#eee"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,b=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-b=[];for(let x=0;x<W;x+=40)for(let y=0;y<H;y+=40)b.push({x,y,o:Math.random()*10});}
-window.onresize=init;init();
-function draw(){
-  g.clearRect(0,0,W,H);
-  let t=Date.now()*0.002;
-  b.forEach(i=>{
-    let s=20+Math.sin(t+i.o)*20;
-    g.fillStyle=\`hsl(\${i.o*36},60%,60%)\`;
-    g.fillRect(i.x+20-s/2,i.y+20-s/2,s,s);
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/nodes': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#101"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,n=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-n=[];for(let i=0;i<40;i++)n.push({x:Math.random()*W,y:Math.random()*H,vx:Math.random()-.5,vy:Math.random()-.5});}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(17,0,17,0.2)';g.fillRect(0,0,W,H);
-  g.strokeStyle='#f0f';g.lineWidth=1;
-  n.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-    n.forEach(p2=>{
-      if(Math.hypot(p.x-p2.x,p.y-p2.y)<150){g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p2.x,p2.y);g.stroke();}
-    });
-    g.fillStyle='#fff';g.beginPath();g.arc(p.x,p.y,3,0,7);g.fill();
-  });
-  requestAnimationFrame(draw);
-}
-draw();
-</script></body></html>`,
-  'nexus://procedural/ocean': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#001a33"><canvas id="c"></canvas><script>
-const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,t=0;
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);}
-window.onresize=init;init();
-function draw(){
-  g.fillStyle='rgba(0,26,51,0.2)';g.fillRect(0,0,W,H);
-  t+=0.02;
-  for(let i=0;i<4;i++){
-    g.fillStyle=\`hsla(200,100%,\${50-i*10}%,0.4)\`;
-    g.beginPath();g.moveTo(0,H);
-    for(let x=0;x<=W;x+=20){
-      g.lineTo(x,H*0.5+i*40+Math.sin(x*0.01+t+i)*50+Math.sin(x*0.02-t*1.5)*20);
+  time+=0.006;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const pitch=(-0.75-tiltY*0.4)*str;
+  const yaw=(time*0.5+tiltX*0.45)*str;
+  const cosP=Math.cos(pitch), sinP=Math.sin(pitch);
+  const cosY=Math.cos(yaw), sinY=Math.sin(yaw);
+  const fov=620*(1+imp*0.15);
+
+  g.fillStyle='#010106';g.fillRect(0,0,W,H);
+
+  // Core Glow
+  const coreGrad=g.createRadialGradient(W/2,H/2,0,W/2,H/2,160);
+  coreGrad.addColorStop(0,'rgba(255,235,180,0.25)');
+  coreGrad.addColorStop(0.5,'rgba(0,240,255,0.06)');
+  coreGrad.addColorStop(1,'transparent');
+  g.fillStyle=coreGrad;g.fillRect(0,0,W,H);
+
+  for(let i=0;i<stars.length;i++){
+    const s=stars[i];
+    // Rotate around galactic center
+    const x1=s.x*cosY-s.y*sinY;
+    const y1=s.x*sinY+s.y*cosY;
+    const z1=s.z;
+
+    // Pitch inclination
+    const y2=y1*cosP-z1*sinP;
+    const z2=y1*sinP+z1*cosP+900-imp*140;
+
+    if(z2>50){
+      const sx=W/2+(x1*fov)/z2;
+      const sy=H/2+(y2*fov)/z2;
+      const radius=Math.max(0.6,(s.sz*fov)/z2);
+      const alpha=(1-z2/1800);
+      g.fillStyle='hsla('+s.hue+',90%,85%,'+alpha+')';
+      g.beginPath();g.arc(sx,sy,radius,0,Math.PI*2);g.fill();
     }
-    g.lineTo(W,H);g.fill();
   }
+
   requestAnimationFrame(draw);
 }
 draw();
 </script></body></html>`,
-  'nexus://procedural/petals': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#fce4ec"><canvas id="c"></canvas><script>
+
+  // 7. OCEAN SWELL 3D - 3D Perspective Wave Grid with Atmospheric Moonlight
+  'nexus://procedural/ocean': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000a16"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
-let W,H,p=[];
-function init(){W=innerWidth;H=innerHeight;c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;c.style.width=W+'px';c.style.height=H+'px';g.scale(devicePixelRatio,devicePixelRatio);
-p=[];for(let i=0;i<50;i++)p.push({x:Math.random()*W,y:Math.random()*H,a:Math.random()*Math.PI*2,v:Math.random()*2+1,s:Math.random()*10+5});}
-window.onresize=init;init();
+let W,H,time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+}
+window.onresize=init;
+init();
 function draw(){
-  g.fillStyle='rgba(252,228,236,0.2)';g.fillRect(0,0,W,H);
-  p.forEach(i=>{
-    i.x+=Math.cos(i.a)*i.v;i.y+=Math.sin(i.a)*i.v+1;i.a+=0.05;
-    if(i.y>H+20){i.y=-20;i.x=Math.random()*W;}
-    g.fillStyle='#f48fb1';
-    g.save();g.translate(i.x,i.y);g.rotate(i.a);
-    g.beginPath();g.ellipse(0,0,i.s,i.s*0.5,0,0,7);g.fill();
-    g.restore();
+  time+=0.024;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const pitch=(-tiltY*0.4)*str;
+  const yaw=(tiltX*0.4)*str;
+  const fov=520*(1+imp*0.14);
+  const horizonY=H*0.44+pitch*H*0.35;
+  const camX=yaw*W*0.35;
+
+  g.fillStyle='#000812';g.fillRect(0,0,W,H);
+
+  // Distant Moon & Specular Reflection
+  const moonX=W/2-camX*0.2;
+  const moonY=horizonY-H*0.14;
+  const moonGrad=g.createRadialGradient(moonX,moonY,0,moonX,moonY,H*0.3);
+  moonGrad.addColorStop(0,'rgba(210,245,255,0.22)');
+  moonGrad.addColorStop(1,'transparent');
+  g.fillStyle=moonGrad;g.fillRect(0,0,W,H);
+
+  // 3D Wave Grid
+  const rows=32, cols=28;
+  const spacingX=80, spacingZ=50;
+
+  for(let r=rows;r>=1;r--){
+    const z=r*spacingZ+50;
+    g.beginPath();
+    for(let c=-cols/2;c<=cols/2;c++){
+      const x=c*spacingX-camX;
+      const waveH=Math.sin(c*0.4+time*1.8)*22+Math.cos(r*0.3-time*1.2)*18+Math.sin((c+r)*0.25+time)*12;
+      const sx=W/2+(x*fov)/z;
+      const sy=horizonY+((80-waveH)*fov)/z;
+      c===-cols/2?g.moveTo(sx,sy):g.lineTo(sx,sy);
+    }
+    const alpha=Math.max(0.1,1-z/1600);
+    g.strokeStyle='rgba(56,189,248,'+(alpha*0.7)+')';
+    g.lineWidth=Math.max(0.8,(1.8*fov)/z);
+    g.stroke();
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>`,
+
+  // 8. ISOMETRIC HEXAGONS 3D - 3D Honeycomb Floating Terrain with Wave Displacement
+  'nexus://procedural/hexagons': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#050510"><canvas id="c"></canvas><script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.02;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const fov=500*(1+imp*0.14);
+  const rotX=tiltX*str*0.35;
+  const rotY=tiltY*str*0.35;
+
+  g.fillStyle='#04040c';g.fillRect(0,0,W,H);
+
+  const hexR=34;
+  const dx=hexR*Math.sqrt(3);
+  const dy=hexR*1.5;
+  const cols=Math.ceil(W/dx)+4;
+  const rows=Math.ceil(H/dy)+4;
+
+  for(let r=-2;r<rows;r++){
+    for(let c=-2;c<cols;c++){
+      const x=c*dx+(r%2===0?0:dx/2)+rotX*40;
+      const y=r*dy+rotY*40;
+      const dist=Math.hypot(x-W/2,y-H/2);
+      const wave=Math.sin(dist*0.015-time*2.5)*18;
+      const curR=Math.max(4,hexR-2+wave*0.15);
+
+      g.beginPath();
+      for(let s=0;s<6;s++){
+        const a=(s/6)*Math.PI*2+Math.PI/6;
+        const px=x+Math.cos(a)*curR;
+        const py=y+Math.sin(a)*curR-wave;
+        s===0?g.moveTo(px,py):g.lineTo(px,py);
+      }
+      g.closePath();
+      const alpha=0.35+Math.sin(dist*0.01-time)*0.3;
+      g.strokeStyle='hsla('+(210+wave*3)+',100%,65%,'+alpha+')';
+      g.fillStyle='rgba(10,14,35,0.7)';
+      g.fill();
+      g.lineWidth=1.2;
+      g.stroke();
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>`,
+
+  // 9. AURORA BOREALIS 3D - 3D Mountain Horizon & Shimmering Polar Curtains
+  'nexus://procedural/aurora': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#010408"><canvas id="c"></canvas><script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,stars=[],time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  stars=[];
+  for(let i=0;i<180;i++){
+    stars.push({x:Math.random()*W,y:Math.random()*H*0.7,r:Math.random()*1.2+0.4,a:Math.random()});
+  }
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.012;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const shiftX=tiltX*str*35;
+  const shiftY=tiltY*str*25;
+
+  g.fillStyle='#01030a';g.fillRect(0,0,W,H);
+
+  // Background Stars
+  stars.forEach(s=>{
+    g.fillStyle='rgba(255,255,255,'+(s.a*(0.6+Math.sin(time*2+s.x)*0.4))+')';
+    g.beginPath();g.arc((s.x+shiftX*0.3+W)%W,(s.y+shiftY*0.3+H)%H,s.r,0,Math.PI*2);g.fill();
   });
+
+  // 3 Layers of 3D Aurora Curtains
+  const curtains=[
+    {color:'rgba(16,185,129,',speed:0.8,depth:0.4,yOff:0.3},
+    {color:'rgba(56,189,248,',speed:1.2,depth:0.7,yOff:0.38},
+    {color:'rgba(168,85,247,',speed:1.5,depth:1.0,yOff:0.46}
+  ];
+
+  curtains.forEach(c=>{
+    const ox=shiftX*c.depth;
+    const oy=shiftY*c.depth;
+    g.beginPath();
+    for(let x=-40;x<=W+40;x+=16){
+      const y=H*c.yOff+Math.sin(x*0.006+time*c.speed)*H*0.14+Math.sin(x*0.012-time*0.6)*H*0.06+oy;
+      x===-40?g.moveTo(x+ox,y):g.lineTo(x+ox,y);
+    }
+    g.lineTo(W+40,H);g.lineTo(-40,H);g.closePath();
+    const grad=g.createLinearGradient(0,H*0.15,0,H*0.75);
+    grad.addColorStop(0,'transparent');
+    grad.addColorStop(0.3,c.color+'0.08)');
+    grad.addColorStop(0.6,c.color+'0.22)');
+    grad.addColorStop(1,'transparent');
+    g.fillStyle=grad;g.fill();
+    g.strokeStyle=c.color+'0.55)';g.lineWidth=1.5+c.depth;g.stroke();
+  });
+
+  // Foreground Silhouetted Mountains
+  g.fillStyle='#020508';
+  g.beginPath();
+  g.moveTo(0,H);
+  for(let x=0;x<=W;x+=20){
+    const my=H*0.82-Math.sin(x*0.005)*55-Math.sin(x*0.012)*30+shiftY*1.2;
+    g.lineTo(x,my);
+  }
+  g.lineTo(W,H);g.closePath();g.fill();
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>`,
+
+  // 10. HYPERSPACE STARLIGHT 3D - 3D Warp Speed Star Flight
+  'nexus://procedural/starlight': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000"><canvas id="c"></canvas><script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,stars=[],time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  stars=[];
+  for(let i=0;i<800;i++){
+    stars.push({
+      x:(Math.random()-0.5)*2000,
+      y:(Math.random()-0.5)*1600,
+      z:Math.random()*1500+20,
+      pz:0
+    });
+    stars[i].pz=stars[i].z;
+  }
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.016;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const fov=480;
+  const speed=18+imp*45;
+  const steerX=tiltX*str*300;
+  const steerY=tiltY*str*300;
+
+  g.fillStyle='rgba(0,0,4,0.25)';g.fillRect(0,0,W,H);
+
+  stars.forEach(s=>{
+    s.pz=s.z;
+    s.z-=speed;
+    if(s.z<=10){
+      s.z=1500;
+      s.pz=1500;
+      s.x=(Math.random()-0.5)*2000;
+      s.y=(Math.random()-0.5)*1600;
+    }
+    const sx=W/2+((s.x-steerX)*fov)/s.z;
+    const sy=H/2+((s.y-steerY)*fov)/s.z;
+    const px=W/2+((s.x-steerX)*fov)/s.pz;
+    const py=H/2+((s.y-steerY)*fov)/s.pz;
+
+    if(sx>=0&&sx<=W&&sy>=0&&sy<=H){
+      const alpha=Math.min(1,(1-s.z/1500)*1.5);
+      g.strokeStyle='rgba(200,240,255,'+alpha+')';
+      g.lineWidth=Math.max(1,(2.5*fov)/s.z);
+      g.beginPath();g.moveTo(px,py);g.lineTo(sx,sy);g.stroke();
+    }
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>`,
+
+  // 11. QUANTUM CORE 3D - 3D Oblique Motherboard Processor Bus
+  'nexus://procedural/circuit': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#000812"><canvas id="c"></canvas><script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,time=0,traces=[];
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  traces=[];
+  for(let i=0;i<45;i++){
+    const x=(i-22)*38;
+    traces.push({x,z:Math.random()*800+100,speed:Math.random()*6+8,color:i%2===0?'#00f0ff':'#10b981'});
+  }
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.02;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const fov=520*(1+imp*0.14);
+  const horizonY=H*0.48+(-tiltY*0.4)*str*H*0.3;
+  const camX=tiltX*str*W*0.35;
+
+  g.fillStyle='#01070e';g.fillRect(0,0,W,H);
+
+  // Central Die
+  const dieZ=380;
+  const dieX=W/2-camX;
+  const dieY=horizonY+(60*fov)/dieZ;
+  const dieW=(280*fov)/dieZ, dieH=(160*fov)/dieZ;
+
+  g.fillStyle='rgba(6,22,38,0.9)';
+  g.fillRect(dieX-dieW/2,dieY-dieH/2,dieW,dieH);
+  g.strokeStyle='#00f0ff';g.lineWidth=2;
+  g.strokeRect(dieX-dieW/2,dieY-dieH/2,dieW,dieH);
+
+  // Traces spreading out from chip in 3D
+  traces.forEach(t=>{
+    const px=t.x-camX;
+    g.strokeStyle='rgba(0,240,255,0.4)';
+    g.lineWidth=1.2;
+    g.beginPath();
+    const sx1=W/2+(px*fov)/100;
+    const sy1=horizonY+(110*fov)/100;
+    const sx2=W/2+(px*fov)/900;
+    const sy2=horizonY+(110*fov)/900;
+    g.moveTo(sx1,sy1);g.lineTo(sx2,sy2);g.stroke();
+
+    // Data packet
+    t.z-=t.speed;
+    if(t.z<80)t.z=900;
+    const bx=W/2+(px*fov)/t.z;
+    const by=horizonY+(110*fov)/t.z;
+    g.fillStyle=t.color;
+    g.beginPath();g.arc(bx,by,Math.max(1.5,(3*fov)/t.z),0,Math.PI*2);g.fill();
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>`,
+
+  // 12. SAKURA PETALS 3D - 3D Tumbling Blossom Petals in Spring Breeze
+  'nexus://procedural/petals': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#14050d"><canvas id="c"></canvas><script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,petals=[],time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  petals=[];
+  for(let i=0;i<140;i++){
+    petals.push({
+      x:(Math.random()-0.5)*2000,
+      y:(Math.random()-0.5)*1800,
+      z:Math.random()*1200+60,
+      pitch:Math.random()*Math.PI*2,
+      yaw:Math.random()*Math.PI*2,
+      roll:Math.random()*Math.PI*2,
+      speed:Math.random()*1.5+1.2,
+      sz:Math.random()*6+12
+    });
+  }
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.016;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const fov=550*(1+imp*0.14);
+  const windX=tiltX*str*60+Math.sin(time)*20;
+  const windY=tiltY*str*40;
+
+  g.fillStyle='rgba(18,5,12,0.3)';g.fillRect(0,0,W,H);
+
+  petals.forEach(p=>{
+    p.y+=p.speed*(1+imp*0.4);
+    p.x+=Math.sin(time+p.z)*1.5+windX*0.03;
+    p.pitch+=0.02;p.yaw+=0.015;p.roll+=0.025;
+    if(p.y>1000){p.y=-1000;p.x=(Math.random()-0.5)*2000;}
+
+    const sx=W/2+(p.x*fov)/p.z;
+    const sy=H/2+(p.y*fov)/p.z;
+    const scale=fov/p.z;
+    const sz=p.sz*scale;
+
+    if(sx>=-50&&sx<=W+50&&sy>=-50&&sy<=H+50){
+      g.save();
+      g.translate(sx,sy);
+      g.rotate(p.roll);
+      g.scale(Math.cos(p.pitch),Math.sin(p.yaw));
+      const alpha=(1-p.z/1300)*0.85;
+      g.fillStyle='rgba(244,143,177,'+Math.max(0.1,alpha)+')';
+      g.beginPath();g.ellipse(0,0,sz,sz*0.55,0,0,Math.PI*2);g.fill();
+      g.restore();
+    }
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>`,
+
+  // 13. ATMOSPHERIC RAIN 3D - 3D Perspective Rain Drops with Ground Ripples
+  'nexus://procedural/rain': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#05070e"><canvas id="c"></canvas><script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,drops=[],time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  drops=[];
+  for(let i=0;i<260;i++){
+    drops.push({
+      x:(Math.random()-0.5)*2200,
+      y:(Math.random()-0.5)*1800,
+      z:Math.random()*1200+50,
+      len:Math.random()*25+35,
+      speed:Math.random()*12+18
+    });
+  }
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.02;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const fov=520*(1+imp*0.14);
+  const wind=tiltX*str*40;
+
+  g.fillStyle='rgba(4,6,12,0.25)';g.fillRect(0,0,W,H);
+
+  drops.forEach(d=>{
+    d.y+=d.speed*(1+imp*0.5);
+    d.x+=wind*0.08;
+    if(d.y>900){d.y=-900;d.x=(Math.random()-0.5)*2200;}
+
+    const sx=W/2+(d.x*fov)/d.z;
+    const sy=H/2+(d.y*fov)/d.z;
+    const dropLen=(d.len*fov)/d.z;
+
+    if(sx>=0&&sx<=W&&sy>=0&&sy<=H){
+      const alpha=(1-d.z/1300)*0.75;
+      g.strokeStyle='rgba(180,220,255,'+alpha+')';
+      g.lineWidth=Math.max(1,(1.6*fov)/d.z);
+      g.beginPath();g.moveTo(sx,sy);g.lineTo(sx+wind*0.15,sy+dropLen);g.stroke();
+    }
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>`,
+
+  // 14. BLIZZARD SNOW 3D - 3D Depth Flakes in Swirling Turbulence
+  'nexus://procedural/snow': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#030712"><canvas id="c"></canvas><script>
+const c=document.getElementById('c'),g=c.getContext('2d');
+let W,H,flakes=[],time=0;
+const g3=()=>window.__nexus3D||{tiltX:0,tiltY:0,impulse:0,strength:0.6};
+function init(){
+  W=innerWidth;H=innerHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=Math.floor(W*dpr);c.height=Math.floor(H*dpr);
+  c.style.width=W+'px';c.style.height=H+'px';
+  g.scale(dpr,dpr);
+  flakes=[];
+  for(let i=0;i<320;i++){
+    flakes.push({
+      x:(Math.random()-0.5)*2200,
+      y:(Math.random()-0.5)*1800,
+      z:Math.random()*1200+60,
+      r:Math.random()*2+1.2,
+      speed:Math.random()*2+2
+    });
+  }
+}
+window.onresize=init;
+init();
+function draw(){
+  time+=0.016;
+  const {tiltX,tiltY,impulse:imp,strength:str}=g3();
+  const fov=540*(1+imp*0.14);
+  const wind=tiltX*str*50;
+
+  g.fillStyle='rgba(3,7,16,0.3)';g.fillRect(0,0,W,H);
+
+  flakes.forEach(f=>{
+    f.y+=f.speed*(1+imp*0.4);
+    f.x+=Math.sin(time+f.z*0.01)*1.2+wind*0.06;
+    if(f.y>900){f.y=-900;f.x=(Math.random()-0.5)*2200;}
+
+    const sx=W/2+(f.x*fov)/f.z;
+    const sy=H/2+(f.y*fov)/f.z;
+    const rad=Math.max(0.8,(f.r*fov)/f.z);
+
+    if(sx>=0&&sx<=W&&sy>=0&&sy<=H){
+      const alpha=(1-f.z/1300)*0.85;
+      g.fillStyle='rgba(230,245,255,'+alpha+')';
+      g.beginPath();g.arc(sx,sy,rad,0,Math.PI*2);g.fill();
+    }
+  });
+
   requestAnimationFrame(draw);
 }
 draw();
 </script></body></html>`,
 };
 
-// Detect both nexus:// protocol URIs and inline HTML strings
 export const isWallpaperHtmlDocument = (wallpaper: string) =>
   wallpaper.startsWith('nexus://procedural/') ||
   wallpaper.startsWith('<!DOCTYPE') ||

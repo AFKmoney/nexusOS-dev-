@@ -35,12 +35,15 @@ import type {
 // ─────────────────────────────────────────────────────────────────────
 
 export default function HyperIDE({ windowId }: { windowId: string; initPath?: string }) {
-  const { kernelRules, addNotification, windows, openWindow } = useOS();
+  const { kernelRules, addNotification, windows, openWindow, isMobileView } = useOS();
 
   // Resolve initPath from window data (passed by OS::OPEN_APP:hyperide:/path)
   const win = windows.find(w => w.id === windowId);
   const initPath = win?.data?.path as string | undefined;
   const initProjectRoot = win?.data?.projectRoot as string | undefined;
+
+  // ─── Mobile View Mode State ──────────────────────────────────────
+  const [mobileTab, setMobileTab] = useState<'editor' | 'files' | 'composer' | 'preview'>('editor');
 
   // ─── Project state ───────────────────────────────────────────────
   // A project is a folder that serves as the root for multi-file editing.
@@ -72,13 +75,21 @@ export default function HyperIDE({ windowId }: { windowId: string; initPath?: st
   // ─── Save indicator ──────────────────────────────────────────────
   const [savedIndicator, setSavedIndicator] = useState(false);
 
-  // ─── AI state ────────────────────────────────────────────────────
+  // ─── AI state & Engine Coherence ─────────────────────────────────
+  const activeLocalModel = localBrain.getActiveModel();
+  const isLMStudio = localBrain.isLMStudioAvailable();
+  const engineDesc = activeLocalModel 
+    ? `Local GGUF: ${activeLocalModel.name}`
+    : isLMStudio
+      ? `Local Server: ${localBrain.getLMStudioModelName()} (:1234)`
+      : `Kernel Cloud Agent (No local GGUF loaded)`;
+
   const [isAiThinking, setIsAiThinking] = useState(false);
-  const [isAiConnected, setIsAiConnected] = useState(localBrain.isReady());
+  const [isAiConnected, setIsAiConnected] = useState(true);
   const [aiMessages, setAiMessages] = useState<AiMsg[]>([
     {
       role: 'ai',
-      content: `⚡ **NEXUS Neural Forge** ${localBrain.isReady() ? 'Online' : 'Initializing'}...\n\nI am connected to the kernel. I can:\n- **Refactor** & optimize logic\n- **Debug** complex errors\n- **Generate** complete files\n- **Explain** architecture\n\nWhat are we building today, Creator?`,
+      content: `⚡ **NEXUS Neural Forge Active**\n\n- **Agent Link:** Connected to Kernel\n- **Engine Status:** ${engineDesc}\n\nI can refactor logic, debug complex errors, generate complete modules, and explain system architecture.\n\nWhat are we building today, Creator?`,
     },
   ]);
   const [aiInput, setAiInput] = useState('');
@@ -466,6 +477,208 @@ export default function HyperIDE({ windowId }: { windowId: string; initPath?: st
   };
 
   // ─── Render ──────────────────────────────────────────────────────
+  if (isMobileView) {
+    return (
+      <div 
+        className="h-full flex flex-col bg-[#09090B] text-slate-200 font-sans text-sm overflow-hidden select-none"
+        onClick={() => setContextMenu(null)}
+      >
+        {/* Mobile Navigation Rail / Tabs */}
+        <div className="flex items-center justify-around bg-[#181818] border-b border-[#2D2D2D] p-1.5 shrink-0 z-10">
+          <button
+            onClick={() => setMobileTab('files')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
+              mobileTab === 'files' 
+                ? 'bg-[#007ACC] text-white shadow-sm' 
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Files size={13} />
+            <span>Files</span>
+          </button>
+
+          <button
+            onClick={() => setMobileTab('editor')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
+              mobileTab === 'editor' 
+                ? 'bg-[#007ACC] text-white shadow-sm' 
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <FileCode2 size={13} />
+            <span className="truncate max-w-[80px]">{activeTab ? activeTab.name : 'Editor'}</span>
+            {activeTab?.modified && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+          </button>
+
+          <button
+            onClick={() => setMobileTab('composer')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
+              mobileTab === 'composer' 
+                ? 'bg-accent/20 border border-accent/40 text-accent font-black' 
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${isAiThinking ? 'bg-accent animate-ping' : 'bg-accent'}`} />
+            <span>Forge</span>
+          </button>
+
+          <button
+            onClick={() => setMobileTab('preview')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
+              mobileTab === 'preview' 
+                ? 'bg-emerald-600 text-white shadow-sm' 
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Play size={12} fill="currentColor" />
+            <span>Run</span>
+          </button>
+        </div>
+
+        {/* Mobile Full-Bleed Content Panes */}
+        <div className="flex-1 min-h-0 relative">
+          {mobileTab === 'files' && (
+            <div className="h-full w-full bg-[#181818] overflow-y-auto">
+              <SidePanel
+                sidePanel={sidePanel}
+                project={project}
+                showNewFile={showNewFile}
+                newFileName={newFileName}
+                renameTarget={renameTarget}
+                renameValue={renameValue}
+                searchQuery={searchQuery}
+                searchResults={searchResults}
+                activeTabPath={activeTab?.path || ''}
+                modifiedTabs={tabs.filter((t) => t.modified)}
+                onNewFileClick={() => { setIsNewFolder(false); setNewFileDir(''); setShowNewFile(true); }}
+                onNewFolderClick={() => { setIsNewFolder(true); setNewFileDir(''); setShowNewFile(true); }}
+                isNewFolder={isNewFolder}
+                onSetNewFileName={setNewFileName}
+                onCreateFile={() => createFile()}
+                onCancelNewFile={() => setShowNewFile(false)}
+                onSetRenameValue={setRenameValue}
+                onDoRename={doRename}
+                onCancelRename={() => setRenameTarget(null)}
+                onSetSearchQuery={setSearchQuery}
+                onSearch={handleSearch}
+                onOpenFile={(p) => { openFile(p); setMobileTab('editor'); }}
+                onContextMenu={handleContextMenu}
+                onClose={() => setMobileTab('editor')}
+                onNeuralReview={() => {
+                  setMobileTab('composer');
+                  askAI('Review all recently modified files and suggest improvements.');
+                }}
+                onCreateProject={createNewApp}
+              />
+            </div>
+          )}
+
+          {mobileTab === 'editor' && (
+            <div className="h-full w-full flex flex-col min-h-0 bg-[#1E1E1E]">
+              {/* Top micro bar for project action */}
+              <div className="flex items-center justify-between px-3 py-1.5 bg-[#252526] border-b border-[#333333] shrink-0 text-xs">
+                <span className="text-[#858585] truncate font-mono text-[10px]">{activeTab?.path || project?.name || 'HyperIDE Workspace'}</span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button 
+                    onClick={saveFile}
+                    className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white text-[11px] font-medium"
+                  >
+                    Save
+                  </button>
+                  <button 
+                    onClick={() => { setMobileTab('preview'); runProject(); }}
+                    className="px-2.5 py-0.5 rounded bg-[#007ACC] hover:bg-[#005A9E] text-white text-[11px] font-bold flex items-center gap-1"
+                  >
+                    <Play size={10} fill="currentColor" /> Run
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 min-h-0">
+                <EditorPane
+                  tabs={tabs}
+                  activeIdx={activeIdx}
+                  activeTab={activeTab}
+                  ext={ext}
+                  highlighted={highlighted}
+                  lineCount={lineCount}
+                  cursorPos={cursorPos}
+                  wordWrap={wordWrap}
+                  showPreview={false}
+                  showFindReplace={showFindReplace}
+                  savedIndicator={savedIndicator}
+                  searchQuery={searchQuery}
+                  replaceQuery={replaceQuery}
+                  editorRef={editorRef}
+                  onSelectTab={setActiveIdx}
+                  onCloseTab={closeTab}
+                  onSave={saveFile}
+                  onTogglePreview={() => setMobileTab('preview')}
+                  onToggleFindReplace={() => setShowFindReplace((r) => !r)}
+                  onCloseFindReplace={() => setShowFindReplace(false)}
+                  onContentChange={updateContent}
+                  onCursorChange={updateCursorPos}
+                  onSearchQueryChange={setSearchQuery}
+                  onReplaceQueryChange={setReplaceQuery}
+                  onFindAndReplace={findAndReplace}
+                  onBrowseFiles={() => setMobileTab('files')}
+                  onNewManifest={createNewApp}
+                />
+              </div>
+            </div>
+          )}
+
+          {mobileTab === 'composer' && (
+            <div className="h-full w-full bg-[#1E1E1E]">
+              <AIPanel
+                aiMessages={aiMessages}
+                aiInput={aiInput}
+                isAiThinking={isAiThinking}
+                activeTab={activeTab}
+                aiScrollRef={aiScrollRef}
+                onSetAiInput={setAiInput}
+                onAsk={askAI}
+                onAiAction={aiAction}
+                onCopyCode={copyCode}
+                onApplyAICode={(code) => {
+                  applyAICode(code);
+                  setMobileTab('editor');
+                }}
+                onClose={() => setMobileTab('editor')}
+              />
+            </div>
+          )}
+
+          {mobileTab === 'preview' && (
+            <div className="h-full w-full bg-[#1E1E1E] flex flex-col">
+              <div className="p-2 bg-[#2D2D2D] border-b border-[#333333] flex items-center justify-between text-xs text-white">
+                <span className="font-bold flex items-center gap-1.5"><Play size={12} className="text-emerald-400" /> Live Preview</span>
+                <button onClick={() => setMobileTab('editor')} className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20">Back to Code</button>
+              </div>
+              <div className="flex-1 min-h-0">
+                <PreviewPane content={activeTab?.content || '<h1>No active file preview</h1>'} previewRef={previewRef} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {contextMenu && (
+          <FileContextMenu
+            state={contextMenu}
+            onNewFileHere={(path) => { setIsNewFolder(false); setNewFileDir(path); setShowNewFile(true); setContextMenu(null); }}
+            onNewFolderHere={(path) => { setIsNewFolder(true); setNewFileDir(path); setShowNewFile(true); setContextMenu(null); }}
+            onOpenFolder={(path) => { openProject(path); setContextMenu(null); }}
+            onOpenFile={(path) => { openFile(path); setMobileTab('editor'); setContextMenu(null); }}
+            onRename={startRename}
+            onDuplicate={duplicateFile}
+            onCopyPath={(path) => { navigator.clipboard.writeText(path); setContextMenu(null); }}
+            onDelete={deleteFile}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Desktop Multi-Pane Render
   return (
     <div
       className="h-full flex bg-[#09090B] text-slate-200 font-sans text-sm overflow-hidden"

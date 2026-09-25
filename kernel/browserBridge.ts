@@ -131,6 +131,7 @@ class BrowserBridge {
       throw new Error(`Active surface ${this.activeId} not found.`);
     }
     kernelLog.info(`[BrowserBridge] dispatch ${command.kind} → ${this.activeId}`);
+    eventBus.emit('browser:command-executed', { command, surfaceId: this.activeId, timestamp: Date.now() });
     return surface.execute(command);
   }
 

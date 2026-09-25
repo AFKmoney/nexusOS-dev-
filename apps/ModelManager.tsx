@@ -229,39 +229,39 @@ export default function ModelManager({ windowId }: { windowId: string }) {
 
   // ─── Render ────────────────────────────────────────────────────────
   return (
-    <div className="h-full flex flex-col bg-[#050508] text-slate-200 font-sans">
-      <div className="px-5 py-4 border-b border-white/5 bg-black/30 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent/10 rounded-xl border border-accent/20">
+    <div className="h-full flex flex-col bg-[#050508] text-slate-200 font-sans select-none overflow-hidden">
+      <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-white/5 bg-black/30 flex items-center justify-between gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-2 bg-accent/10 rounded-xl border border-accent/20 shrink-0">
             <Cpu size={18} className="text-accent" />
           </div>
-          <div>
-            <div className="text-base font-bold text-white">Model Manager</div>
-            <div className="text-xs text-zinc-500 uppercase tracking-widest">HuggingFace GGUF Hub</div>
+          <div className="min-w-0">
+            <div className="text-sm sm:text-base font-bold text-white truncate">Model Manager</div>
+            <div className="text-[10px] text-zinc-500 uppercase tracking-widest truncate">HuggingFace GGUF Hub</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1 rounded-lg bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-widest">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/20 text-accent text-[11px] font-bold uppercase tracking-wider">
             {installedModels.length} installed
           </div>
-          <div className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-zinc-400 text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
-            <HardDrive size={12} /> {loadedModelIds.length} loaded
+          <div className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-zinc-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
+            <HardDrive size={11} /> {loadedModelIds.length} loaded
           </div>
         </div>
       </div>
 
-      <div className="mx-4 mt-3 mb-1 p-3 rounded-xl bg-accent/5 border border-accent/15 flex items-center gap-3">
+      <div className="mx-2.5 sm:mx-4 mt-2 sm:mt-3 mb-1 p-2.5 sm:p-3 rounded-xl bg-accent/5 border border-accent/15 flex items-center gap-2.5">
         <Zap size={18} className="text-accent shrink-0" />
         <div className="flex-1 min-w-0">
-          <div className="text-xs text-zinc-500 uppercase tracking-widest">Active Model</div>
-          <div className="text-sm font-bold text-emerald-300 truncate">
-            {activeModel?.name || 'No active model'}
+          <div className="text-[10px] text-zinc-500 uppercase tracking-widest">Active Model Engine</div>
+          <div className="text-xs sm:text-sm font-bold text-emerald-300 truncate">
+            {activeModel?.name || (localBrain.isLMStudioAvailable() ? `LM Studio: ${localBrain.getLMStudioModelName()}` : 'Kernel Cloud Agent (Default)')}
           </div>
-          <div className="text-[11px] text-zinc-500 mt-0.5 truncate">
-            {activeModel ? `${formatCtx(activeModel)} ctx · ${formatGpuLayers(activeModel)} GPU layers` : 'Choose an installed model to begin.'}
+          <div className="text-[10px] sm:text-[11px] text-zinc-500 mt-0.5 truncate">
+            {activeModel ? `${formatCtx(activeModel)} ctx · ${formatGpuLayers(activeModel)} GPU layers` : '0 local GGUF models loaded · Forge using Kernel Agent fallback'}
           </div>
         </div>
-        <div className="text-xs text-accent font-mono">LOCAL</div>
+        <div className="text-[10px] sm:text-xs text-accent font-mono shrink-0">{activeModel ? 'LOCAL GGUF' : 'KERNEL AGENT'}</div>
       </div>
 
       {isSwitching && (

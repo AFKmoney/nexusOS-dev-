@@ -117,6 +117,19 @@ async function startServer() {
 
   // Universal AI Proxy for external LLM endpoints (NVIDIA NIM, OpenAI-compatible, etc.)
   app.post("/api/ai/proxy", async (req, res) => {
+    let clientDisconnected = false;
+    const abortController = new AbortController();
+    const onClientClose = () => {
+      clientDisconnected = true;
+      try {
+        abortController.abort();
+      } catch {}
+    };
+    req.on("close", onClientClose);
+
+    let connectionTimer: NodeJS.Timeout | null = null;
+    let idleTimer: NodeJS.Timeout | null = null;
+
     try {
       let { url, headers: clientHeaders = {}, body } = req.body;
       if (!url) {
@@ -208,12 +221,25 @@ async function startServer() {
 
       console.log(`[AI-Proxy] Forwarding to: ${targetUrl}`);
 
+      // Allow up to 120s for initial response connection / TTFB (cold start or model queuing)
+      connectionTimer = setTimeout(() => {
+        try {
+          abortController.abort(new DOMException("AI upstream connection timed out", "TimeoutError"));
+        } catch {}
+      }, 120000);
+
       const response = await fetch(targetUrl, {
         method: "POST",
         headers,
-        signal: AbortSignal.timeout(120000),
+        signal: abortController.signal,
         body: typeof body === "string" ? body : JSON.stringify(body),
       });
+
+      // Clear connection timer once headers are received
+      if (connectionTimer) {
+        clearTimeout(connectionTimer);
+        connectionTimer = null;
+      }
 
       const contentType = response.headers.get("content-type") || "application/json";
       res.status(response.status);
@@ -228,20 +254,48 @@ async function startServer() {
         }
 
         const reader = response.body.getReader();
+
+        // Activity timeout: If no chunk is received for 90s during active streaming, close gracefully
+        const resetIdleTimer = () => {
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(() => {
+            try {
+              reader.cancel().catch(() => {});
+            } catch {}
+          }, 90000);
+        };
+        resetIdleTimer();
+
         try {
           while (true) {
+            if (clientDisconnected || req.destroyed || res.writableEnded) break;
             const { done, value } = await reader.read();
             if (done) break;
+            if (clientDisconnected || req.destroyed || res.writableEnded) break;
+            resetIdleTimer();
             res.write(value);
             if (typeof (res as any).flush === "function") {
               (res as any).flush();
             }
           }
-        } catch (streamErr) {
-          console.warn("[AI-Proxy] Stream reading ended or client disconnected:", streamErr);
+        } catch (streamErr: any) {
+          const isExpectedClosure =
+            clientDisconnected ||
+            req.destroyed ||
+            res.writableEnded ||
+            streamErr?.name === "AbortError" ||
+            streamErr?.name === "TimeoutError" ||
+            (typeof streamErr?.message === "string" && /aborted|timeout|premature close|closed/i.test(streamErr.message));
+
+          if (!isExpectedClosure) {
+            console.error("[AI-Proxy] Stream error:", streamErr?.message || streamErr);
+          }
         } finally {
+          if (idleTimer) clearTimeout(idleTimer);
           reader.cancel().catch(() => {});
-          res.end();
+          if (!res.writableEnded) {
+            res.end();
+          }
         }
       } else {
         res.setHeader("Content-Type", contentType);
@@ -249,12 +303,34 @@ async function startServer() {
         res.send(text);
       }
     } catch (err: any) {
-      console.error("[AI-Proxy] Error:", err);
-      if (err.name === "AbortError" || err.name === "TimeoutError") {
-        res.status(504).json({ error: "Endpoint timed out after 90s. The remote AI model may be offline, queued, or taking too long." });
+      if (connectionTimer) clearTimeout(connectionTimer);
+      if (idleTimer) clearTimeout(idleTimer);
+
+      const isAbortOrTimeout =
+        clientDisconnected ||
+        req.destroyed ||
+        err?.name === "AbortError" ||
+        err?.name === "TimeoutError" ||
+        (typeof err?.message === "string" && /aborted|timeout/i.test(err.message));
+
+      if (isAbortOrTimeout) {
+        if (!res.headersSent) {
+          res.status(504).json({ error: "Endpoint timed out or was cancelled. The remote AI model may be offline, queued, or taking too long." });
+        } else if (!res.writableEnded) {
+          res.end();
+        }
       } else {
-        res.status(500).json({ error: `AI Proxy request failed: ${err.message}` });
+        console.error("[AI-Proxy] Error:", err?.message || err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: `AI Proxy request failed: ${err.message}` });
+        } else if (!res.writableEnded) {
+          res.end();
+        }
       }
+    } finally {
+      if (connectionTimer) clearTimeout(connectionTimer);
+      if (idleTimer) clearTimeout(idleTimer);
+      req.off("close", onClientClose);
     }
   });
 
@@ -329,10 +405,13 @@ async function startServer() {
         });
 
         for await (const chunk of responseStream) {
+          if (req.destroyed || res.writableEnded) break;
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
         }
-        res.write("data: [DONE]\n\n");
-        res.end();
+        if (!res.writableEnded) {
+          res.write("data: [DONE]\n\n");
+          res.end();
+        }
       } else {
         const completion = await openai.chat.completions.create({
           model,
@@ -345,13 +424,28 @@ async function startServer() {
         res.json(completion);
       }
     } catch (err: any) {
+      if (req.destroyed || res.writableEnded) return;
       console.error("[OpenAI-Chat] Error:", err.message);
-      res.status(500).json({ error: err.message || "OpenAI request failed" });
+      if (!res.headersSent) {
+        res.status(500).json({ error: err.message || "OpenAI request failed" });
+      } else {
+        res.end();
+      }
     }
   });
 
   // Proxy for Gemini API
   app.post("/api/gemini/models/:modelId", async (req, res) => {
+    let clientDisconnected = false;
+    const abortController = new AbortController();
+    const onClientClose = () => {
+      clientDisconnected = true;
+      try {
+        abortController.abort();
+      } catch {}
+    };
+    req.on("close", onClientClose);
+
     try {
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
@@ -367,6 +461,7 @@ async function startServer() {
         headers: {
           'Content-Type': 'application/json'
         },
+        signal: abortController.signal,
         body: JSON.stringify(req.body)
       });
       
@@ -376,21 +471,34 @@ async function startServer() {
       }
       
       if (response.body) {
-        // use node-fetch readable stream interop or native WebStream reader
-        // since Node 18 fetch returns WebStream
         const reader = response.body.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          res.write(value);
+        try {
+          while (true) {
+            if (clientDisconnected || req.destroyed || res.writableEnded) break;
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (clientDisconnected || req.destroyed || res.writableEnded) break;
+            res.write(value);
+          }
+        } catch (streamErr: any) {
+          // Client disconnect / abort handled silently
+        } finally {
+          reader.cancel().catch(() => {});
+          if (!res.writableEnded) res.end();
         }
-        res.end();
       } else {
         res.end();
       }
     } catch (err: any) {
+      if (clientDisconnected || req.destroyed || res.writableEnded) return;
       console.error("[GEMINI] Proxy Error:", err);
-      res.status(500).json({ error: { message: err.message } });
+      if (!res.headersSent) {
+        res.status(500).json({ error: { message: err.message } });
+      } else {
+        res.end();
+      }
+    } finally {
+      req.off("close", onClientClose);
     }
   });
 

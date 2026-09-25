@@ -55,6 +55,7 @@ const partializeOSState = (state: OSState) => ({
   globalZIndex: state.globalZIndex,
   activeWorkspace: state.activeWorkspace,
   uiScale: state.uiScale,
+  mobileMode: state.mobileMode,
   customManifests: state.customManifests,
 });
 
@@ -78,6 +79,8 @@ export const useOS = create<OSState>()(
       kernelRules: DEFAULT_KERNEL_RULES,
       isForging: false,
       uiScale: 1.0,
+      mobileMode: 'auto' as const,
+      isMobileView: typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
       isShellLocked: false,
       daemonLocked: false,
       daemonLockLog: [],

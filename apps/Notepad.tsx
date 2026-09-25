@@ -146,20 +146,20 @@ export default function NotepadApp({ windowId }: { windowId: string }) {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-2 py-1.5 bg-zinc-900 border-b border-white/5">
-        <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 px-2 py-1.5 bg-zinc-900 border-b border-white/5 shrink-0">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
           <input 
             value={activeTab.path} 
             onChange={e => updateActiveTab({ path: e.target.value })}
             placeholder="Filename (e.g. docs/notes.txt)"
-            className="bg-transparent border border-white/10 rounded px-2 py-1 text-xs w-64 outline-none focus:border-accent/50 transition-colors"
+            className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-xs flex-1 max-w-[240px] outline-none focus:border-accent/50 transition-colors font-mono"
           />
-          <button onClick={() => handleSave(activeTab.id)} className="p-1 text-zinc-400 hover:text-accent hover:bg-white/5 rounded transition" title="Save (Auto-saves every 2s)">
-            <Save size={14} />
+          <button onClick={() => handleSave(activeTab.id)} className="p-1.5 text-zinc-400 hover:text-accent hover:bg-white/5 active:bg-white/10 rounded-lg transition shrink-0" title="Save">
+            <Save size={15} />
           </button>
-          <div className="w-px h-4 bg-white/10 mx-1" />
-          <button onClick={() => setShowFind(!showFind)} className={`p-1 rounded transition ${showFind ? 'bg-accent/20 text-accent' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`} title="Find/Replace">
-            <Search size={14} />
+          <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0" />
+          <button onClick={() => setShowFind(!showFind)} className={`p-1.5 rounded-lg transition shrink-0 ${showFind ? 'bg-accent/20 text-accent' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`} title="Find/Replace">
+            <Search size={15} />
           </button>
         </div>
       </div>

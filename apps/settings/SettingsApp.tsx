@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useOS } from '../../store/osStore';
 import {
-  User, Cpu, Shield, Zap, Palette, Monitor, Brain, CheckCircle, Database, AlertCircle, Globe, Plus, Trash2, TestTube2, Loader2, Cloud
+  User, Cpu, Shield, Zap, Palette, Monitor, Brain, CheckCircle, Database, AlertCircle, Globe, Plus, Trash2, TestTube2, Loader2, Cloud, Smartphone
 } from 'lucide-react';
 import { aiPipelineBridge } from '../../kernel/aiPipelineBridge';
 import { localBrain } from '../../services/localBrain';
@@ -22,8 +22,12 @@ export default function SettingsApp() {
     uiScale,
     addNotification,
     setWallpaper,
+    wallpaper,
     wallpaperMotionStrength,
-    setWallpaperMotionStrength
+    setWallpaperMotionStrength,
+    mobileMode,
+    setMobileMode,
+    isMobileView
   } = useOS();
 
   const [tab, setTab] = useState<'profile' | 'system' | 'appearance' | 'daemon' | 'ai' | 'models' | 'providers'>('profile');
@@ -150,35 +154,71 @@ export default function SettingsApp() {
   };
 
   const WALLPAPERS = [
-    { name: 'Aurora', id: 'nexus://procedural/aurora' },
-    { name: 'Matrix', id: 'nexus://procedural/matrix' },
-    { name: 'Nebula', id: 'nexus://procedural/nebula' },
-    { name: 'Cyberpunk', id: 'https://images.unsplash.com/photo-1605142859862-978be7eba909?auto=format&fit=crop&q=80&w=2000' },
+    { name: 'Cosmic Nebula 3D', id: 'nexus://procedural/nebula', category: 'Deep Cosmos' },
+    { name: 'Neon Grid Horizon 3D', id: 'nexus://procedural/neon-grid', category: 'Synthwave' },
+    { name: 'Cyber City 3D', id: 'nexus://procedural/cyber-city', category: 'Cyberpunk' },
+    { name: 'Matrix Digital Rain 3D', id: 'nexus://procedural/matrix', category: 'Volumetric Code' },
+    { name: 'Warp Tunnel 3D', id: 'nexus://procedural/tunnel', category: 'Hyperspace' },
+    { name: 'Spiral Galaxy 3D', id: 'nexus://procedural/galaxy', category: 'Astrophysics' },
+    { name: 'Ocean Swell 3D', id: 'nexus://procedural/ocean', category: 'Fluid Grid' },
+    { name: 'Isometric Hexagons 3D', id: 'nexus://procedural/hexagons', category: 'Terrain' },
+    { name: 'Aurora Borealis 3D', id: 'nexus://procedural/aurora', category: 'Atmospheric' },
+    { name: 'Hyperspace Starlight 3D', id: 'nexus://procedural/starlight', category: 'Warp Drive' },
+    { name: 'Quantum Core 3D', id: 'nexus://procedural/circuit', category: 'Hardware' },
+    { name: 'Atmospheric Rain 3D', id: 'nexus://procedural/rain', category: 'Weather' },
+    { name: 'Blizzard Snow 3D', id: 'nexus://procedural/snow', category: 'Winter' },
+    { name: 'Sakura Petals 3D', id: 'nexus://procedural/petals', category: 'Nature' },
+    { name: 'Cyberpunk Metropolis 3D', id: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?q=80&w=1600&auto=format&fit=crop', category: 'WebGL Photo 3D' },
+    { name: 'Deep Space Webb 3D', id: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1600&auto=format&fit=crop', category: 'WebGL Photo 3D' },
+    { name: 'Obsidian Mountain 3D', id: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1600&auto=format&fit=crop', category: 'WebGL Photo 3D' },
+    { name: 'Tokyo Neon Rain 3D', id: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1600&auto=format&fit=crop', category: 'WebGL Photo 3D' },
   ];
 
   return (
-    <div className="h-full flex flex-col bg-[#050508] text-slate-200">
-      <div className="flex-1 flex overflow-hidden">
-        <div className="w-56 border-r border-white/5 bg-black/40 p-4 space-y-1 shrink-0">
-          <div className="px-3 py-4 mb-2">
-            <div className="text-xs font-black text-zinc-600 uppercase tracking-[0.2em] mb-4">Control Center</div>
-            {tabs.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
-                  tab === id
-                    ? 'bg-accent/15 border border-accent/20 text-accent'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
-                }`}
-              >
-                <Icon size={14} /> {label}
-              </button>
-            ))}
-          </div>
+    <div className="h-full flex flex-col bg-[#050508] text-slate-200 select-none overflow-hidden">
+      {/* Mobile Top Tabs */}
+      {isMobileView && (
+        <div className="flex items-center gap-1.5 px-3 py-2 bg-black/40 border-b border-white/5 overflow-x-auto no-scrollbar shrink-0">
+          {tabs.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 ${
+                tab === id
+                  ? 'bg-accent/20 border border-accent/40 text-accent font-black shadow-sm'
+                  : 'bg-white/5 border border-white/5 text-zinc-400 hover:text-white'
+              }`}
+            >
+              <Icon size={12} /> {label}
+            </button>
+          ))}
         </div>
+      )}
 
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Desktop Sidebar */}
+        {!isMobileView && (
+          <div className="w-56 border-r border-white/5 bg-black/40 p-4 space-y-1 shrink-0">
+            <div className="px-3 py-2 mb-2">
+              <div className="text-xs font-black text-zinc-600 uppercase tracking-[0.2em] mb-4">Control Center</div>
+              {tabs.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all mb-1 ${
+                    tab === id
+                      ? 'bg-accent/15 border border-accent/20 text-accent'
+                      : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+                  }`}
+                >
+                  <Icon size={14} /> {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
           {tab === 'profile' && (
             <div className="max-w-2xl animate-in fade-in slide-in-from-bottom-4 space-y-6">
               <div className="flex items-center justify-between">
@@ -191,24 +231,24 @@ export default function SettingsApp() {
                 </button>
               </div>
 
-              <div className="flex items-center gap-6 p-6 rounded-3xl bg-white/[0.02] border border-white/5">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-3xl font-black text-white border border-white/20 shadow-2xl">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-2xl sm:text-3xl font-black text-white border border-white/20 shadow-2xl shrink-0">
                   {profileName?.[0] || 'A'}
                 </div>
-                <div className="flex-1 space-y-3">
+                <div className="flex-1 w-full space-y-3">
                   <input
-                    className="bg-transparent text-xl font-bold text-white border-b border-white/10 focus:border-accent outline-none w-full pb-1 mb-1"
+                    className="bg-transparent text-lg sm:text-xl font-bold text-white border-b border-white/10 focus:border-accent outline-none w-full pb-1 mb-1"
                     value={profileName}
                     onChange={(e) => setProfileName(e.target.value)}
                     placeholder="Enter Identity Name"
                   />
                   <textarea
-                    className="w-full min-h-24 bg-black/30 border border-white/10 rounded-2xl p-3 text-sm text-zinc-200 outline-none focus:border-accent/50"
+                    className="w-full min-h-20 sm:min-h-24 bg-black/30 border border-white/10 rounded-2xl p-3 text-xs sm:text-sm text-zinc-200 outline-none focus:border-accent/50"
                     value={profileBio}
                     onChange={(e) => setProfileBio(e.target.value)}
                     placeholder="Profile bio, mission, or operational notes"
                   />
-                  <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">DAEMON.AUTH_TOKEN :: OK</div>
+                  <div className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest font-mono">DAEMON.AUTH_TOKEN :: OK</div>
                 </div>
               </div>
 
@@ -266,6 +306,42 @@ export default function SettingsApp() {
                   >
                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${kernelRules.fullAutonomy ? 'left-7' : 'left-1'}`} />
                   </button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/5 group hover:bg-white/[0.04] transition-all gap-3 sm:gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors shrink-0">
+                      <Smartphone size={18} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-white">Display &amp; Viewport Mode</div>
+                      <div className="text-xs text-zinc-500">
+                        {mobileMode === 'auto' ? `Auto-detect (${isMobileView ? 'Mobile active' : 'Desktop active'})` : `${mobileMode.toUpperCase()} forced`}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-black/40 p-1 rounded-xl border border-white/10 self-start sm:self-auto">
+                    {(['auto', 'mobile', 'desktop'] as const).map(mode => (
+                      <button
+                        key={mode}
+                        onClick={() => {
+                          setMobileMode(mode);
+                          addNotification({
+                            title: 'Display Mode',
+                            message: `Viewport set to ${mode.toUpperCase()}`,
+                            type: 'info'
+                          });
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all ${
+                          mobileMode === mode
+                            ? 'bg-accent text-black font-black shadow-sm'
+                            : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/5 group hover:bg-white/[0.04] transition-all">
@@ -440,7 +516,7 @@ export default function SettingsApp() {
               <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-6">
                 <div>
                   <div className="text-[10px] text-zinc-500 uppercase font-black mb-4 tracking-widest">Accent Synchronization</div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                     {ACCENTS.map(acc => (
                       <button
                         key={acc.name}
@@ -472,32 +548,47 @@ export default function SettingsApp() {
                 </div>
 
                 <div>
-                  <div className="text-[10px] text-zinc-500 uppercase font-black mb-4 tracking-widest">Active Surface (Wallpaper)</div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {WALLPAPERS.map(wp => (
-                      <button
-                        key={wp.id}
-                        onClick={() => {
-                            updateKernelRules({ ...kernelRules }); // trigger re-render
-                            setWallpaper(wp.id);
-                            addNotification({ title: 'Wallpaper Set', message: `${wp.name} activated.`, type: 'success' });
-                        }}
-                        className="p-4 rounded-xl border border-white/5 hover:border-white/20 bg-white/5 transition-all text-left group"
-                      >
-                        <div className="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors">{wp.name}</div>
-                        <div className="text-[9px] text-zinc-600 uppercase mt-1">Procedural Map</div>
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">Active Surface (Wallpapers 3D 3DS)</div>
+                    <span className="text-[10px] text-accent font-mono uppercase tracking-wider">{WALLPAPERS.length} Wallpapers 3D</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto custom-scrollbar p-1">
+                    {WALLPAPERS.map(wp => {
+                      const isActive = wallpaper === wp.id;
+                      return (
+                        <button
+                          key={wp.id}
+                          onClick={() => {
+                              updateKernelRules({ ...kernelRules }); // trigger re-render
+                              setWallpaper(wp.id);
+                              addNotification({ title: 'Wallpaper 3D Activé', message: `${wp.name} en relief gyroscopique 3DS`, type: 'success' });
+                          }}
+                          className={`p-3.5 rounded-xl border transition-all text-left relative group ${
+                            isActive
+                              ? 'border-accent/50 bg-accent/10 ring-1 ring-accent/30 shadow-sm'
+                              : 'border-white/5 hover:border-white/20 bg-white/5'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-1">
+                            <div className={`text-xs font-bold truncate transition-colors ${isActive ? 'text-white' : 'text-zinc-300 group-hover:text-white'}`}>
+                              {wp.name}
+                            </div>
+                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-white/10 text-accent shrink-0">3DS</span>
+                          </div>
+                          <div className="text-[9px] text-zinc-500 uppercase mt-1 truncate">{wp.category}</div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-[10px] text-zinc-500 uppercase font-black mb-4 tracking-widest">Motion Parallax</div>
+                  <div className="text-[10px] text-zinc-500 uppercase font-black mb-4 tracking-widest">3DS Motion Parallax & Gyroscope</div>
                   <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm font-bold text-white">Cursor Reactivity</div>
-                        <div className="text-xs text-zinc-500">How strongly the live wallpaper shifts with your cursor</div>
+                        <div className="text-sm font-bold text-white">Effet 3D & Gyroscope (Tous les Wallpapers)</div>
+                        <div className="text-xs text-zinc-500">Parallaxe stéréoscopique 3DS multi-plans, capteur gyroscopique et impulsion au tap</div>
                       </div>
                       <div className="text-xs font-mono text-accent">{Math.round(wallpaperMotionStrength * 100)}%</div>
                     </div>

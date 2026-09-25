@@ -23,44 +23,44 @@ export default function WelcomeApp({ id }: { id: string }) {
   }, [setHasSeenIntro]);
 
   return (
-    <div className="h-full flex items-center justify-center bg-[#030306] text-zinc-100 p-6 overflow-hidden">
-      <div className={`max-w-2xl w-full transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+    <div className="h-full flex items-center justify-center bg-[#030306] text-zinc-100 p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+      <div className={`max-w-2xl w-full my-auto transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-4">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-3 sm:mb-4">
             <Zap size={12} className="animate-pulse" /> System Online
           </div>
-          <h1 className="text-4xl font-black uppercase tracking-tight text-white mb-2">
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white mb-2">
             NexusOS
           </h1>
-          <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
             AI-native operating system. Built for developers, designed for the future.
           </p>
         </div>
 
         {/* Feature Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-6 sm:mb-8">
           {FEATURES.map((f, i) => (
             <div
               key={f.title}
-              className="group p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-accent/20 transition-all duration-300 cursor-default"
+              className="group p-3 sm:p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-accent/20 transition-all duration-300 cursor-default"
               style={{ animationDelay: `${i * 100}ms` }}
             >
-              <f.icon size={18} className="text-accent mb-2 group-hover:scale-110 transition-transform" />
-              <div className="text-xs font-bold text-white mb-1">{f.title}</div>
+              <f.icon size={18} className="text-accent mb-1.5 sm:mb-2 group-hover:scale-110 transition-transform" />
+              <div className="text-xs font-bold text-white mb-0.5 sm:mb-1">{f.title}</div>
               <div className="text-[10px] text-zinc-500 leading-relaxed">{f.desc}</div>
             </div>
           ))}
         </div>
 
         {/* Quick Actions */}
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
           <button
             onClick={() => {
               openWindow('daemon_chat');
               closeWindow(id);
             }}
-            className="flex items-center gap-2 px-5 py-3 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-black uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-accent/10 border border-accent/20 text-accent text-[11px] sm:text-xs font-black uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
           >
             <Brain size={14} /> Talk to DAEMON
           </button>
@@ -69,20 +69,20 @@ export default function WelcomeApp({ id }: { id: string }) {
               openWindow('settings');
               closeWindow(id);
             }}
-            className="flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-[11px] sm:text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all"
           >
             Configure AI <ChevronRight size={14} />
           </button>
           <button
             onClick={() => closeWindow(id)}
-            className="flex items-center gap-2 px-5 py-3 rounded-full bg-zinc-100 text-black text-xs font-black uppercase tracking-widest hover:bg-white transition-all"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-zinc-100 text-black text-[11px] sm:text-xs font-black uppercase tracking-widest hover:bg-white transition-all"
           >
             Enter OS <ArrowRight size={14} />
           </button>
         </div>
 
         {/* Version */}
-        <div className="text-center mt-6 text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
+        <div className="text-center mt-5 sm:mt-6 text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
           NexusOS v2.0.6 — Created by Philippe-Antoine Robert
         </div>
       </div>

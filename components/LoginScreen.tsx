@@ -32,23 +32,23 @@ export default function LoginScreen({
         <h1 className="text-3xl font-extralight text-white tracking-[0.25em] uppercase mb-2 drop-shadow-lg" style={{ color: 'white' }}>NexusOS</h1>
         <div className="text-xs text-zinc-600 tracking-[0.2em] uppercase mb-12">Select Profile</div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-wrap justify-center gap-6 sm:gap-8 px-4 max-w-sm sm:max-w-none">
           {profiles.map(p => (
             <div
               key={p.id}
               onClick={() => login(p.id)}
-              className="flex flex-col items-center gap-4 cursor-pointer group"
+              className="flex flex-col items-center gap-3 sm:gap-4 cursor-pointer group p-2 rounded-2xl active:scale-95 transition-transform"
             >
               <div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all shadow-xl backdrop-blur-md border border-white/10 group-hover:border-accent/40 group-hover:shadow-accent"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center opacity-85 group-hover:opacity-100 group-hover:scale-110 transition-all shadow-xl backdrop-blur-md border border-white/10 group-hover:border-accent/40 group-hover:shadow-accent"
                 style={{ backgroundColor: `${p.themeColor}20`, color: p.themeColor }}
               >
-                <Users size={28} />
+                <Users size={24} className="sm:w-7 sm:h-7" />
               </div>
               <div className="text-center">
-                <div className="text-white font-medium text-base tracking-wide group-hover:text-emerald-300 transition-colors drop-shadow-md">{p.name}</div>
-                {p.isAdmin && <div className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-1">Administrator</div>}
-                {p.id === 'daemon' && <div className="text-[10px] text-accent font-bold tracking-widest uppercase mt-1 animate-pulse">DAEMON AI</div>}
+                <div className="text-white font-medium text-sm sm:text-base tracking-wide group-hover:text-emerald-300 transition-colors drop-shadow-md">{p.name}</div>
+                {p.isAdmin && <div className="text-[9px] sm:text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-0.5 sm:mt-1">Administrator</div>}
+                {p.id === 'daemon' && <div className="text-[9px] sm:text-[10px] text-accent font-bold tracking-widest uppercase mt-0.5 sm:mt-1 animate-pulse">DAEMON AI</div>}
               </div>
             </div>
           ))}

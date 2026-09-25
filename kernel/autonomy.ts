@@ -15,6 +15,7 @@ import { initGovernanceBridge } from './governanceBridge';
 import { buildGuardianDirective } from './guardianDirective';
 import { usageTracker } from './usageTracker';
 import { kernelLog } from './log';
+import { businessAutonomy } from './businessAutonomy';
 
 // ═══════════════════════════════════════════════════════════════════
 // DAEMON AUTONOMY ENGINE — Event-Driven Neural Substrate
@@ -54,6 +55,25 @@ interface SystemSnapshot {
 }
 
 const MISSION_POOL: Mission[] = [
+  {
+    id: 'BUSINESS_AUTONOMY_PULSE',
+    trigger: 'business_goal_active',
+    weight: () => {
+      const activeGoal = businessAutonomy.getActiveGoal();
+      return (activeGoal && activeGoal.status === 'running') ? 0.98 : 0.05;
+    },
+    prompt: (state) => {
+      const activeGoal = businessAutonomy.getActiveGoal();
+      return `[MISSION: BUSINESS_AUTONOMY_PULSE]
+Active business goal: "${activeGoal?.title || 'Online Business'}".
+Category: ${activeGoal?.category || 'saas'} | Progress: ${activeGoal?.progress || 0}% | OODA Phase: ${activeGoal?.oodaPhase || 'OBSERVE'}
+Current Thought: "${activeGoal?.currentThought || 'Advancing business tasks'}"
+Installed Apps: ${state.apps}
+Desktop Files: ${state.desktop.join(', ')}
+
+Advance the business roadmap. Execute the next OODA pulse or write/test an asset in /home/user/Business.`;
+    }
+  },
   {
     id: 'OOM_PREVENTION',
     trigger: 'high_memory',
@@ -687,6 +707,10 @@ ${this.eventQueue.slice(-5).join('\n') || 'No recent events.'}
           summary: `Mission ${selectedMission.id} completed (tick #${this.tickCount})`,
           outcome: 'success',
         });
+
+        if (selectedMission.id === 'BUSINESS_AUTONOMY_PULSE') {
+          void businessAutonomy.tickOoda();
+        }
       }
 
       // ── Phase 4: Self-reflection (every 10 ticks) ──

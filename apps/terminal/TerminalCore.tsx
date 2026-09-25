@@ -352,12 +352,19 @@ export default function TerminalCore({ windowId }: { windowId: string }) {
     }
   };
 
+  const quickShortcuts = ['help', 'sysinfo', 'ps', 'ls -la', 'clear', 'neofetch'];
+
+  const executeShortcut = (cmd: string) => {
+    setInput(cmd);
+    handleCommand(cmd);
+  };
+
   return (
     <div
-      className="h-full bg-[#020204] p-4 font-mono text-base overflow-hidden flex flex-col text-green-500 selection:bg-green-500/30"
+      className="h-full bg-[#020204] p-3 sm:p-4 font-mono text-base overflow-hidden flex flex-col text-green-500 selection:bg-green-500/30"
       onClick={() => inputRef.current?.focus()}
     >
-      <div className="flex-1 overflow-y-auto pb-4 space-y-0.5">
+      <div className="flex-1 overflow-y-auto pb-2 space-y-0.5 custom-scrollbar">
         {history.map((h, i) => (
           <div
             key={i}
@@ -377,15 +384,15 @@ export default function TerminalCore({ windowId }: { windowId: string }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="flex gap-2 items-center border-t border-green-900/30 pt-3 shrink-0">
+      <div className="flex gap-2 items-center border-t border-green-900/30 pt-2 shrink-0">
         {realMode ? (
           <span className="text-accent font-bold text-[10px] shrink-0 uppercase tracking-widest px-2 py-0.5 bg-accent/10 rounded">
             shell
           </span>
         ) : (
-          <span className="text-accent font-bold text-xs shrink-0">
-            <ChevronRight size={16} className="inline" />
-            {currentDir.replace('/home/user', '~')} $
+          <span className="text-accent font-bold text-xs shrink-0 flex items-center">
+            <ChevronRight size={14} className="inline" />
+            <span className="hidden sm:inline">{currentDir.replace('/home/user', '~')}</span> $
           </span>
         )}
         <input
@@ -398,6 +405,29 @@ export default function TerminalCore({ windowId }: { windowId: string }) {
           disabled={isProcessing}
           spellCheck={false}
         />
+      </div>
+
+      {/* Touch & Mobile Virtual Command Bar */}
+      <div className="flex items-center gap-1.5 pt-2 mt-1 border-t border-white/5 overflow-x-auto no-scrollbar shrink-0 select-none">
+        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider mr-1 shrink-0">Cmds:</span>
+        {quickShortcuts.map((sc) => (
+          <button
+            key={sc}
+            onClick={() => executeShortcut(sc)}
+            className="px-2.5 py-1 rounded bg-green-950/40 hover:bg-green-900/60 border border-green-700/30 text-[10px] font-mono text-green-300 hover:text-white transition shrink-0 active:scale-95"
+          >
+            {sc}
+          </button>
+        ))}
+        <button
+          onClick={() => {
+            addLine(`${currentDir.replace('/home/user', '~')} $ ^C`, 'in');
+            setInput('');
+          }}
+          className="px-2 py-1 rounded bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-[10px] font-mono text-red-300 transition shrink-0 ml-auto"
+        >
+          ^C
+        </button>
       </div>
     </div>
   );

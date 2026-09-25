@@ -38,7 +38,7 @@ type BrowseMode = 'ai' | 'chromium';
 type AiMsg = { role: 'user' | 'ai'; content: string; sources?: { title: string; url: string }[] };
 
 export default function NetRunnerApp({ windowId }: { windowId: string }) {
-  const { windows, kernelRules, addNotification } = useOS();
+  const { windows, kernelRules, addNotification, isMobileView } = useOS();
   const win = windows.find((w) => w.id === windowId);
 
   const [url, setUrl] = useState(win?.data?.path || '');
@@ -304,7 +304,7 @@ Do not invent page contents that cannot be supported. Prefer accuracy over narra
     const prompts: Record<string, string> = {
       summarize: `Summarize the following web page content in 3-5 bullet points:\n\n${aiContent.slice(0, 2000)}`,
       keypoints: `Extract the 5 most important takeaways from this page:\n\n${aiContent.slice(0, 2000)}`,
-      translate: `Translate the main content of this page to French:\n\n${aiContent.slice(0, 2000)}`,
+      translate: `Translate the main content of this page to clear, professional English:\n\n${aiContent.slice(0, 2000)}`,
       facts: `List all verifiable facts and data points from this page:\n\n${aiContent.slice(0, 2000)}`
     };
     if (prompts[action]) {
@@ -322,28 +322,30 @@ Do not invent page contents that cannot be supported. Prefer accuracy over narra
 
   return (
     <div className="h-full flex flex-col bg-[#0a0d12] text-slate-200 font-sans overflow-hidden">
-      <div className="bg-[#050810] border-b border-white/5 flex items-center gap-1.5 px-2 py-1.5 shrink-0">
-        <button onClick={goBack} disabled={!backStack.length} className="p-1.5 hover:bg-white/5 rounded-lg transition-all disabled:opacity-20 text-zinc-500 hover:text-white">
-          <ArrowLeft size={15} />
-        </button>
-        <button onClick={goFwd} disabled={!fwdStack.length} className="p-1.5 hover:bg-white/5 rounded-lg transition-all disabled:opacity-20 text-zinc-500 hover:text-white">
-          <ArrowRight size={15} />
-        </button>
-        <button onClick={() => url && void navigate(url)} className="p-1.5 hover:bg-white/5 rounded-lg transition-all text-zinc-500 hover:text-white">
-          {isLoading ? <Loader2 size={15} className="animate-spin text-accent" /> : <RefreshCw size={15} />}
-        </button>
-        <button onClick={() => setUrl('')} className="p-1.5 hover:bg-white/5 rounded-lg transition-all text-zinc-500 hover:text-white">
-          <Home size={15} />
-        </button>
+      <div className="bg-[#050810] border-b border-white/5 flex flex-wrap items-center gap-1.5 px-2 py-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={goBack} disabled={!backStack.length} className="p-1.5 hover:bg-white/5 rounded-lg transition-all disabled:opacity-20 text-zinc-500 hover:text-white">
+            <ArrowLeft size={15} />
+          </button>
+          <button onClick={goFwd} disabled={!fwdStack.length} className="p-1.5 hover:bg-white/5 rounded-lg transition-all disabled:opacity-20 text-zinc-500 hover:text-white">
+            <ArrowRight size={15} />
+          </button>
+          <button onClick={() => url && void navigate(url)} className="p-1.5 hover:bg-white/5 rounded-lg transition-all text-zinc-500 hover:text-white">
+            {isLoading ? <Loader2 size={15} className="animate-spin text-accent" /> : <RefreshCw size={15} />}
+          </button>
+          <button onClick={() => setUrl('')} className="p-1.5 hover:bg-white/5 rounded-lg transition-all text-zinc-500 hover:text-white">
+            <Home size={15} />
+          </button>
+        </div>
 
-        <div className="flex-1 flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 focus-within:border-accent/40 rounded-xl px-3 py-1 transition-all">
+        <div className="flex-1 min-w-[150px] flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-white/5 focus-within:border-accent/40 rounded-xl px-2.5 py-1 transition-all">
           {url ? (
             mode === 'ai' ? <Sparkles size={13} className="text-accent shrink-0" /> : <Globe size={13} className="text-green-500 shrink-0" />
           ) : (
             <Search size={13} className="text-zinc-600 shrink-0" />
           )}
           <input
-            className="flex-1 bg-transparent text-sm outline-none text-white placeholder:text-zinc-600 font-mono"
+            className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm outline-none text-white placeholder:text-zinc-600 font-mono"
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -351,24 +353,26 @@ Do not invent page contents that cannot be supported. Prefer accuracy over narra
             placeholder="Search or enter URL..."
           />
           {urlInput && (
-            <button onClick={() => setUrlInput('')} className="text-zinc-500 hover:text-zinc-400">
+            <button onClick={() => setUrlInput('')} className="text-zinc-500 hover:text-zinc-400 shrink-0">
               <X size={13} />
             </button>
           )}
         </div>
 
-        <div className="flex bg-zinc-900 border border-white/5 rounded-xl p-0.5">
-          <button onClick={() => setMode('ai')} className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${mode === 'ai' ? 'bg-accent/20 text-accent' : 'text-zinc-600 hover:text-zinc-300'}`}>
-            <Sparkles size={11} /> AI
-          </button>
-          <button onClick={() => setMode('chromium')} className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${mode === 'chromium' ? 'bg-accent/20 text-accent' : 'text-zinc-600 hover:text-zinc-300'}`}>
-            <Globe size={11} /> Chromium
+        <div className="flex items-center gap-1 shrink-0 ml-auto sm:ml-0">
+          <div className="flex bg-zinc-900 border border-white/5 rounded-xl p-0.5">
+            <button onClick={() => setMode('ai')} className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 ${mode === 'ai' ? 'bg-accent/20 text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}>
+              <Sparkles size={11} /> AI
+            </button>
+            <button onClick={() => setMode('chromium')} className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 ${mode === 'chromium' ? 'bg-accent/20 text-accent' : 'text-zinc-500 hover:text-zinc-300'}`}>
+              <Globe size={11} /> Web
+            </button>
+          </div>
+
+          <button onClick={() => setChatOpen(!chatOpen)} className={`p-1.5 rounded-xl hover:bg-white/5 transition-all ${chatOpen ? 'text-accent bg-accent/10' : 'text-zinc-500 hover:text-zinc-300'}`} title="AI Chat">
+            <Bot size={16} />
           </button>
         </div>
-
-        <button onClick={() => setChatOpen(!chatOpen)} className={`p-1.5 rounded-xl hover:bg-white/5 transition-all ${chatOpen ? 'text-accent bg-accent/10' : 'text-zinc-600 hover:text-zinc-300'}`} title="AI Chat">
-          <Bot size={16} />
-        </button>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
@@ -488,7 +492,7 @@ Do not invent page contents that cannot be supported. Prefer accuracy over narra
         </div>
 
         {chatOpen && (
-          <div className="w-80 border-l border-white/5 bg-[#050810] flex flex-col shrink-0">
+          <div className={`${isMobileView ? 'absolute inset-0 z-30' : 'w-80 border-l border-white/5'} bg-[#050810] flex flex-col shrink-0`}>
             <div className="px-4 py-2.5 border-b border-white/5 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Bot size={15} className="text-accent" />

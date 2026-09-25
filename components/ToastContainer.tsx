@@ -48,7 +48,7 @@ export default function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-[9997] space-y-2 pointer-events-none" style={{ maxWidth: 360 }}>
+    <div className="fixed top-4 right-3 left-3 sm:left-auto sm:right-4 z-[9997] space-y-2 pointer-events-none max-w-none sm:max-w-[360px]">
       {toasts.map((toast, i) => {
         const cfg = typeConfig[toast.type];
         const Icon = cfg.icon;

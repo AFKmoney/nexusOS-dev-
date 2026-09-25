@@ -38,12 +38,13 @@ export default function CustomAppRunner({ windowId, onBack, appId }: { windowId:
     setLoading(true);
     try {
       let content: string | null = null;
+      const resolvedAppId = targetAppId || (sourcePath?.includes('/system/apps/') ? sourcePath.split('/system/apps/')[1]?.split('/')[0] : undefined);
 
       // For generated apps, use appGenerator.getInlinedEntry() which
       // inlines CSS and JS into the HTML so it works in an iframe
       // without path resolution issues.
-      if (isGeneratedApp && targetAppId) {
-        content = appGenerator.getInlinedEntry(targetAppId);
+      if (resolvedAppId) {
+        content = appGenerator.getInlinedEntry(resolvedAppId);
       }
 
       // Fallback: read the single HTML file directly (legacy forged apps)
@@ -52,6 +53,13 @@ export default function CustomAppRunner({ windowId, onBack, appId }: { windowId:
       }
 
       if (content) {
+        // If content is missing Tailwind or Lucide, inject them so icons and modern UI work
+        if (!content.includes('tailwindcss.com')) {
+          content = content.replace('<head>', '<head>\n<script src="https://cdn.tailwindcss.com"></script>');
+        }
+        if (!content.includes('lucide')) {
+          content = content.replace('</body>', '<script src="https://unpkg.com/lucide@latest"></script><script>setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 150);</script>\n</body>');
+        }
         setHtml(content);
         setError('');
         setLoading(false);

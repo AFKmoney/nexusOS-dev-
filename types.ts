@@ -100,7 +100,7 @@ export interface ContextMenuState {
   x: number;
   y: number;
   targetId?: string;
-  targetType: 'desktop' | 'text' | 'window' | 'icon' | 'taskbar' | 'taskbar-icon' | 'background' | 'app-icon';
+  targetType: 'desktop' | 'text' | 'window' | 'icon' | 'taskbar' | 'taskbar-icon' | 'background' | 'app-icon' | 'nexus-menu';
   filePath?: string;
   appId?: string;
   textSelection?: string;

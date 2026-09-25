@@ -201,6 +201,16 @@ REQUIREMENTS:
     vfs.createDir(dataDir, SYSTEM_VFS_APP_ID);
     vfs.writeFile(`${dataDir}/.keep`, '', SYSTEM_VFS_APP_ID);
 
+    // Create desktop shortcut in /home/user/Desktop so the app is instantly clickable
+    const desktopDir = '/home/user/Desktop';
+    if (!vfs.stat(desktopDir)) {
+      vfs.createDirRecursive(desktopDir, SYSTEM_VFS_APP_ID);
+    }
+    const desktopShortcutPath = `${desktopDir}/${name}.lnk`;
+    vfs.writeFile(desktopShortcutPath, `NEXUSOS_APP_SHORTCUT:${appId}`, SYSTEM_VFS_APP_ID);
+    files.push(desktopShortcutPath);
+    eventBus.emit('VFS_FILE_CREATED', { path: desktopShortcutPath, appId: SYSTEM_VFS_APP_ID });
+
     const os = useOS.getState();
     if (typeof (os as any).registerCustomApp === 'function') {
       (os as any).registerCustomApp({
@@ -219,7 +229,7 @@ REQUIREMENTS:
 
     os.addNotification({
       title: '✅ App Generated',
-      message: `"${name}" created with ${files.length} files at ${appDir}`,
+      message: `"${name}" created with ${files.length} files at ${appDir} and shortcut on Desktop`,
       type: 'success',
     } as any);
 
@@ -284,21 +294,48 @@ REQUIREMENTS:
 
     // Inline CSS
     html = html.replace(
-      /<link[^>]*href=["']styles\.css["'][^>]*>/gi,
+      /<link[^>]*href=["'](?:\.\/)?styles\.css["'][^>]*>/gi,
       `<style>\n${css}\n</style>`
     );
     // Inline JS
     html = html.replace(
-      /<script[^>]*src=["']app\.js["'][^>]*><\/script>/gi,
+      /<script[^>]*src=["'](?:\.\/)?app\.js["'][^>]*><\/script>/gi,
       `<script>\n${js}\n</script>`
     );
     // If no link/script tags found, append
     if (css && !html.includes('<style>')) {
-      html = html.replace('</head>', `<style>\n${css}\n</style>\n</head>`);
+      if (html.includes('</head>')) {
+        html = html.replace('</head>', `<style>\n${css}\n</style>\n</head>`);
+      } else {
+        html = `<style>\n${css}\n</style>\n` + html;
+      }
     }
-    if (js && !html.includes('<script>')) {
-      html = html.replace('</body>', `<script>\n${js}\n</script>\n</body>`);
+    if (js && !html.includes(js)) {
+      if (html.includes('</body>')) {
+        html = html.replace('</body>', `<script>\n${js}\n</script>\n</body>`);
+      } else {
+        html = html + `\n<script>\n${js}\n</script>`;
+      }
     }
+
+    // Ensure modern styling CDNs are present if missing
+    if (!html.includes('tailwindcss.com')) {
+      const tailwindTag = '<script src="https://cdn.tailwindcss.com"></script>';
+      if (html.includes('<head>')) {
+        html = html.replace('<head>', `<head>\n  ${tailwindTag}`);
+      } else {
+        html = `${tailwindTag}\n` + html;
+      }
+    }
+    if (!html.includes('lucide')) {
+      const lucideTag = '<script src="https://unpkg.com/lucide@latest"></script><script>window.addEventListener("DOMContentLoaded", () => { if (window.lucide) window.lucide.createIcons(); }); setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 150);</script>';
+      if (html.includes('</body>')) {
+        html = html.replace('</body>', `  ${lucideTag}\n</body>`);
+      } else {
+        html = html + `\n${lucideTag}`;
+      }
+    }
+
     return html;
   }
 }

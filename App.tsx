@@ -23,6 +23,13 @@ import { NeuralHoloUI } from './components/NeuralHoloUI';
 import ToastContainer from './components/ToastContainer';
 import { getDesktopPath } from './appShellConstants';
 import { kernelLog } from './kernel/log';
+import { useMobileDetection } from './hooks/useMobileDetection';
+import { useParallax3DS } from './hooks/useParallax3DS';
+import MobileStatusBar from './components/MobileStatusBar';
+import MobileHomeScreen from './components/MobileHomeScreen';
+import MobileNavBar from './components/MobileNavBar';
+import MobileAppSwitcher from './components/MobileAppSwitcher';
+import MobileControlCenter from './components/MobileControlCenter';
 
 // DAEMON Bridge — Auto-initializes on import. If installed, boots silently.
 import './kernel/daemonBridge';
@@ -59,6 +66,7 @@ function NeuralThoughtStream() {
 
 type DesktopIconGridProps = {
   currentUserId?: string | null;
+  isMobile?: boolean;
   openContextMenu: (state: {
     isOpen: boolean;
     x: number;
@@ -71,11 +79,13 @@ type DesktopIconGridProps = {
 
 function DesktopIconGrid({
   currentUserId,
+  isMobile,
   openContextMenu,
   openWindow
 }: DesktopIconGridProps) {
   const desktopPath = getDesktopPath(currentUserId);
   const accentColor = useOS((state) => state.accentColor);
+  const { iconOffsetX, iconOffsetY, triggerImpulse } = useParallax3DS();
 
   useEffect(() => {
     themeEngine.setCustomAccent(accentColor);
@@ -179,31 +189,71 @@ function DesktopIconGrid({
     }
   }, [desktopPath]);
 
-  const desktopItems = vfs.listDir(desktopPath, SYSTEM_VFS_APP_ID) || [];
-  // Icons with custom positions use absolute positioning; others use grid
-  const positionedItems = desktopItems.filter(name => iconPositions[name]);
-  const gridItems = desktopItems.filter(name => !iconPositions[name]);
+  const [desktopItems, setDesktopItems] = useState<string[]>(() => {
+    return vfs.listDir(desktopPath, SYSTEM_VFS_APP_ID) || [];
+  });
+
+  const refreshDesktop = useCallback(() => {
+    const items = vfs.listDir(desktopPath, SYSTEM_VFS_APP_ID) || [];
+    setDesktopItems(items);
+  }, [desktopPath]);
+
+  useEffect(() => {
+    refreshDesktop();
+    const unsubs = [
+      eventBus.on('VFS_FILE_CREATED', refreshDesktop),
+      eventBus.on('VFS_FILE_MODIFIED', refreshDesktop),
+      eventBus.on('VFS_FILE_DELETED', refreshDesktop),
+      eventBus.on('VFS_DIR_CREATED', refreshDesktop),
+      eventBus.on('app:generated', refreshDesktop),
+      eventBus.on('app:registered', refreshDesktop),
+      eventBus.on('app:shortcut-created', refreshDesktop),
+    ];
+    const timer = setInterval(refreshDesktop, 1500);
+    return () => {
+      unsubs.forEach(u => u());
+      clearInterval(timer);
+    };
+  }, [desktopPath, refreshDesktop]);
+
+  // In mobile mode, always use clean touch-friendly grid without overlapping freeform positions
+  const positionedItems = isMobile ? [] : desktopItems.filter(name => iconPositions[name]);
+  const gridItems = isMobile ? desktopItems : desktopItems.filter(name => !iconPositions[name]);
 
   return (
     <div
       ref={desktopRef}
-      className="absolute inset-0 bottom-16 p-5 overflow-hidden"
+      className={`absolute inset-0 ${isMobile ? 'bottom-16 p-3' : 'bottom-16 p-5'} overflow-y-auto custom-scrollbar`}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDesktopDrop}
+      onClick={(e) => {
+        if (e.target === desktopRef.current) {
+          triggerImpulse();
+        }
+      }}
+      style={{
+        transform: `translate3d(${iconOffsetX}px, ${iconOffsetY}px, 0)`,
+        transition: 'transform 0.08s ease-out',
+        willChange: 'transform',
+      }}
     >
       {/* Grid items (default position) */}
-      <div className="grid grid-cols-[repeat(auto-fill,96px)] grid-rows-[repeat(auto-fill,96px)] gap-3 h-full content-start">
+      <div className={`grid ${isMobile ? 'grid-cols-4 gap-2' : 'grid-cols-[repeat(auto-fill,96px)] grid-rows-[repeat(auto-fill,96px)] gap-3'} h-full content-start`}>
         {gridItems.map(name => {
           const itemPath = `${desktopPath}/${name}`;
+          const displayName = name.endsWith('.lnk') ? name.slice(0, -4) : name;
           return (
             <div
               key={name}
-              draggable
+              draggable={!isMobile}
               onDragStart={(e) => {
                 e.dataTransfer.setData('text/plain', itemPath);
                 e.dataTransfer.setData('text/nexusos-desktop-icon', name);
               }}
-              className="flex flex-col items-center p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors"
+              className="flex flex-col items-center p-2 rounded-xl hover:bg-white/5 active:bg-white/10 cursor-pointer group transition-colors"
+              onClick={() => {
+                if (isMobile) handleFileOpen(itemPath);
+              }}
               onDoubleClick={() => handleFileOpen(itemPath)}
               onContextMenu={(e) => {
                 e.preventDefault();
@@ -211,19 +261,20 @@ function DesktopIconGrid({
                 openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'icon', filePath: itemPath });
               }}
             >
-              <div className="w-12 h-12 bg-zinc-900/50 rounded-xl flex items-center justify-center border border-white/5 group-hover:border-accent/30 transition-all shadow-md group-hover:shadow-accent">
-                {getSmartIcon(itemPath, 24)}
+              <div className={`${isMobile ? 'w-11 h-11' : 'w-12 h-12'} bg-zinc-900/60 rounded-xl flex items-center justify-center border border-white/8 group-hover:border-accent/30 group-active:scale-95 transition-all shadow-md group-hover:shadow-accent`}>
+                {getSmartIcon(itemPath, isMobile ? 22 : 24)}
               </div>
-              <span className="text-[11px] text-zinc-300 mt-1.5 text-center truncate w-full drop-shadow-md group-hover:text-white transition-colors">{name}</span>
+              <span className="text-[10px] sm:text-[11px] text-zinc-300 mt-1.5 text-center truncate w-full drop-shadow-md group-hover:text-white transition-colors">{displayName}</span>
             </div>
           );
         })}
       </div>
 
-      {/* Positioned items (absolute, user-moved) */}
-      {positionedItems.map(name => {
+      {/* Positioned items (absolute, user-moved) - Desktop only */}
+      {!isMobile && positionedItems.map(name => {
         const itemPath = `${desktopPath}/${name}`;
         const pos = iconPositions[name]!;
+        const displayName = name.endsWith('.lnk') ? name.slice(0, -4) : name;
         return (
           <div
             key={name}
@@ -244,7 +295,7 @@ function DesktopIconGrid({
             <div className="w-12 h-12 bg-zinc-900/50 rounded-xl flex items-center justify-center border border-white/5 group-hover:border-accent/30 transition-all shadow-md group-hover:shadow-accent">
               {getSmartIcon(itemPath, 24)}
             </div>
-            <span className="text-[11px] text-zinc-300 mt-1.5 text-center truncate w-full drop-shadow-md group-hover:text-white transition-colors">{name}</span>
+            <span className="text-[11px] text-zinc-300 mt-1.5 text-center truncate w-full drop-shadow-md group-hover:text-white transition-colors">{displayName}</span>
           </div>
         );
       })}
@@ -252,16 +303,25 @@ function DesktopIconGrid({
   );
 }
 
-function DesktopWidgets() {
+function DesktopWidgets({ isMobile }: { isMobile?: boolean }) {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
+
   return (
-    <div className="absolute top-6 right-6 flex flex-col gap-0.5 pointer-events-none select-none z-0 text-white/80 items-end">
-      <div className="text-5xl font-light tracking-tight drop-shadow-lg tabular-nums">{time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
-      <div className="text-sm font-medium drop-shadow-md text-accent/80">{time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+    <div className={`absolute pointer-events-none select-none z-0 text-white/80 items-end ${
+      isMobile 
+        ? 'top-3 right-3 flex flex-col gap-0'
+        : 'top-6 right-6 flex flex-col gap-0.5'
+    }`}>
+      <div className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-light tracking-tight drop-shadow-lg tabular-nums`}>
+        {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+      </div>
+      <div className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium drop-shadow-md text-accent/80`}>
+        {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+      </div>
     </div>
   );
 }
@@ -282,6 +342,7 @@ export default function App() {
     openContextMenu,
     openWindow,
     closeWindow,
+    minimizeWindow,
     isSearchOpen,
     toggleSearch,
     currentUser,
@@ -289,11 +350,35 @@ export default function App() {
     toggleStartMenu,
     profiles,
     login,
-    setBooted
+    setBooted,
+    mobileMode,
+    isMobileView: storeIsMobileView,
+    setIsMobileView
   } = useOS();
   const { lockShell, unlockShell, isShellLocked: locked } = useOS();
   const [bootTimedOut, setBootTimedOut] = useState(false);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
+  const [mobileAppSwitcherOpen, setMobileAppSwitcherOpen] = useState(false);
+  const [mobileControlCenterOpen, setMobileControlCenterOpen] = useState(false);
+  const { triggerImpulse } = useParallax3DS();
+
+  const { isMobile: detectedMobile } = useMobileDetection(mobileMode);
+  const isMobile = storeIsMobileView || detectedMobile;
+
+  const hasVisibleMobileWindow = isMobile && windows.some(w => !w.isMinimized);
+
+  const handleGoHome = useCallback(() => {
+    windows.forEach(w => {
+      if (!w.isMinimized) minimizeWindow(w.id);
+    });
+    setMobileAppSwitcherOpen(false);
+    setMobileControlCenterOpen(false);
+  }, [windows, minimizeWindow]);
+
+  // Sync mobile view state to global store when screen size or mode changes
+  useEffect(() => {
+    setIsMobileView(detectedMobile);
+  }, [detectedMobile, setIsMobileView]);
 
   // Spotlight: Cmd/Ctrl+K toggles global search
   useEffect(() => {
@@ -405,6 +490,32 @@ export default function App() {
     const target = e.target as HTMLElement;
     if (!target.closest('.start-menu') && isStartMenuOpen) toggleStartMenu();
     if (useOS.getState().contextMenu.isOpen) useOS.getState().closeContextMenu();
+
+    // 3DS Parallax: tap = tilt impulsif when clicking/tapping on desktop substrate
+    if (
+      !target.closest('.window-frame') &&
+      !target.closest('.taskbar') &&
+      !target.closest('.start-menu') &&
+      !target.closest('.context-menu') &&
+      !target.closest('button') &&
+      !target.closest('input')
+    ) {
+      triggerImpulse();
+    }
+  };
+
+  const handleGlobalTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      !target.closest('.window-frame') &&
+      !target.closest('.taskbar') &&
+      !target.closest('.start-menu') &&
+      !target.closest('.context-menu') &&
+      !target.closest('button') &&
+      !target.closest('input')
+    ) {
+      triggerImpulse();
+    }
   };
 
   const handleGlobalContextMenu = (e: React.MouseEvent) => {
@@ -435,13 +546,14 @@ export default function App() {
     <div
       className="h-screen w-screen overflow-hidden relative"
       onClick={handleGlobalClick}
+      onTouchStart={handleGlobalTouchStart}
       onContextMenu={handleGlobalContextMenu}
     >
       <DesktopWallpaper wallpaper={wallpaper} />
 
       <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
-      <DesktopWidgets />
+      <DesktopWidgets isMobile={isMobile} />
 
       <div
         className="absolute inset-0 z-10 overflow-hidden"
@@ -454,11 +566,12 @@ export default function App() {
       >
         <DesktopIconGrid
           currentUserId={currentUser?.id ?? null}
+          isMobile={isMobile}
           openContextMenu={openContextMenu}
           openWindow={openWindow}
         />
 
-        <div className="absolute inset-0 bottom-20 overflow-hidden pointer-events-none">
+        <div className={`absolute inset-0 ${isMobile ? 'bottom-14' : 'bottom-20'} overflow-hidden pointer-events-none`}>
           {(windows || []).filter(w => w.workspaceId === activeWorkspace || !w.workspaceId).map(win => (
             <WindowFrame key={win.id} windowState={win} />
           ))}

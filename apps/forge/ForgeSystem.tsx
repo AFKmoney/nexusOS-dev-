@@ -4,6 +4,7 @@ import { useOS } from '../../store/osStore';
 import { aiService } from '../../services/puterService';
 import { vfs, SYSTEM_VFS_APP_ID } from '../../kernel/fileSystem';
 import { memory } from '../../kernel/memory';
+import { eventBus } from '../../kernel/eventBus';
 import { Cpu, Zap, Code, Eye, RefreshCw, Rocket, Box, Loader2, Sparkles, AlertCircle, CheckCircle, RotateCcw, Braces, FileCode2, Command } from 'lucide-react';
 
 import { localBrain } from '../../services/localBrain';
@@ -189,6 +190,10 @@ export default function ForgeSystem({ windowId }: { windowId: string }) {
       permissions: ['vfs.read', 'vfs.write', 'network']
     });
 
+    eventBus.emit('VFS_FILE_CREATED', { path: desktopPath, appId: SYSTEM_VFS_APP_ID });
+    eventBus.emit('app:generated', { appId, name: manifestName, path: appDir });
+    eventBus.emit('app:registered', { appId, name: manifestName });
+
     memory.remember(`Created app: "${manifestName}" — ${prompt} (desktop: ${desktopPath})`, ['forge', 'app', 'created']);
 
     addNotification({
@@ -260,11 +265,21 @@ export default function ForgeSystem({ windowId }: { windowId: string }) {
               setCode(codeRef.current);
               lastUpdateRef.current = now;
             }
-          }, 'forge').then(() => { clearTimeout(timeout); resolve(); }).catch((e) => { clearTimeout(timeout); reject(e); });
+          }, 'forge').then(() => { clearTimeout(timeout); resolve(); }).catch((e) => { clearTimeout(timeout); resolve(); });
         });
 
-        // Extract only the HTML block — strip any prose/markdown leaking before or after
-        const raw = codeRef.current;
+        // If stream ended empty or failed, attempt single-shot generation
+        if (!codeRef.current || codeRef.current.length < 40) {
+          try {
+            const fallback = await aiService.generateOnce(userPrompt, kernelRules, 'coder');
+            if (fallback && fallback.trim()) {
+              codeRef.current = fallback;
+            }
+          } catch {}
+        }
+
+        // Extract only the HTML block — strip thought tags and markdown leaking before or after
+        const raw = codeRef.current.replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim();
         const htmlStart = raw.search(/<!DOCTYPE\s+html/i) !== -1
           ? raw.search(/<!DOCTYPE\s+html/i)
           : raw.search(/<html/i);
@@ -332,69 +347,69 @@ export default function ForgeSystem({ windowId }: { windowId: string }) {
   return (
     <div className="h-full flex flex-col bg-[#050508] text-accent font-mono">
       {/* Top Bar */}
-      <div className="p-2 bg-[#0a0a0c] border-b border-white/5 flex justify-between items-center shrink-0">
-        <div className="flex items-center gap-3 px-2">
-          <div className="p-1 bg-accent/10 rounded">
+      <div className="p-2 sm:p-2.5 bg-[#0a0a0c] border-b border-white/5 flex flex-wrap justify-between items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 px-1 sm:px-2 min-w-0">
+          <div className="p-1 bg-accent/10 rounded shrink-0">
             <Cpu size={18} className={isGenerating ? 'animate-spin text-accent' : 'text-accent'} />
           </div>
-          <div>
-            <div className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600">Neural Forge {isAiConnected ? '(Online)' : '(Offline)'}</div>
-            <div className={`text-xs font-mono ${statusColor} flex items-center gap-1`}>
-              {(isGenerating || isNaming) && <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />}
-              {isNaming ? 'Naming app...' : isAiConnected ? (statusMsg || status) : 'Waiting for Neural Core...'}
+          <div className="min-w-0">
+            <div className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-zinc-500 truncate">Neural Forge {isAiConnected ? '(Online)' : '(Offline)'}</div>
+            <div className={`text-[11px] sm:text-xs font-mono ${statusColor} flex items-center gap-1 truncate`}>
+              {(isGenerating || isNaming) && <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse shrink-0" />}
+              <span className="truncate">{isNaming ? 'Naming app...' : isAiConnected ? (statusMsg || status) : 'Waiting for Neural Core...'}</span>
               {isGenerating && tokenCount > 0 && (
-                <span className="text-zinc-500 ml-1">({tokenCount} tok)</span>
+                <span className="text-zinc-500 ml-1 shrink-0">({tokenCount} tok)</span>
               )}
               {retryCount > 0 && !isGenerating && (
-                <span className="text-yellow-600 ml-1">[{retryCount} retries]</span>
+                <span className="text-yellow-600 ml-1 shrink-0">[{retryCount} retries]</span>
               )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {status === 'DONE' && <CheckCircle size={18} className="text-accent" />}
-          {status === 'ERROR' && <AlertCircle size={18} className="text-red-400" />}
-          <div className="flex bg-black/60 p-1 rounded-lg border border-white/5">
-            <button onClick={() => setView('code')} className={`px-2 py-1 rounded transition-all ${view === 'code' ? 'bg-zinc-800 text-white' : 'text-zinc-600 hover:text-zinc-400'}`}><Code size={16}/></button>
-            <button onClick={() => setView('preview')} className={`px-2 py-1 rounded transition-all ${view === 'preview' ? 'bg-zinc-800 text-white' : 'text-zinc-600 hover:text-zinc-400'}`}><Eye size={16}/></button>
+        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+          {status === 'DONE' && <CheckCircle size={16} className="text-accent" />}
+          {status === 'ERROR' && <AlertCircle size={16} className="text-red-400" />}
+          <div className="flex bg-black/60 p-0.5 rounded-lg border border-white/5">
+            <button onClick={() => setView('code')} className={`px-2 py-1 rounded transition-all ${view === 'code' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`} title="View Code"><Code size={15}/></button>
+            <button onClick={() => setView('preview')} className={`px-2 py-1 rounded transition-all ${view === 'preview' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`} title="View Preview"><Eye size={15}/></button>
           </div>
           {code && !isGenerating && !isNaming && (
-            <button onClick={() => handleInstall()} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/90 hover:bg-accent text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-950/40">
-              {isNaming ? <Loader2 size={14} className="animate-spin" /> : <Rocket size={14} />}
-              {isNaming ? 'NAMING...' : 'INSTALL'}
+            <button onClick={() => handleInstall()} className="flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-accent/90 hover:bg-accent text-white rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-950/40">
+              {isNaming ? <Loader2 size={13} className="animate-spin" /> : <Rocket size={13} />}
+              <span>{isNaming ? 'NAMING...' : 'INSTALL'}</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Prompt Bar */}
-      <div className="p-3 bg-black border-b border-zinc-900/80 flex gap-2 shrink-0">
-        <div className="flex-1 relative">
+      <div className="p-2 sm:p-3 bg-black border-b border-zinc-900/80 flex gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex-1 min-w-0 relative">
           <input
-            className="w-full bg-[#0a0a0c] border border-white/5 rounded-lg px-4 py-2.5 text-sm text-emerald-50 outline-none focus:border-accent/40 transition-all placeholder:text-zinc-500 font-sans"
-            placeholder="Describe the app to forge... (e.g. 'Pomodoro timer with dark theme')"
+            className="w-full bg-[#0a0a0c] border border-white/5 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-emerald-50 outline-none focus:border-accent/40 transition-all placeholder:text-zinc-500 font-sans"
+            placeholder="Describe the app to forge..."
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSynthesize()}
             disabled={isGenerating}
           />
           {isGenerating && (
-            <div className="absolute right-3 top-2.5 text-xs font-bold text-accent/50 uppercase flex items-center gap-1.5">
-              <Loader2 size={12} className="animate-spin" /> {status}
+            <div className="absolute right-3 top-2 sm:top-2.5 text-[10px] sm:text-xs font-bold text-accent/50 uppercase flex items-center gap-1.5">
+              <Loader2 size={12} className="animate-spin" /> <span className="hidden sm:inline">{status}</span>
             </div>
           )}
         </div>
         <button
           onClick={() => handleSynthesize()}
           disabled={isGenerating || !prompt.trim()}
-          className="bg-accent hover:bg-accent text-white px-5 py-2 rounded-lg text-sm font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg disabled:opacity-30 hover:scale-105 active:scale-95"
+          className="bg-accent hover:bg-accent text-white px-3 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-black uppercase tracking-widest flex items-center gap-1.5 sm:gap-2 transition-all shadow-lg disabled:opacity-30 active:scale-95 shrink-0"
         >
-          {isGenerating ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} fill="currentColor" />}
-          {isGenerating ? 'FORGING' : 'FORGE'}
+          {isGenerating ? <RefreshCw size={15} className="animate-spin" /> : <Zap size={15} fill="currentColor" />}
+          <span>{isGenerating ? 'FORGING' : 'FORGE'}</span>
         </button>
         {code && !isGenerating && !isNaming && (
-          <button onClick={() => { setCode(''); codeRef.current=''; setStatus('IDLE'); setStatusMsg(''); }} className="p-2 border border-white/10 hover:border-red-500/30 text-zinc-600 hover:text-red-400 rounded-lg transition-all" title="Clear">
-            <RotateCcw size={16} />
+          <button onClick={() => { setCode(''); codeRef.current=''; setStatus('IDLE'); setStatusMsg(''); }} className="p-2 border border-white/10 hover:border-red-500/30 text-zinc-500 hover:text-red-400 rounded-lg transition-all shrink-0" title="Clear">
+            <RotateCcw size={15} />
           </button>
         )}
       </div>

@@ -4,6 +4,7 @@ import type { AppManifest, ContextMenuState, KernelRules, Notification as NotifT
 import { DEFAULT_SINGLETON_APPS } from './osStoreConstants';
 import type { OverrideMode } from '../kernel/humanOverride';
 import type { HealthStatus } from '../kernel/autonomyHealthMonitor';
+import { isCurrentViewportMobile } from '../hooks/useMobileDetection';
 
 export interface GovernanceState {
   overrideMode: OverrideMode;
@@ -49,6 +50,8 @@ export interface OSStateShape {
   isSearchOpen: boolean;
   isForging: boolean;
   uiScale: number;
+  mobileMode: 'auto' | 'mobile' | 'desktop';
+  isMobileView: boolean;
   isShellLocked: boolean;
   daemonLocked: boolean;
   daemonLockLog: string[];
@@ -68,6 +71,8 @@ export interface OSStateShape {
   openContextMenu: (state: ContextMenuState) => void;
   closeContextMenu: () => void;
   setUiScale: (scale: number) => void;
+  setMobileMode: (mode: 'auto' | 'mobile' | 'desktop') => void;
+  setIsMobileView: (isMobile: boolean) => void;
   lockShell: () => void;
   unlockShell: () => void;
   setClipboard: (val: { path: string; operation: 'copy' | 'cut' } | null) => void;
@@ -114,6 +119,11 @@ export const createUIActions = (
   openContextMenu: (contextMenu: ContextMenuState) => set({ contextMenu }),
   closeContextMenu: () => set(state => ({ contextMenu: { ...state.contextMenu, isOpen: false } })),
   setUiScale: (uiScale: number) => set({ uiScale }),
+  setMobileMode: (mobileMode: 'auto' | 'mobile' | 'desktop') => {
+    const isMobile = isCurrentViewportMobile(mobileMode);
+    set({ mobileMode, isMobileView: isMobile });
+  },
+  setIsMobileView: (isMobileView: boolean) => set({ isMobileView }),
   lockShell: () => set({ isShellLocked: true }),
   unlockShell: () => set({ isShellLocked: false }),
 });
@@ -195,15 +205,17 @@ export const createWindowActions = (
     const id = uuid();
     const nextZ = get().globalZIndex + 1;
 
-    const width = app.defaultSize?.width || 800;
-    const height = app.defaultSize?.height || 600;
-    
-    // Calculate centered position with slight cascade for multiple windows
-    const cascadeOffset = (get().windows.length % 5) * 30;
     const screenW = typeof window !== 'undefined' ? window.innerWidth : 1200;
     const screenH = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const x = Math.max(0, (screenW - width) / 2) + cascadeOffset;
-    const y = Math.max(0, (screenH - height) / 2) + cascadeOffset;
+    const isMobile = get().isMobileView || isCurrentViewportMobile(get().mobileMode);
+
+    const width = isMobile ? screenW : (app.defaultSize?.width || 800);
+    const height = isMobile ? (screenH - 64) : (app.defaultSize?.height || 600);
+    
+    // Calculate centered position with slight cascade for multiple windows
+    const cascadeOffset = isMobile ? 0 : (get().windows.length % 5) * 30;
+    const x = isMobile ? 0 : Math.max(0, (screenW - width) / 2) + cascadeOffset;
+    const y = isMobile ? 0 : Math.max(0, (screenH - height) / 2) + cascadeOffset;
 
     const newWin: WindowState = {
       id,
@@ -215,7 +227,7 @@ export const createWindowActions = (
       height,
       zIndex: nextZ,
       isMinimized: false,
-      isMaximized: false,
+      isMaximized: isMobile,
       data,
       workspaceId: get().activeWorkspace
     };

@@ -135,27 +135,27 @@ export default function DashboardApp() {
         </div>
       </div>
 
-      <div className="flex-1 p-6 space-y-4 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 p-3 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar">
         {/* ── Top Stats Grid ────────────────────────────────────────────── */}
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           {[
             { label: 'Apps', value: registry.length, icon: Box, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Windows', value: windows.length, icon: Monitor, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Memory', value: memories, icon: Brain, color: 'text-violet-400', bg: 'bg-violet-500/10' },
             { label: 'Tools', value: tools.length, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10' },
           ].map(s => (
-            <div key={s.label} className={`${s.bg} backdrop-blur-sm border border-white/5 rounded-2xl p-3 flex items-center gap-3`}>
-              <s.icon size={20} className={s.color} />
+            <div key={s.label} className={`${s.bg} backdrop-blur-sm border border-white/5 rounded-2xl p-2.5 sm:p-3 flex items-center gap-2.5 sm:gap-3`}>
+              <s.icon size={18} className={s.color} />
               <div>
-                <div className="text-xl font-bold leading-tight">{s.value}</div>
-                <div className="text-[10px] text-zinc-500 uppercase tracking-wider">{s.label}</div>
+                <div className="text-lg sm:text-xl font-bold leading-tight">{s.value}</div>
+                <div className="text-[9px] sm:text-[10px] text-zinc-500 uppercase tracking-wider">{s.label}</div>
               </div>
             </div>
           ))}
         </div>
 
         {/* ── Two-column panel row ──────────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {/* DAEMON Core Status */}
           <div className="bg-neutral-900/60 border border-white/5 rounded-2xl p-4">
             <div className="text-xs text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">

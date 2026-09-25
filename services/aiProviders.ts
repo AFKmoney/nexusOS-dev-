@@ -1330,70 +1330,79 @@ ${suffix}`;
     const decoder = new TextDecoder();
     let buffer = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
 
-      // Handle different stream formats
-      if (provider.type === 'google') {
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith('data: ')) {
-            const payload = trimmed.slice(6);
-            if (payload === '[DONE]') continue;
-            try {
-              const data = JSON.parse(payload);
-              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (text) onToken(text);
-            } catch {}
-          } else if (trimmed.startsWith('{')) {
-            try {
-              const data = JSON.parse(trimmed);
-              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (text) onToken(text);
-            } catch {}
-          }
-        }
-      } else if (provider.type === 'anthropic') {
-        // Anthropic SSE format
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith('data: ')) {
-            const payload = trimmed.slice(6);
-            if (payload === '[DONE]') continue;
-            try {
-              const data = JSON.parse(payload);
-              if (data.type === 'content_block_delta') {
-                const text = data.delta?.text || '';
+        // Handle different stream formats
+        if (provider.type === 'google') {
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data: ')) {
+              const payload = trimmed.slice(6);
+              if (payload === '[DONE]') continue;
+              try {
+                const data = JSON.parse(payload);
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (text) onToken(text);
-              }
-            } catch {}
+              } catch {}
+            } else if (trimmed.startsWith('{')) {
+              try {
+                const data = JSON.parse(trimmed);
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) onToken(text);
+              } catch {}
+            }
           }
-        }
-      } else {
-        // OpenAI SSE format
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
-            try {
-              const data = JSON.parse(trimmed.slice(6));
-              const delta = data.choices?.[0]?.delta;
-              const content = delta?.content || '';
-              // Stream fluid content directly — internal reasoning stays internal
-              if (content) {
-                onToken(content);
-              }
-            } catch {}
+        } else if (provider.type === 'anthropic') {
+          // Anthropic SSE format
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data: ')) {
+              const payload = trimmed.slice(6);
+              if (payload === '[DONE]') continue;
+              try {
+                const data = JSON.parse(payload);
+                if (data.type === 'content_block_delta') {
+                  const text = data.delta?.text || '';
+                  if (text) onToken(text);
+                }
+              } catch {}
+            }
+          }
+        } else {
+          // OpenAI SSE format
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
+              try {
+                const data = JSON.parse(trimmed.slice(6));
+                const delta = data.choices?.[0]?.delta;
+                const content = delta?.content || '';
+                // Stream fluid content directly — internal reasoning stays internal
+                if (content) {
+                  onToken(content);
+                }
+              } catch {}
+            }
           }
         }
       }
+    } catch (streamErr: any) {
+      const isAbort = streamErr?.name === 'AbortError' || streamErr?.name === 'TimeoutError' || /abort|timeout|closed/i.test(streamErr?.message || '');
+      if (!isAbort) {
+        throw streamErr;
+      }
+    } finally {
+      reader.cancel().catch(() => {});
     }
   }
 

@@ -8,11 +8,14 @@ import {
   Wand2, Pin, Settings, RefreshCw, Edit3, Info, Activity, Zap, Layers, PinOff,
   LogOut, ArrowDownFromLine, ArrowUpFromLine,
   Bug, FileCode, AlignLeft, Eraser, MessageSquare, Image as ImageIcon,
-  FolderOpen, Play, Wallpaper, Languages, Tag, FileSearch, BrainCircuit, Paintbrush
+  FolderOpen, Play, Wallpaper, Languages, Tag, FileSearch, BrainCircuit, Paintbrush,
+  Rocket, ShieldCheck, Smartphone
 } from 'lucide-react';
 import { aiService } from '../services/puterService';
 import { vfs, SYSTEM_VFS_APP_ID } from '../kernel/fileSystem';
+import { eventBus } from '../kernel/eventBus';
 import { getDesktopPath } from '../appShellConstants';
+import { useMobileDetection } from '../hooks/useMobileDetection';
 
 interface MenuItemProps {
   icon: React.ElementType;
@@ -35,8 +38,11 @@ export default function ContextMenu() {
     minimizeWindow, closeWindow, toggleMaximizeWindow, restoreWindow,
     windows, openWindow, clipboard, setClipboard, addNotification, kernelRules,
     pinApp, unpinApp, pinnedApps, registry, logout, updateWindow, setWallpaper, lockShell,
-    currentUser, activeWindowId
+    currentUser, activeWindowId, mobileMode, setMobileMode, isMobileView: storeIsMobileView
   } = useOS();
+
+  const { isMobile: detectedMobile } = useMobileDetection(mobileMode);
+  const isMobile = storeIsMobileView || detectedMobile;
   
   const menuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,10 +55,10 @@ export default function ContextMenu() {
         let { x, y } = contextMenu;
         
         // Edge Collision Detection
-        if (x + width > innerWidth) x -= width;
-        if (y + height > innerHeight) y -= height;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
+        if (x + width > innerWidth) x = Math.max(8, innerWidth - width - 8);
+        if (y + height > innerHeight) y = Math.max(8, innerHeight - height - 8);
+        if (x < 8) x = 8;
+        if (y < 8) y = 8;
 
         setPosition({ x, y });
     }
@@ -246,11 +252,20 @@ export default function ContextMenu() {
       const app = registry.find(a => a.id === appId);
       if (!app) return;
       const desktopPath = getDesktopPath(currentUser?.id ?? null);
+      if (!vfs.resolveNode(desktopPath)) {
+        vfs.createDirRecursive(desktopPath, SYSTEM_VFS_APP_ID);
+      }
       const shortcutName = `${app.name}.lnk`;
       const destPath = `${desktopPath}/${shortcutName}`;
       // Create a .lnk file that the desktop handler recognizes as an app shortcut
       vfs.writeFile(destPath, `NEXUSOS_APP_SHORTCUT:${appId}`, SYSTEM_VFS_APP_ID);
-      addNotification({ title: 'Shortcut Created', message: `${app.name} shortcut added to desktop.`, type: 'success' });
+      eventBus.emit('VFS_FILE_CREATED', { path: destPath, appId: SYSTEM_VFS_APP_ID });
+      eventBus.emit('app:shortcut-created', { appId, path: destPath });
+      addNotification({ 
+        title: 'Desktop Shortcut Created', 
+        message: `"${app.name}" was added to your desktop.`, 
+        type: 'success' 
+      });
       closeContextMenu();
   };
 
@@ -563,12 +578,14 @@ export default function ContextMenu() {
             {contextMenu.targetType === 'window' && <Monitor size={14}/>}
             {contextMenu.targetType === 'icon' && <FileText size={14}/>}
             {contextMenu.targetType === 'desktop' && <Monitor size={14}/>}
+            {contextMenu.targetType === 'nexus-menu' && <Zap size={14} className="text-accent"/>}
             
             {contextMenu.targetType === 'text' && (contextMenu.textElement ? "Input Field" : "Selection")}
             {(contextMenu.targetType === 'desktop' || contextMenu.targetType === 'background') && "System"}
             {contextMenu.targetType === 'icon' && (fileName || "File")}
             {contextMenu.targetType === 'window' && "Window Controls"}
             {contextMenu.targetType === 'taskbar' && "Taskbar"}
+            {contextMenu.targetType === 'nexus-menu' && "Nexus System Menu"}
             {contextMenu.targetType === 'app-icon' && targetAppName}
         </div>
 
@@ -594,7 +611,7 @@ export default function ContextMenu() {
                         <SubHeader label="Neural Writer" />
                         <NeuralItem icon={Sparkles} label="Enhance with AI..." onClick={handleCustomAiModify} />
                         <NeuralItem icon={Wand2} label="Fix Grammar & Spelling" onClick={() => handleAiEditInPlace("Fix grammar and spelling errors.")} />
-                        <NeuralItem icon={Languages} label="Translate to Spanish" onClick={() => handleAiEditInPlace("Translate to Spanish.")} />
+                        <NeuralItem icon={Languages} label="Translate to English" onClick={() => handleAiEditInPlace("Translate this text to clear, polished English.")} />
                         <NeuralItem icon={Zap} label="Complete Sentence" onClick={() => handleAiEditInPlace("Complete this thought or sentence.")} />
                         <NeuralItem icon={Eraser} label="Clear Field" onClick={() => { if(contextMenu.textElement) { contextMenu.textElement.value = ''; closeContextMenu(); } }} />
                     </>
@@ -659,17 +676,30 @@ export default function ContextMenu() {
             </>
         )}
 
-        {/* 3. APP ICONS */}
+        {/* 3. APP ICONS (START MENU & LAUNCHERS) */}
         {contextMenu.targetType === 'app-icon' && (
             <>
-                <MenuItem icon={ExternalLink} label="Launch New Instance" onClick={handleOpen} />
+                <MenuItem icon={ExternalLink} label="Launch App" onClick={handleOpen} />
+                <MenuItem 
+                    icon={Monitor} 
+                    label="Add to Desktop" 
+                    onClick={() => {
+                        if (targetAppId) handleAddAppToDesktop(targetAppId);
+                    }} 
+                />
                 <MenuItem 
                     icon={isPinned ? PinOff : Pin} 
                     label={isPinned ? "Unpin from Taskbar" : "Pin to Taskbar"} 
-                    onClick={() => { isPinned ? unpinApp(targetAppId ?? '') : pinApp(targetAppId ?? ''); closeContextMenu(); }} 
+                    onClick={() => { 
+                        if (targetAppId) {
+                            if (isPinned) unpinApp(targetAppId);
+                            else pinApp(targetAppId);
+                        }
+                        closeContextMenu(); 
+                    }} 
                 />
                 <Separator />
-                <NeuralItem icon={Info} label="About Application" onClick={() => handleAskAI()} />
+                <NeuralItem icon={Info} label="About App" onClick={() => handleAskAI()} />
             </>
         )}
 
@@ -727,6 +757,14 @@ export default function ContextMenu() {
                 
                 <Separator />
                 <SubHeader label="System Tools" />
+                <MenuItem 
+                    icon={isMobile ? Monitor : Smartphone} 
+                    label={isMobile ? "Switch to Desktop Mode" : "Switch to Mobile Mode"} 
+                    onClick={() => { 
+                        setMobileMode(isMobile ? 'desktop' : 'mobile'); 
+                        closeContextMenu(); 
+                    }} 
+                />
                 <MenuItem icon={TerminalIcon} label="Terminal" onClick={() => { openWindow('terminal'); closeContextMenu(); }} />
                 <MenuItem icon={Wallpaper} label="Wallpaper" onClick={() => { openWindow('wallpaper'); closeContextMenu(); }} />
                 <MenuItem icon={Settings} label="Settings" onClick={() => { openWindow('settings'); closeContextMenu(); }} />
@@ -756,6 +794,85 @@ export default function ContextMenu() {
                 
                 <Separator />
                 <MenuItem icon={Trash2} label="Close All Windows" onClick={() => { if(confirm("Close all windows?")) windows.forEach(w => closeWindow(w.id)); closeContextMenu(); }} danger />
+            </>
+        )}
+
+        {/* 6B. NEXUS MENU (START BUTTON / SYSTEM QUICK MENU) */}
+        {contextMenu.targetType === 'nexus-menu' && (
+            <>
+                <SubHeader label="Autonomous Intelligence" />
+                <MenuItem 
+                    icon={Rocket} 
+                    label="Goal & Business Autonomy" 
+                    onClick={() => { openWindow('business_autonomy'); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={Sparkles} 
+                    label="Neural Forge (App Generator)" 
+                    onClick={() => { openWindow('forge'); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={FileCode} 
+                    label="HyperIDE Developer Studio" 
+                    onClick={() => { openWindow('hyperide'); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={TerminalIcon} 
+                    label="Terminal (Neural Shell)" 
+                    onClick={() => { openWindow('terminal'); closeContextMenu(); }} 
+                />
+
+                <Separator />
+                <SubHeader label="System Navigation" />
+                <MenuItem 
+                    icon={FolderOpen} 
+                    label="File Explorer" 
+                    onClick={() => { openWindow('explorer'); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={Play} 
+                    label="NetRunner Browser" 
+                    onClick={() => { openWindow('netrunner'); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={ShieldCheck} 
+                    label="Governance & Policy Matrix" 
+                    onClick={() => { openWindow('governance'); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={Activity} 
+                    label="Task Manager / Monitor" 
+                    onClick={() => { openWindow('monitor'); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={Settings} 
+                    label="System Settings" 
+                    onClick={() => { openWindow('settings'); closeContextMenu(); }} 
+                />
+
+                <Separator />
+                <SubHeader label="Power & Session" />
+                <NeuralItem 
+                    icon={Layers} 
+                    label="Auto-Organize Workspace" 
+                    onClick={handleOrganize} 
+                />
+                <MenuItem 
+                    icon={Lock} 
+                    label="Lock Workstation" 
+                    onClick={() => { lockShell(); closeContextMenu(); }} 
+                />
+                <MenuItem 
+                    icon={RefreshCw} 
+                    label="Restart NexusOS" 
+                    onClick={() => { window.location.reload(); }} 
+                />
+                <MenuItem 
+                    icon={LogOut} 
+                    label="Log Out" 
+                    onClick={() => { logout(); closeContextMenu(); }} 
+                    danger 
+                />
             </>
         )}
 
