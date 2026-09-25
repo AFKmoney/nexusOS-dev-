@@ -1,4 +1,5 @@
 import { eventBus, OS_EVENTS } from './eventBus';
+import { toolForge } from './toolForge';
 
 export type GbaAction = 'play' | 'pause' | 'load' | 'press' | 'open';
 
@@ -59,4 +60,20 @@ function safeParse(s: string): Record<string, unknown> {
   } catch {
     return {};
   }
+}
+
+const forge = toolForge as unknown as {
+  executeToolCalls: (calls: { name: string; arguments?: unknown }[]) => Promise<string>;
+  __gbaWrapped?: boolean;
+};
+
+if (!forge.__gbaWrapped) {
+  const orig = forge.executeToolCalls.bind(toolForge);
+  forge.executeToolCalls = async (toolCalls) => {
+    const split = partitionGbaToolCalls(toolCalls || []);
+    const gbaOut = split.gba.length ? executeGbaToolCalls(split.gba) : '';
+    const restOut = split.rest.length ? await orig(split.rest) : '';
+    return [gbaOut, restOut].filter(Boolean).join('\n');
+  };
+  forge.__gbaWrapped = true;
 }
