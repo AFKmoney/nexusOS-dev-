@@ -79,4 +79,8 @@ export const OS_EVENTS = {
   LOCK_SCREEN: 'os:lock',
   UNLOCK_SCREEN: 'os:unlock',
   DAEMON_DRAW_HOLO: 'daemon:draw_holo',
+  GBA_PRESS: 'os:gba:press',
+  GBA_RELEASE: 'os:gba:release',
+  GBA_LOAD: 'os:gba:load',
+  GBA_COMMAND: 'os:gba:command',
 } as const;
