@@ -172,10 +172,14 @@ export async function hydrateOSRegistry(): Promise<void> {
        }
     });
 
+    const systemIds = SYSTEM_APPS.map((app) => app.id);
+    const mergedInstalled = installedApps.length === 0
+      ? fullRegistry.map((app) => app.id)
+      : Array.from(new Set([...installedApps, ...systemIds]));
+
     useOS.setState({
       registry: fullRegistry,
-      // Only set installedApps on first boot (when empty)
-      ...(installedApps.length === 0 ? { installedApps: fullRegistry.map((app) => app.id) } : {})
+      installedApps: mergedInstalled,
     });
   } catch (error) {
     kernelLog.warn('[OS_STORE] Failed to hydrate app registry:', error);
