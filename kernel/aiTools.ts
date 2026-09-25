@@ -1,5 +1,6 @@
 // NEXUS OS ACTION TOOL DEFINITIONS — Native Function-Calling Schema
 import { AITool } from '../services/aiProviders';
+import './gbaBridge';
 
 export function getOsActionTools(): AITool[] {
   return [
