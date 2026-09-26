@@ -87,7 +87,7 @@ export default function WeatherApp() {
       <div className="absolute inset-0 bg-[#050508]/60 backdrop-blur-3xl z-0" />
 
       {/* Header */}
-      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between z-10 relative bg-black/20">
+      <div className="min-h-12 sm:h-16 px-3 sm:px-6 py-2 border-b border-white/5 flex items-center justify-between gap-2 z-10 relative bg-black/20">
         <form onSubmit={handleSearch} className="relative flex-1 max-w-xs group">
           <Search size={14} className="absolute left-3 top-2.5 text-zinc-500 group-focus-within:text-accent transition-colors" />
           <input

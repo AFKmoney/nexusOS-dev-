@@ -25,19 +25,19 @@ export default function ViralApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent/20 rounded-lg text-accent">
+      <div className="min-h-12 sm:h-16 px-3 sm:px-6 py-2 border-b border-white/5 flex items-center justify-between gap-2 bg-black/40 backdrop-blur-xl shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2 bg-accent/20 rounded-lg text-accent shrink-0">
             <Rocket size={20} />
           </div>
-          <div>
-            <h1 className="text-sm font-black uppercase tracking-[0.2em]">Viral Core</h1>
-            <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">Global Propagation Engine</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-black uppercase tracking-[0.2em] truncate">Viral Core</h1>
+            <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase hidden sm:block">Global Propagation Engine</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 bg-black/40 px-4 py-1.5 rounded-full border border-white/10 shadow-inner">
-          <div className="w-2 h-2 rounded-full bg-accent animate-pulse shadow-accent" />
-          <span className="text-xs font-black font-mono tracking-tighter">{nodes.toLocaleString('en-US')} ACTIVE NODES</span>
+        <div className="flex items-center gap-2 bg-black/40 px-2.5 sm:px-4 py-1.5 rounded-full border border-white/10 shrink-0">
+          <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+          <span className="text-[10px] sm:text-xs font-black font-mono tracking-tighter">{nodes.toLocaleString('en-US')}</span>
         </div>
       </div>
 

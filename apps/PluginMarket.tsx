@@ -85,7 +85,7 @@ export default function PluginMarket({ windowId: _windowId }: { windowId: string
         </div>
 
         {/* Generate bar */}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-zinc-900/50 rounded-xl border border-white/5">
             <Sparkles size={16} className="text-accent shrink-0" />
             <input

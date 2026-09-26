@@ -33,7 +33,7 @@ export default function KeyboardShortcuts({ onClose }: { onClose: () => void }) 
   return (
     <div className="fixed inset-0 z-[9998] flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="relative bg-zinc-900/95 border border-white/10 rounded-2xl shadow-2xl w-[520px] max-h-[80vh] overflow-auto" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-zinc-900/95 border border-white/10 rounded-2xl shadow-2xl w-[calc(100%-24px)] max-w-[520px] max-h-[80vh] overflow-auto" onClick={e => e.stopPropagation()}>
         <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between sticky top-0 bg-zinc-900/95 backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <Keyboard size={16} className="text-accent" />

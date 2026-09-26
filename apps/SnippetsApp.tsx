@@ -62,18 +62,18 @@ export default function SnippetsApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent/20 rounded-lg text-accent">
+      <div className="min-h-12 sm:h-16 px-3 sm:px-6 py-2 border-b border-white/5 flex items-center justify-between gap-2 bg-black/40 backdrop-blur-xl shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2 bg-accent/20 rounded-lg text-accent shrink-0">
             <FileCode2 size={20} />
           </div>
-          <div>
-            <h1 className="text-sm font-black uppercase tracking-[0.2em]">Pattern Repository</h1>
-            <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">Neural Logic Storage</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-black uppercase tracking-[0.2em] truncate">Pattern Repository</h1>
+            <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase hidden sm:block">Neural Logic Storage</p>
           </div>
         </div>
-        <button onClick={addSnippet} className="flex items-center gap-2 px-5 py-2 bg-accent hover:bg-accent text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-accent hover:scale-105 active:scale-95">
-          <Plus size={14} /> New Pattern
+        <button onClick={addSnippet} className="flex items-center gap-1.5 px-3 sm:px-5 py-2 bg-accent text-white rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider shrink-0">
+          <Plus size={14} /> New
         </button>
       </div>
 

@@ -60,21 +60,19 @@ export default function HabitTracker() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent/20 rounded-lg">
+      <div className="min-h-12 sm:h-16 px-3 sm:px-6 py-2 border-b border-white/5 flex items-center justify-between gap-2 bg-black/40 backdrop-blur-xl shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2 bg-accent/20 rounded-lg shrink-0">
             <Target size={20} className="text-accent" />
           </div>
-          <div>
-            <h1 className="text-sm font-black uppercase tracking-[0.2em]">Neural Protocols</h1>
-            <p className="text-[10px] text-zinc-500 font-mono tracking-widest">Behavioral Optimization Engine</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-black uppercase tracking-[0.2em] truncate">Neural Protocols</h1>
+            <p className="text-[10px] text-zinc-500 font-mono tracking-widest hidden sm:block">Behavioral Optimization Engine</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full border border-white/5 shadow-inner">
-            <Flame size={14} className="text-orange-500" />
-            <span className="text-[10px] font-black font-mono">{habits.reduce((acc, h) => acc + h.streak, 0)} TOTAL STREAK</span>
-          </div>
+        <div className="flex items-center gap-2 bg-black/40 px-2.5 sm:px-3 py-1 rounded-full border border-white/5 shrink-0">
+          <Flame size={14} className="text-orange-500" />
+          <span className="text-[10px] font-black font-mono">{habits.reduce((acc, h) => acc + h.streak, 0)}</span>
         </div>
       </div>
 
