@@ -118,7 +118,7 @@ export default function Taskbar() {
                     >
                       <Icon size={20} className={`transition-colors ${isActive ? 'text-accent' : 'text-zinc-400 group-hover:text-white'}`} />
                       {isActive && <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-accent rounded-full" />}
-                      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-[#0a0a0c]/95 backdrop-blur-xl border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-wider text-zinc-200 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-lg translate-y-2 group-hover:translate-y-0 z-[100]">
+                      <div className="hidden sm:block absolute bottom-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-[#0a0a0c]/95 backdrop-blur-xl border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-wider text-zinc-200 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-lg translate-y-2 group-hover:translate-y-0 z-[100]">
                         {app.name}
                       </div>
                     </button>

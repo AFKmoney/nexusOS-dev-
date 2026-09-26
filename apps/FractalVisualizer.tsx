@@ -192,7 +192,7 @@ export default function FractalVisualizer() {
                 />
                 
                 {/* Overlay Panel */}
-                <div className="absolute top-4 left-4 w-full sm:w-64 bg-black/60 backdrop-blur-xl border border-accent/20 rounded-xl p-4 flex flex-col gap-4 pointer-events-none">
+                <div className="absolute top-3 left-3 right-3 sm:right-auto sm:w-64 bg-black/60 backdrop-blur-xl border border-accent/20 rounded-xl p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 pointer-events-none">
                     <div>
                         <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">State Analysis</div>
                         <div className="text-xs text-accent">Stable Fractal Resonance</div>

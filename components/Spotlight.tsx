@@ -120,7 +120,7 @@ export default function Spotlight({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[8vh] sm:pt-[15vh] bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <div

@@ -60,18 +60,18 @@ export default function ContactsApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent/20 rounded-lg">
+      <div className="min-h-12 sm:h-16 px-3 sm:px-6 py-2 border-b border-white/5 flex items-center justify-between gap-2 bg-black/40 backdrop-blur-xl shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2 bg-accent/20 rounded-lg shrink-0">
             <Users size={20} className="text-accent" />
           </div>
-          <div>
-            <h1 className="text-sm font-black uppercase tracking-[0.2em]">Node Directory</h1>
-            <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">Participant Uplink Registry</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-black uppercase tracking-[0.2em] truncate">Node Directory</h1>
+            <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase hidden sm:block">Participant Uplink Registry</p>
           </div>
         </div>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-5 py-2 bg-accent hover:bg-accent text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-accent hover:scale-105">
-          <UserPlus size={14} /> Register Node
+        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-3 sm:px-5 py-2 bg-accent text-white rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider shrink-0">
+          <UserPlus size={14} /> <span className="hidden xs:inline sm:inline">Add</span>
         </button>
       </div>
 

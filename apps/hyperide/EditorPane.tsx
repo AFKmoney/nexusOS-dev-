@@ -1,4 +1,5 @@
 import React, { RefObject } from 'react';
+import { useOS } from '../../store/osStore';
 import {
   Save, CheckCheck, Replace, MoreHorizontal, X, Code, Play,
   Box, ShieldAlert, ChevronRight,
@@ -52,6 +53,7 @@ export const EditorPane: React.FC<EditorPaneProps> = (props) => {
   } = props;
 
   const monaco = useMonaco();
+  const { isMobileView } = useOS();
   
   const getLanguage = (extension: string) => {
     switch(extension) {
@@ -123,17 +125,17 @@ export const EditorPane: React.FC<EditorPaneProps> = (props) => {
 
         {/* Find & Replace Overlay */}
         {showFindReplace && (
-          <div className="px-4 py-2.5 bg-[#252526] border-b border-[#333] flex items-center gap-3 shrink-0 shadow-lg">
+          <div className="px-3 sm:px-4 py-2.5 bg-[#252526] border-b border-[#333] flex flex-wrap items-center gap-2 sm:gap-3 shrink-0 shadow-lg">
             <Replace size={16} className="text-[#007ACC]" />
             <input
               autoFocus
-              className="w-48 bg-[#3C3C3C] border border-[#3C3C3C] rounded px-3 py-1.5 text-xs text-white outline-none focus:border-[#007ACC]"
+              className="w-full sm:w-48 bg-[#3C3C3C] border border-[#3C3C3C] rounded px-3 py-1.5 text-xs text-white outline-none focus:border-[#007ACC]"
               placeholder="Find..."
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
             />
             <input
-              className="w-48 bg-[#3C3C3C] border border-[#3C3C3C] rounded px-3 py-1.5 text-xs text-white outline-none focus:border-[#007ACC]"
+              className="w-full sm:w-48 bg-[#3C3C3C] border border-[#3C3C3C] rounded px-3 py-1.5 text-xs text-white outline-none focus:border-[#007ACC]"
               placeholder="Replace with..."
               value={replaceQuery}
               onChange={(e) => onReplaceQueryChange(e.target.value)}
@@ -176,7 +178,7 @@ export const EditorPane: React.FC<EditorPaneProps> = (props) => {
                 ) : (
                   <button
                     onClick={(e) => { e.stopPropagation(); onCloseTab(i); }}
-                    className={`p-0.5 rounded text-zinc-400 hover:text-white transition-all shrink-0 ${i === activeIdx ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                    className={`p-0.5 rounded text-zinc-400 hover:text-white transition-all shrink-0 ${i === activeIdx || isMobileView ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                   >
                     <X size={14} />
                   </button>
@@ -200,16 +202,16 @@ export const EditorPane: React.FC<EditorPaneProps> = (props) => {
             <p className="text-[#969696] font-mono text-sm max-w-md text-center mb-10 leading-relaxed">
               VS Code style editor powered by Monaco
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 px-4">
               <button
                 onClick={onBrowseFiles}
-                className="px-8 py-3.5 bg-[#007ACC] hover:bg-[#005A9E] rounded text-sm font-black text-white uppercase tracking-[0.2em] transition-all"
+                className="px-6 sm:px-8 py-3 bg-[#007ACC] hover:bg-[#005A9E] rounded text-sm font-black text-white uppercase tracking-[0.2em] transition-all"
               >
                 Browse Files
               </button>
               <button
                 onClick={onNewManifest}
-                className="px-8 py-3.5 bg-transparent border border-[#007ACC] hover:bg-[#007ACC]/10 rounded text-sm font-black text-[#007ACC] uppercase tracking-[0.2em] transition-all"
+                className="px-6 sm:px-8 py-3 bg-transparent border border-[#007ACC] hover:bg-[#007ACC]/10 rounded text-sm font-black text-[#007ACC] uppercase tracking-[0.2em] transition-all"
               >
                 New App
               </button>
@@ -228,8 +230,8 @@ export const EditorPane: React.FC<EditorPaneProps> = (props) => {
                   onMount={handleEditorMount}
                   options={{
                     wordWrap: wordWrap ? 'on' : 'off',
-                    minimap: { enabled: true },
-                    fontSize: 14,
+                    minimap: { enabled: !isMobileView },
+                    fontSize: isMobileView ? 13 : 14,
                     fontFamily: '"JetBrains Mono", "Fira Code", monospace',
                     lineHeight: 24,
                     padding: { top: 16 },
