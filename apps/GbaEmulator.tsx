@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Gamepad2, Pause, Play, RotateCcw, Upload, Bell, Bot, FolderOpen, Cpu } from 'lucide-react';
+import { Gamepad2, Pause, Play, RotateCcw, Upload, Bell, Bot, FolderOpen, Cpu, Save } from 'lucide-react';
 import { eventBus, OS_EVENTS } from '../kernel/eventBus';
 import { vfs, SYSTEM_VFS_APP_ID } from '../kernel/fileSystem';
 import { useOS } from '../store/osStore';
 import { useMobileDetection } from '../hooks/useMobileDetection';
 
 const ROM_DIR = '/home/user/Roms';
+const SAVE_DIR = '/home/user/Roms/saves';
 const BIOS_PATH = '/home/user/Roms/gba_bios.bin';
 
 type PadKey = 'A' | 'B' | 'L' | 'R' | 'START' | 'SELECT' | 'U' | 'D' | 'Lft' | 'Rgt';
-
 const KEY_MAP: Record<string, PadKey> = {
   ArrowUp: 'U', ArrowDown: 'D', ArrowLeft: 'Lft', ArrowRight: 'Rgt',
   z: 'A', x: 'B', a: 'L', s: 'R', Enter: 'START', Shift: 'SELECT',
@@ -41,6 +41,7 @@ export default function GbaEmulator() {
   const [coreError, setCoreError] = useState<string | null>(null);
   const [romName, setRomName] = useState<string | null>(null);
   const [roms, setRoms] = useState<string[]>([]);
+  const [saves, setSaves] = useState<string[]>([]);
   const [hasBios, setHasBios] = useState(false);
   const [running, setRunning] = useState(false);
   const [autonomous, setAutonomous] = useState(true);
@@ -52,8 +53,11 @@ export default function GbaEmulator() {
 
   const refreshRoms = useCallback(() => {
     vfs.createDirRecursive(ROM_DIR, SYSTEM_VFS_APP_ID);
+    vfs.createDirRecursive(SAVE_DIR, SYSTEM_VFS_APP_ID);
     const list = vfs.listDir(ROM_DIR, SYSTEM_VFS_APP_ID) || [];
     setRoms(list.filter((n) => /\.(gba|gbc|gb)$/i.test(n)));
+    const saveList = vfs.listDir(SAVE_DIR, SYSTEM_VFS_APP_ID) || [];
+    setSaves(saveList.filter((n) => /\.(sav|srm)$/i.test(n)));
     const bios = vfs.readFile(BIOS_PATH, SYSTEM_VFS_APP_ID);
     setHasBios(Boolean(bios && bios.length > 100));
   }, []);
@@ -75,10 +79,21 @@ export default function GbaEmulator() {
       if (d.kind === 'error') { setCoreError(String(d.message || 'core error')); setStatus('CORE ERROR'); }
       if (d.kind === 'rom') setStatus(`CART ${d.name || ''} \u00b7 ${d.size || 0} bytes`);
       if (d.kind === 'bios') setStatus(`BIOS ${d.size || 0} bytes`);
+      if (d.kind === 'save') {
+        const bytes = new Uint8Array(d.bytes || []);
+        if (bytes.length === 0) { setStatus('SAVE EMPTY \u00b7 play first'); return; }
+        const base = String(d.name || 'cart').replace(/[^\w.\-]+/g, '_');
+        const file = `${base}.sav`;
+        vfs.createDirRecursive(SAVE_DIR, SYSTEM_VFS_APP_ID);
+        vfs.writeFile(`${SAVE_DIR}/${file}`, u8ToB64(bytes), SYSTEM_VFS_APP_ID);
+        setStatus(`SAVED ${file} \u00b7 ${bytes.length} bytes`);
+        refreshRoms();
+      }
+      if (d.kind === 'loadsave') setStatus(`SAVE LOADED \u00b7 ${d.size || 0} bytes`);
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
-  }, [postCore]);
+  }, [postCore, refreshRoms]);
 
   const press = useCallback((key: PadKey, down: boolean) => {
     if (down) held.current.add(key); else held.current.delete(key);
@@ -132,6 +147,18 @@ export default function GbaEmulator() {
     try { attachRomBytes(name, b64ToU8(raw)); } catch { setStatus(`VFS DECODE FAIL \u00b7 ${name}`); }
   }, [attachRomBytes]);
 
+  const requestSave = useCallback(() => {
+    if (!romName) { setStatus('NO CART \u00b7 cannot save'); return; }
+    postCore({ cmd: 'save', name: romName.replace(/\.(gba|gbc|gb)$/i, '') });
+  }, [postCore, romName]);
+
+  const loadSave = useCallback((name: string) => {
+    const raw = vfs.readFile(`${SAVE_DIR}/${name}`, SYSTEM_VFS_APP_ID);
+    if (!raw) { setStatus(`SAVE MISS \u00b7 ${name}`); return; }
+    try { postCore({ cmd: 'loadsave', bytes: Array.from(b64ToU8(raw)) }); setStatus(`LOADING SAVE \u00b7 ${name}`); }
+    catch { setStatus(`SAVE DECODE FAIL \u00b7 ${name}`); }
+  }, [postCore]);
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       const k = KEY_MAP[e.key] || KEY_MAP[e.key.toLowerCase()];
@@ -177,9 +204,11 @@ export default function GbaEmulator() {
         window.setTimeout(() => press(p.key!, false), 80);
       }
       if (p.action === 'load' && p.rom) loadRomFromVfs(p.rom);
+      if (p.action === 'save') requestSave();
+      if (p.action === 'loadsave' && p.rom) loadSave(p.rom);
     });
     return () => { unsubNotif(); unsubFocus(); unsubCmd(); };
-  }, [autonomous, loadRomFromVfs, pause, play, press]);
+  }, [autonomous, loadRomFromVfs, loadSave, pause, play, press, requestSave]);
 
   useEffect(() => {
     if (!autonomous || !running) {
@@ -230,14 +259,23 @@ export default function GbaEmulator() {
           <button type="button" onClick={() => { postCore({ cmd: 'stop' }); setRunning(false); setStatus('RESET'); }} className="h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1"><RotateCcw size={12} /> Reset</button>
           <button type="button" onClick={() => biosRef.current?.click()} className="h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest">{hasBios ? 'BIOS OK' : 'Load BIOS'}</button>
           <button type="button" onClick={() => fileRef.current?.click()} className="h-9 px-3 rounded-lg bg-accent text-black text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1"><Upload size={12} /> Load ROM</button>
+          <button type="button" onClick={requestSave} className="h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-1"><Save size={12} /> Save</button>
           <input ref={fileRef} type="file" accept=".gba,.gbc,.gb" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void ingestRomFile(f); }} />
           <input ref={biosRef} type="file" accept=".bin,.bios" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void ingestBiosFile(f); }} />
         </div>
         {roms.length > 0 && (
           <div className="w-full max-w-[720px] space-y-1">
-            <div className="text-[10px] uppercase tracking-widest text-zinc-500 flex items-center gap-1"><FolderOpen size={11} /> VFS {ROM_DIR} (≤512KB persisted)</div>
+            <div className="text-[10px] uppercase tracking-widest text-zinc-500 flex items-center gap-1"><FolderOpen size={11} /> VFS {ROM_DIR}</div>
             {roms.map((n) => (
               <button key={n} type="button" onClick={() => loadRomFromVfs(n)} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-mono border ${romName === n ? 'border-accent bg-accent/10 text-accent' : 'border-white/5 bg-white/5 text-zinc-300'}`}>{n}</button>
+            ))}
+          </div>
+        )}
+        {saves.length > 0 && (
+          <div className="w-full max-w-[720px] space-y-1">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-500 flex items-center gap-1"><Save size={11} /> VFS {SAVE_DIR}</div>
+            {saves.map((n) => (
+              <button key={n} type="button" onClick={() => loadSave(n)} className="w-full text-left px-3 py-2 rounded-lg text-xs font-mono border border-white/5 bg-white/5 text-zinc-300">{n}</button>
             ))}
           </div>
         )}
@@ -254,7 +292,7 @@ export default function GbaEmulator() {
         </div>
         <div className="w-full max-w-[720px] text-[10px] text-zinc-500 font-mono flex items-start gap-2 px-1">
           <Bell size={12} className="shrink-0 mt-0.5 text-accent" />
-          <span>IodineGBA core (MIT). Provide your own BIOS — we do not ship Nintendo IP. Auto yields on notifications. DAEMON: gba_command.</span>
+          <span>Menu Nexus → Games / Media / All. Load BIOS + ROM. Save writes /home/user/Roms/saves/*.sav</span>
         </div>
       </div>
     </div>
