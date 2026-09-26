@@ -73,11 +73,13 @@ export function getOsActionTools(): AITool[] {
     { name: 'complete_goal', description: 'Mark an AutoPilot goal complete', parameters: { type: 'object', properties: { goalId: str('Goal id') }, required: ['goalId'] } },
     { name: 'set_autopilot', description: 'Engage or disengage AutoPilot', parameters: { type: 'object', properties: { mode: { type: 'string', enum: ['on', 'off'] } }, required: ['mode'] } },
 
-    { name: 'forge_skill', description: 'Create or update a skill', parameters: { type: 'object', properties: { name: str('Skill name'), description: str('Summary'), code: str('JavaScript body') }, required: ['name', 'description', 'code'] } },
+    { name: 'forge_skill', description: 'Create or update a skill. Set exposeAs to register a new OS::COMMAND the agent can call later.', parameters: { type: 'object', properties: { name: str('Skill name'), description: str('Summary'), code: str('JavaScript body. Receives ctx.'), exposeAs: str('Optional OS command name, e.g. SNAP_NOTES') }, required: ['name', 'description', 'code'] } },
     { name: 'call_skill', description: 'Run a forged skill', parameters: { type: 'object', properties: { name: str('Skill name'), args: { type: 'object', description: 'ctx.args' } }, required: ['name'] } },
     { name: 'list_skills', description: 'List forged skills', parameters: { type: 'object', properties: {} } },
     { name: 'delete_skill', description: 'Delete a forged skill', parameters: { type: 'object', properties: { name: str('Skill name') }, required: ['name'] } },
-    { name: 'build_app', description: 'Generate an app from a description', parameters: { type: 'object', properties: { description: str('What to build'), name: str('Optional name') }, required: ['description'] } },
+    { name: 'build_app', description: 'Generate an app from a description, register it, and open it', parameters: { type: 'object', properties: { description: str('What to build'), name: str('Optional name') }, required: ['description'] } },
+    { name: 'list_apps', description: 'List generated apps the agent created plus whether they are open', parameters: { type: 'object', properties: {} } },
+    { name: 'use_app', description: 'Drive a generated app: open it and click/set/read/eval inside it', parameters: { type: 'object', properties: { appId: str('gen_… id'), command: { type: 'string', enum: ['focus', 'click', 'set', 'read', 'eval'] }, selector: str('CSS selector'), value: str('Value for set'), code: str('JS for eval') }, required: ['appId', 'command'] } },
     { name: 'self_evolve', description: 'Trigger a self-evolution pass', parameters: { type: 'object', properties: { directive: str('What to evolve') } } },
 
     { name: 'cluster_scan', description: 'Scan the local cluster', parameters: { type: 'object', properties: {} } },

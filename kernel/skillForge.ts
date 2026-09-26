@@ -31,6 +31,13 @@ const SKILLS_DIR = '/system/skills';
 const MAX_SKILL_SIZE = 50_000;        // 50 KB source cap
 const MAX_EXECUTION_MS = 30_000;      // 30 s timeout
 const SAFE_SKILL_NAME = /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/;
+const SAFE_EXPOSE = /^[A-Z][A-Z0-9_]{1,31}$/;
+const RESERVED_OS = new Set([
+  'WRITE_FILE', 'READ_FILE', 'DELETE_FILE', 'MOVE_FILE', 'COPY_FILE', 'LIST_DIR',
+  'CREATE_FOLDER', 'SEARCH_FILES', 'EMPTY_TRASH', 'OPEN_APP', 'CLOSE_APP', 'FOCUS_APP',
+  'BUILD_APP', 'FORGE_SKILL', 'CALL_SKILL', 'LIST_SKILLS', 'DELETE_SKILL',
+  'NOTIFY', 'OPEN_URL', 'GBA_COMMAND', 'X_OPEN', 'X_SEARCH', 'X_POST', 'X_TIMELINE', 'X_PROFILE',
+]);
 
 export interface Skill {
   name: string;
@@ -244,8 +251,13 @@ class SkillForgeEngine {
       invocations: existing?.invocations ?? 0,
     };
     if (existing?.lastResult) skill.lastResult = existing.lastResult;
-    const exposedAs = exposeAs || existing?.exposedAsAction;
-    if (exposedAs) skill.exposedAsAction = exposedAs;
+    const exposedAs = (exposeAs || existing?.exposedAsAction || '').toUpperCase().replace(/[^A-Z0-9_]/g, '');
+    if (exposedAs) {
+      if (!SAFE_EXPOSE.test(exposedAs) || RESERVED_OS.has(exposedAs)) {
+        return { success: false, error: `Cannot expose OS::${exposedAs}` };
+      }
+      skill.exposedAsAction = exposedAs;
+    }
     this.skills.set(name, skill);
 
     try {
@@ -598,6 +610,11 @@ class SkillForgeEngine {
     return this.skills.get(name);
   }
 
+  findByExpose(action: string): Skill | undefined {
+    const key = action.toUpperCase();
+    return Array.from(this.skills.values()).find(s => s.exposedAsAction === key);
+  }
+
   async delete(name: string): Promise<boolean> {
     await this.load();
     if (!this.skills.has(name)) return false;
@@ -612,7 +629,7 @@ class SkillForgeEngine {
   async getSystemSkillContext(): Promise<string> {
     await this.load();
     if (this.skills.size === 0) return '';
-    let ctx = '\n\n[SKILLS — AI-authored, callable via OS::CALL_SKILL:<name>:<json-args>]\n';
+    let ctx = '\n\n[SKILLS — AI-authored. call_skill, or OS::<exposeAs> if registered. build_app + use_app drive generated apps.]\n';
     for (const s of this.skills.values()) {
       ctx += `  • ${s.name}: ${s.description}${s.exposedAsAction ? ` (exposed as OS::${s.exposedAsAction})` : ''}\n`;
     }

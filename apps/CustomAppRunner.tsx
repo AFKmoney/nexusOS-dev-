@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { vfs, SYSTEM_VFS_APP_ID } from '../kernel/fileSystem';
 import { useOS } from '../store/osStore';
 import { appGenerator } from '../kernel/appGenerator';
+import { eventBus, OS_EVENTS } from '../kernel/eventBus';
 import { Loader2, AlertTriangle, RefreshCw, Code, Eye, ChevronLeft, FolderOpen } from 'lucide-react';
 
 export default function CustomAppRunner({ windowId, onBack, appId }: { windowId: string, onBack?: () => void, appId?: string }) {
@@ -22,6 +23,7 @@ export default function CustomAppRunner({ windowId, onBack, appId }: { windowId:
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'preview' | 'code'>('preview');
   const retryCount = useRef(0);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
 
   // Determine if this is a multi-file generated app (has a manifest.json
   // in /system/apps/<id>/) vs a single-file forged app (just an HTML file).
@@ -93,6 +95,23 @@ export default function CustomAppRunner({ windowId, onBack, appId }: { windowId:
     }, 5000);
     return () => clearInterval(interval);
   }, [sourcePath, targetAppId, isGeneratedApp]);
+
+  useEffect(() => {
+    const off = eventBus.on(OS_EVENTS.APP_COMMAND, (payload) => {
+      const cmd = (payload || {}) as { appId?: string; command?: string; selector?: string; value?: string; code?: string };
+      if (!cmd.appId || cmd.appId !== targetAppId) return;
+      const win = frameRef.current?.contentWindow;
+      if (!win) return;
+      win.postMessage({
+        nexusCmd: true,
+        command: cmd.command,
+        selector: cmd.selector,
+        value: cmd.value,
+        code: cmd.code,
+      }, '*');
+    });
+    return () => { off(); };
+  }, [targetAppId]);
 
   // Open the app's source in HyperIDE for editing
   const editInHyperIDE = () => {
@@ -169,6 +188,7 @@ export default function CustomAppRunner({ windowId, onBack, appId }: { windowId:
       <div className="flex-1 relative">
         {view === 'preview' ? (
           <iframe
+            ref={frameRef}
             srcDoc={html}
             className="w-full h-full border-none bg-white"
             sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin"

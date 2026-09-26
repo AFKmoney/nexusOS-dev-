@@ -86,4 +86,6 @@ export const OS_EVENTS = {
   X_COMMAND: 'os:x:command',
   X_STATUS: 'os:x:status',
   X_RESULTS: 'os:x:results',
+  APP_COMMAND: 'os:app:command',
+  APP_REPLY: 'os:app:reply',
 } as const;

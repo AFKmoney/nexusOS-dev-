@@ -1162,13 +1162,16 @@ export class ToolForge {
           if (parts.length >= 3) {
             const skillName = (parts[0] || '').trim();
             const description = (parts[1] || '').trim();
-            const code = parts.slice(2).join('|');
-            const regResult = await skillForge.register(skillName, description, code);
+            const maybeExpose = (parts[2] || '').trim();
+            const exposeLooksLikeCode = maybeExpose.includes(' ') || maybeExpose.includes('(') || maybeExpose.includes('{') || maybeExpose.includes(';');
+            const exposeAs = !exposeLooksLikeCode && /^[A-Z][A-Z0-9_]{1,31}$/.test(maybeExpose) ? maybeExpose : undefined;
+            const code = exposeAs ? parts.slice(3).join('|') : parts.slice(2).join('|');
+            const regResult = await skillForge.register(skillName, description, code, exposeAs);
             result = regResult.success
-              ? `[OS::FORGE_SKILL] → ✅ Skill '${skillName}' registered and persisted`
+              ? `[OS::FORGE_SKILL] → ✅ Skill '${skillName}' registered${exposeAs ? ` as OS::${exposeAs}` : ''}`
               : `[OS::FORGE_SKILL] → ⚠ ${regResult.error}`;
           } else {
-            result = `[OS::FORGE_SKILL] → ⚠ Format: OS::FORGE_SKILL:<name>|<description>|<code>`;
+            result = `[OS::FORGE_SKILL] → ⚠ Format: OS::FORGE_SKILL:<name>|<description>|[EXPOSE]|<code>`;
           }
           break;
         }
@@ -1350,8 +1353,43 @@ export class ToolForge {
           break;
         }
 
-        default:
-          result = `[OS::${action.type}] → Unknown action type`;
+        case 'USE_APP': {
+          const raw = toStringArg(actionArgs[0]);
+          const [appId = '', command = 'focus', selector = '', value = ''] = raw.split('|');
+          const { dispatchAppCommand } = await import('./appBridge');
+          result = dispatchAppCommand({
+            appId: appId.trim(),
+            command: (command.trim() || 'focus') as any,
+            selector: selector || undefined,
+            value: value || undefined,
+          });
+          break;
+        }
+
+        case 'LIST_APPS': {
+          const { listLiveGeneratedApps } = await import('./appBridge');
+          const apps = listLiveGeneratedApps();
+          const system = useOS.getState().registry.filter(a => !a.isCustom).map(a => a.id);
+          result = `[OS::LIST_APPS] generated:\n${apps.map(a => `  ${a.open ? '●' : '○'} ${a.id}  ${a.name}`).join('\n') || '  (none)'}\nbuilt-in: ${system.join(', ')}`;
+          break;
+        }
+
+        default: {
+          try {
+            await skillForge.load();
+            const skill = skillForge.findByExpose(action.type);
+            if (skill) {
+              const execResult = await skillForge.execute(skill.name, toStringArg(actionArgs[0]));
+              result = execResult.success
+                ? `[OS::${action.type}] → ✅ via skill ${skill.name}\n${clampLength(typeof execResult.result === 'string' ? execResult.result : JSON.stringify(execResult.result ?? ''), 2000)}`
+                : `[OS::${action.type}] → ⚠ ${execResult.error}`;
+            } else {
+              result = `[OS::${action.type}] → Unknown action type`;
+            }
+          } catch (e: unknown) {
+            result = `[OS::${action.type}] → ⚠ ${e instanceof Error ? e.message : String(e)}`;
+          }
+        }
       }
 
       if (result) results.push(result);
@@ -1550,7 +1588,9 @@ export class ToolForge {
           osAction = `OS::SET_AUTOPILOT:${args.mode}`;
           break;
         case 'forge_skill':
-          osAction = `OS::FORGE_SKILL:${args.name}|${args.description}|${args.code}`;
+          osAction = args.exposeAs
+            ? `OS::FORGE_SKILL:${args.name}|${args.description}|${String(args.exposeAs).toUpperCase()}|${args.code}`
+            : `OS::FORGE_SKILL:${args.name}|${args.description}|${args.code}`;
           break;
         case 'call_skill':
           osAction = `OS::CALL_SKILL:${args.name}:${args.args ? JSON.stringify(args.args) : ''}`;
@@ -1563,6 +1603,12 @@ export class ToolForge {
           break;
         case 'build_app':
           osAction = `OS::BUILD_APP:${args.description}`;
+          break;
+        case 'list_apps':
+          osAction = `OS::LIST_APPS`;
+          break;
+        case 'use_app':
+          osAction = `OS::USE_APP:${args.appId}|${args.command}|${args.selector || ''}|${args.value || args.code || ''}`;
           break;
         case 'self_evolve':
           osAction = `OS::SELF_EVOLVE:${args.directive || ''}`;

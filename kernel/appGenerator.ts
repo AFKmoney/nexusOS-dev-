@@ -419,6 +419,33 @@ REQUIREMENTS:
       }
     }
 
+    const bridge = `<script>
+window.NEXUS = window.NEXUS || {
+  send: function(type, data){ try { parent.postMessage({ nexus: true, type: type, data: data }, '*'); } catch(e) {} },
+};
+window.addEventListener('message', function(e){
+  var msg = e.data || {};
+  if (!msg.nexusCmd) return;
+  var el = msg.selector ? document.querySelector(msg.selector) : null;
+  try {
+    if (msg.command === 'click' && el) el.click();
+    if (msg.command === 'set' && el) {
+      if ('value' in el) el.value = msg.value || '';
+      else el.textContent = msg.value || '';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (msg.command === 'read' && el) {
+      parent.postMessage({ nexus: true, type: 'reply', data: el.value || el.textContent }, '*');
+    }
+    if (msg.command === 'eval' && msg.value) { new Function(msg.value)(); }
+    window.dispatchEvent(new CustomEvent('nexus-command', { detail: msg }));
+  } catch (err) {}
+});
+</script>`;
+    if (html.includes('</body>')) html = html.replace('</body>', `${bridge}</body>`);
+    else html += bridge;
+
     return html;
   }
 }
