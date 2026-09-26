@@ -40,7 +40,7 @@ export default function MarkdownPreview() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-accent/20 rounded-lg text-accent">
             <FileText size={20} />
@@ -93,7 +93,7 @@ export default function MarkdownPreview() {
       </div>
 
       {/* Footer Info */}
-      <div className="h-8 bg-black/60 border-t border-white/5 flex items-center px-6 gap-6 text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em] shrink-0">
+      <div className="h-8 bg-black/60 border-t border-white/5 flex items-center px-4 sm:px-6 gap-6 text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em] shrink-0">
         <span>Words: {content.split(/\s+/).filter(x => x).length}</span>
         <span>Characters: {content.length}</span>
         <span className="ml-auto flex items-center gap-1.5"><BookOpen size={10} /> Auto-Save Active</span>

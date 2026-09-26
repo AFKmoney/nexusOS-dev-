@@ -79,7 +79,7 @@ export default function SystemInfoApp() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <Metric label="Core Load" value={`${load.toFixed(1)}%`} icon={Activity} color="emerald" />
         <Metric label="Uptime" value={formatUptime(uptime)} icon={Clock} color="blue" />
         <Metric label="Neural Latency" value="N/A" icon={Zap} color="amber" />

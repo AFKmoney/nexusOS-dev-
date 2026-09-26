@@ -113,7 +113,7 @@ export default function PasswordManager() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-500/20 rounded-lg text-amber-400">
             <Lock size={20} />
@@ -130,7 +130,7 @@ export default function PasswordManager() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar / Search */}
-        <div className="w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
           <div className="p-4 border-b border-white/5">
             <div className="relative group">
               <Search className="absolute left-3 top-2.5 text-zinc-600 group-focus-within:text-amber-400 transition-colors" size={14} />
@@ -161,7 +161,7 @@ export default function PasswordManager() {
             {showAdd ? (
               <form onSubmit={addEntry} className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 animate-in slide-in-from-bottom-4 duration-300">
                 <h2 className="text-xl font-black uppercase tracking-widest mb-8 text-white">Secure New Credentials</h2>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="col-span-2">
                     <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Service / Site Name</label>
                     <input required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-amber-500/50 outline-none" value={newEntry.site} onChange={e => setNewEntry({...newEntry, site: e.target.value})} />
@@ -203,7 +203,7 @@ export default function PasswordManager() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="bg-black/40 rounded-2xl p-4 border border-white/5 relative">
                         <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest block mb-1">Identity</span>
                         <div className="text-sm font-mono text-zinc-300">{e.username}</div>

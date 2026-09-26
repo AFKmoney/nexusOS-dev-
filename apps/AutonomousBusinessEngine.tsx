@@ -88,7 +88,7 @@ export default function AutonomousBusinessEngine() {
         </p>
         <button
           onClick={() => setShowNewGoalModal(true)}
-          className="px-6 py-2.5 bg-accent text-black font-bold text-sm rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+          className="px-4 sm:px-6 py-2.5 bg-accent text-black font-bold text-sm rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
         >
           <Plus size={16} /> Launch Autonomous Business
         </button>
@@ -115,7 +115,7 @@ export default function AutonomousBusinessEngine() {
   return (
     <div className="h-full flex flex-col bg-[#07070b] text-zinc-200 select-none overflow-hidden font-sans">
       {/* ── TOP HEADER ── */}
-      <div className="px-6 py-4 bg-black/40 border-b border-white/10 flex flex-wrap items-center justify-between gap-4 shrink-0 backdrop-blur-xl">
+      <div className="px-4 sm:px-6 py-4 bg-black/40 border-b border-white/10 flex flex-wrap items-center justify-between gap-4 shrink-0 backdrop-blur-xl">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
             <Rocket size={20} />
@@ -183,7 +183,7 @@ export default function AutonomousBusinessEngine() {
       </div>
 
       {/* ── METRICS STRIP ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-4 bg-black/20 border-b border-white/5 shrink-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-2.5 p-4 bg-black/20 border-b border-white/5 shrink-0">
         <div className="bg-white/5 border border-white/5 p-3 rounded-xl flex items-center justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Revenue Generated</div>
@@ -236,7 +236,7 @@ export default function AutonomousBusinessEngine() {
       </div>
 
       {/* ── REAL-TIME OODA LOOP STEPPER & THOUGHT STREAM ── */}
-      <div className="px-6 py-3.5 bg-black/40 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
+      <div className="px-4 sm:px-6 py-3.5 bg-black/40 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
         {/* Stepper */}
         <div className="flex items-center gap-2">
           {OODA_STEPS.map((step, idx) => {
@@ -270,7 +270,7 @@ export default function AutonomousBusinessEngine() {
       </div>
 
       {/* ── TAB NAVIGATION ── */}
-      <div className="px-6 pt-3 flex gap-2 border-b border-white/5 bg-black/30 shrink-0">
+      <div className="px-4 sm:px-6 pt-3 flex gap-2 border-b border-white/5 bg-black/30 shrink-0">
         <button
           onClick={() => setActiveTab('milestones')}
           className={`pb-2.5 px-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-1.5 ${
@@ -525,7 +525,7 @@ export default function AutonomousBusinessEngine() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 my-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
                 <div className="p-4 bg-black/40 rounded-xl border border-white/5">
                   <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Total Auto-Patches</div>
                   <div className="text-2xl font-black text-purple-300 mt-1">{goal.metrics.autoPatchesCount}</div>
@@ -565,7 +565,7 @@ export default function AutonomousBusinessEngine() {
       {showNewGoalModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="w-full max-w-2xl bg-[#0d0d12] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-4 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Rocket size={16} className="text-accent" /> New Autonomous Goal / Business
               </h2>
@@ -640,7 +640,7 @@ export default function AutonomousBusinessEngine() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-[11px] text-zinc-400 block mb-1">Target Revenue Goal</label>
                       <input

@@ -69,7 +69,7 @@ export default function MonitorApp() {
 
   return (
     <div className="h-full bg-[#050505] p-3 sm:p-6 text-zinc-300 font-mono text-base overflow-y-auto custom-scrollbar flex flex-col selection:bg-cyan-900/30">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6 shrink-0">
+      <div className="grid grid-cols-1 lg:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6 shrink-0">
           <div className={`p-4 sm:p-5 rounded-xl border transition-all flex flex-col justify-between ${kernelRules.autonomyEnabled ? 'bg-emerald-950/10 border-accent/30 shadow-accent' : 'bg-zinc-900/30 border-zinc-800'}`}>
              <div>
                 <div className="flex justify-between items-start mb-3 sm:mb-4">
@@ -113,7 +113,7 @@ export default function MonitorApp() {
              </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div className="bg-zinc-900/30 border border-zinc-800 p-2.5 sm:p-3 rounded-lg flex flex-col justify-between h-24 sm:h-28 relative overflow-hidden group hover:border-accent/30 transition-colors">
                   <div className="flex justify-between items-start z-10">
                       <div className="flex items-center gap-1.5 text-zinc-500 text-xs sm:text-sm font-bold uppercase"><Cpu size={16} /> CPU</div>

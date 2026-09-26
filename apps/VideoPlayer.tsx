@@ -66,7 +66,7 @@ export default function VideoPlayer() {
       </div>
 
       {/* Controls Bar */}
-      <div className="h-20 bg-gradient-to-t from-black to-black/40 px-6 flex flex-col justify-center gap-2 shrink-0 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="h-20 bg-gradient-to-t from-black to-black/40 px-4 sm:px-6 flex flex-col justify-center gap-2 shrink-0 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         
         {/* Progress Slider */}
         <input 

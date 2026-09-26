@@ -119,7 +119,7 @@ export default function DashboardApp() {
   return (
     <div className="h-full flex flex-col bg-[#050508] text-zinc-100 overflow-y-auto custom-scrollbar">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
+      <div className="px-4 sm:px-6 py-4 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
         <div className="flex items-center gap-3">
           <BarChart2 size={18} className="text-accent" />
           <span className="font-bold tracking-widest text-sm uppercase text-white">DAEMON Dashboard</span>
@@ -137,7 +137,7 @@ export default function DashboardApp() {
 
       <div className="flex-1 p-3 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar">
         {/* ── Top Stats Grid ────────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           {[
             { label: 'Apps', value: registry.length, icon: Box, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Windows', value: windows.length, icon: Monitor, color: 'text-accent', bg: 'bg-accent/10' },
@@ -199,7 +199,7 @@ export default function DashboardApp() {
                 />
               </div>
               {/* Detailed Stats */}
-              <div className="grid grid-cols-2 gap-2 text-sm font-mono">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm font-mono">
                 <div className="flex items-center gap-1.5">
                   <Gauge size={12} className="text-zinc-500" />
                   <span className="text-zinc-400">Total</span>

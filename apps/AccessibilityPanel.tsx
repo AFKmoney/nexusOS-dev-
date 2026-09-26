@@ -44,7 +44,7 @@ export default function AccessibilityPanel() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center gap-4 bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center gap-4 bg-black/40 backdrop-blur-xl shrink-0">
         <div className="p-2 bg-accent/20 rounded-lg text-accent">
           <Accessibility size={20} />
         </div>
@@ -107,7 +107,7 @@ export default function AccessibilityPanel() {
               
               <button 
                 onClick={() => setUiScale(1.0)}
-                className="mt-8 px-6 py-2 border border-white/10 text-zinc-500 hover:text-white hover:border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                className="mt-8 px-4 sm:px-6 py-2 border border-white/10 text-zinc-500 hover:text-white hover:border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
               >
                 Reset to Native
               </button>

@@ -65,7 +65,7 @@ export default function DeviceManagerApp() {
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                <Cpu size={14} className="text-accent" /> Core Processing
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                <div className="p-4 bg-black/40 border border-white/5 rounded-xl">
                   <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Architecture</div>
                   <div className="text-sm font-bold text-white uppercase">{hwInfo.arch}</div>
@@ -121,7 +121,7 @@ export default function DeviceManagerApp() {
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                <Monitor size={14} className="text-purple-500" /> Host Environment
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                <div className="p-4 bg-black/40 border border-white/5 rounded-xl">
                   <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Platform</div>
                   <div className="text-sm font-bold text-white uppercase">{hwInfo.platform}</div>

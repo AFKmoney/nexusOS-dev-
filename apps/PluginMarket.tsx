@@ -122,7 +122,7 @@ export default function PluginMarket({ windowId: _windowId }: { windowId: string
             <p className="text-xs mt-1">Describe what you need above and the AI will build it</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {filtered.map(plugin => (
               <div
                 key={plugin.id}

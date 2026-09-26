@@ -120,7 +120,7 @@ export default function AionAgent() {
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5 sm:p-8 space-y-4 sm:space-y-8 relative z-0">
         {messages.map((m, i) => (
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-500`}>
-            <div className={`flex gap-2.5 sm:gap-4 max-w-[95%] sm:max-w-[85%] group ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex gap-2.5 sm:gap-4 max-w-[95%] sm:max-w-[85%] group ${m.role === 'user' ? 'flex-col sm:flex-row-reverse' : 'flex-col sm:flex-row'}`}>
               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl shrink-0 flex items-center justify-center border border-white/10 shadow-lg ${m.role === 'user' ? 'bg-zinc-800 text-zinc-400' : 'bg-accent/10 text-accent'}`}>
                 {m.role === 'user' ? <User size={15} /> : <Zap size={15} className={isAiThinking && i === messages.length - 1 ? 'animate-pulse' : ''} />}
               </div>

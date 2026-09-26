@@ -112,7 +112,7 @@ export default function KanbanApp() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-violet-900/10 via-transparent to-transparent pointer-events-none" />
 
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10 relative">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10 relative">
         <div className="flex items-center gap-4">
           <div className="p-2.5 bg-violet-500/20 rounded-xl">
             <Layout size={20} className="text-violet-400" />
@@ -135,7 +135,7 @@ export default function KanbanApp() {
       {/* Board */}
       <div className="flex-1 flex gap-6 p-6 overflow-x-auto overflow-y-hidden custom-scrollbar relative z-10">
         {columns.map((col, colIdx) => (
-          <div key={col.id} className="w-80 shrink-0 flex flex-col max-h-full">
+          <div key={col.id} className="w-full sm:w-80 shrink-0 flex flex-col max-h-full">
             
             {/* Column Header */}
             <div className={`p-4 bg-zinc-900/80 backdrop-blur-md rounded-t-2xl border-t-4 border-x border-white/5 ${col.color} flex items-center justify-between shrink-0 shadow-lg`}>

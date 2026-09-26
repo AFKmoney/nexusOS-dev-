@@ -87,7 +87,7 @@ export default function WeatherApp() {
       <div className="absolute inset-0 bg-[#050508]/60 backdrop-blur-3xl z-0" />
 
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between z-10 relative bg-black/20">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between z-10 relative bg-black/20">
         <form onSubmit={handleSearch} className="relative flex-1 max-w-xs group">
           <Search size={14} className="absolute left-3 top-2.5 text-zinc-500 group-focus-within:text-accent transition-colors" />
           <input
@@ -125,7 +125,7 @@ export default function WeatherApp() {
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-3 gap-4 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
               <div className="bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col items-center text-center">
                 <Droplets size={18} className="text-accent mb-2" />
                 <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Humidity</span>

@@ -202,9 +202,9 @@ export default function WallpaperApp() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
         {/* Left: Wallpaper Grid */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/20">
+        <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/20 min-h-0">
           {/* Category bar */}
           <div className="sticky top-0 z-10 bg-[#050508]/95 backdrop-blur-sm px-5 py-3 border-b border-white/5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-accent shrink-0">
@@ -229,7 +229,7 @@ export default function WallpaperApp() {
 
           {/* Grid */}
           <div className="p-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
               {filtered.map(preset => {
                 const isActive = currentWallpaper === preset.code;
                 return (
@@ -291,7 +291,7 @@ export default function WallpaperApp() {
         </div>
 
         {/* Right: AI Generator Panel */}
-        <div className="w-72 border-l border-white/5 bg-[#030305] flex flex-col shrink-0">
+        <div className="w-full md:w-72 border-t md:border-t-0 md:border-l border-white/5 bg-[#030305] flex flex-col shrink-0 max-h-[46%] md:max-h-none">
           <div className="p-4 border-b border-white/5">
             <div className="flex items-center gap-2 text-accent">
               <Sparkles size={16} />

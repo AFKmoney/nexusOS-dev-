@@ -51,7 +51,7 @@ export default function ScreenshotTool() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-accent/20 rounded-lg text-accent">
             <Camera size={20} />
@@ -64,7 +64,7 @@ export default function ScreenshotTool() {
         <button 
           onClick={takeCapture}
           disabled={isCapturing}
-          className="flex items-center gap-2 px-6 py-2 bg-accent hover:bg-accent text-black rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-accent active:scale-95 disabled:opacity-50"
+          className="flex items-center gap-2 px-4 sm:px-6 py-2 bg-accent hover:bg-accent text-black rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-accent active:scale-95 disabled:opacity-50"
         >
           {isCapturing ? <Loader2 size={14} className="animate-spin" /> : <Frame size={14} />}
           {isCapturing ? 'CAPTURING' : 'NEW CAPTURE'}
@@ -73,7 +73,7 @@ export default function ScreenshotTool() {
 
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-black/20">
         {screenshots.length > 0 ? (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {screenshots.map(s => (
               <div key={s.id} className="group relative bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
                 <div className="aspect-video bg-black flex items-center justify-center relative overflow-hidden">

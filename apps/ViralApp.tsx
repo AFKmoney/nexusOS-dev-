@@ -25,7 +25,7 @@ export default function ViralApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-accent/20 rounded-lg text-accent">
             <Rocket size={20} />
@@ -43,7 +43,7 @@ export default function ViralApp() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-64 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
           <div className="p-4 space-y-1">
             {[
               { id: 'broadcast', label: 'Broadcast', icon: Globe },
@@ -118,7 +118,7 @@ export default function ViralApp() {
             )}
 
             {activeTab === 'stats' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 grid grid-cols-2 gap-6">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="col-span-2 p-8 bg-white/[0.02] border border-white/5 rounded-3xl text-center">
                   <div className="text-6xl font-black text-white font-mono tracking-tighter mb-2">{nodes.toLocaleString('en-US')}</div>
                   <div className="text-xs font-black uppercase tracking-[0.3em] text-accent">Active Global Nodes</div>

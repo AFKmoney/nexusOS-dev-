@@ -60,7 +60,7 @@ export default function ContactsApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-accent/20 rounded-lg">
             <Users size={20} className="text-accent" />
@@ -77,7 +77,7 @@ export default function ContactsApp() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar / Search */}
-        <div className="w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
           <div className="p-4 border-b border-white/5">
             <div className="relative group">
               <Search className="absolute left-3 top-2.5 text-zinc-600 group-focus-within:text-accent transition-colors" size={14} />
@@ -120,7 +120,7 @@ export default function ContactsApp() {
                     <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Display Name</label>
                     <input required className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-accent/50 outline-none" value={newContact.name} onChange={e => setNewContact({...newContact, name: e.target.value})} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Email Hash</label>
                       <input className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-accent/50 outline-none" value={newContact.email} onChange={e => setNewContact({...newContact, email: e.target.value})} />

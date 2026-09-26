@@ -806,7 +806,7 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
 
         {/* AI Intelligence & Action Drawer */}
         {showAiDrawer && (
-          <div className="w-80 md:w-96 bg-slate-950 border-l border-slate-800 flex flex-col h-full z-30 shadow-2xl animate-in slide-in-from-right duration-200">
+          <div className="w-full sm:w-80 md:w-96 bg-slate-950 border-l border-slate-800 flex flex-col h-full z-30 shadow-2xl animate-in slide-in-from-right duration-200">
             {/* Drawer Header */}
             <div className="p-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">

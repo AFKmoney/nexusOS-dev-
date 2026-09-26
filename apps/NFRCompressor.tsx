@@ -233,7 +233,7 @@ export default function NFRCompressorApp({ windowId }: { windowId: string }) {
       <div className="flex-1 flex overflow-hidden">
         
         {/* Left: File Browser */}
-        <div className="w-64 bg-black/50 border-r border-zinc-800 flex flex-col">
+        <div className="w-full sm:w-64 bg-black/50 border-r border-zinc-800 flex flex-col">
             <div className="p-2 border-b border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-2">
                 <HardDrive size={14} /> Local Storage
             </div>
@@ -264,14 +264,14 @@ export default function NFRCompressorApp({ windowId }: { windowId: string }) {
             
             {/* Top: Controls */}
             {!isChatMode && (
-                <div className="p-6 border-b border-zinc-800 grid grid-cols-2 gap-8 animate-in fade-in slide-in-from-right-4">
+                <div className="p-6 border-b border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-8 animate-in fade-in slide-in-from-right-4">
                     {/* Stats */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">
                             <Sliders size={16} /> Live Metrics
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="bg-black/40 border border-zinc-800 p-3 rounded-lg">
                                 <div className="text-xs text-zinc-500 uppercase tracking-widest">Entropy (Bits)</div>
                                 <div className="text-xl font-mono text-purple-400">{metrics?.loss.toFixed(2) || "-"}</div>

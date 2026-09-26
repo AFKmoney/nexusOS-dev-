@@ -82,7 +82,7 @@ export default function RSSReader() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400">
             <Rss size={20} />
@@ -99,7 +99,7 @@ export default function RSSReader() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-64 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
           <div className="p-4 border-b border-white/5">
             <form onSubmit={addFeed} className="relative">
               <input 

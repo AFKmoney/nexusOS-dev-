@@ -96,7 +96,7 @@ export default function StickyNotes() {
         {notes.map(note => (
           <div
             key={note.id}
-            className={`absolute w-56 min-h-[160px] ${note.color} rounded-2xl shadow-2xl flex flex-col p-4 transition-all hover:scale-[1.02] animate-in zoom-in-95 duration-200 group`}
+            className={`absolute w-full sm:w-56 min-h-[160px] ${note.color} rounded-2xl shadow-2xl flex flex-col p-4 transition-all hover:scale-[1.02] animate-in zoom-in-95 duration-200 group`}
             style={{ left: note.x, top: note.y, zIndex: 10 }}
           >
             <div className="flex items-center justify-between mb-3 opacity-0 group-hover:opacity-100 transition-opacity">

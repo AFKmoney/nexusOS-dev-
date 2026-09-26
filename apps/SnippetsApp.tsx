@@ -62,7 +62,7 @@ export default function SnippetsApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-accent/20 rounded-lg text-accent">
             <FileCode2 size={20} />
@@ -79,7 +79,7 @@ export default function SnippetsApp() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
           <div className="p-4 border-b border-white/5">
             <div className="relative">
               <Search className="absolute left-3 top-2.5 text-zinc-600" size={14} />
@@ -112,7 +112,7 @@ export default function SnippetsApp() {
         <div className="flex-1 flex flex-col bg-[#0a0a0c] relative">
           {activeSnippet ? (
             <div className="h-full flex flex-col animate-in fade-in duration-300">
-              <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-black/20">
+              <div className="px-4 sm:px-6 py-4 border-b border-white/5 flex items-center justify-between bg-black/20">
                 <input 
                   className="bg-transparent text-lg font-black text-white outline-none w-1/2 focus:text-accent transition-colors"
                   value={activeSnippet.title}

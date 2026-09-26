@@ -63,7 +63,7 @@ export default function CalendarApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
             <CalendarIcon size={20} />
@@ -110,7 +110,7 @@ export default function CalendarApp() {
         </div>
 
         {/* Events Sidebar */}
-        <div className="w-80 border-l border-white/5 bg-black/40 flex flex-col shrink-0">
+        <div className="w-full sm:w-80 border-l border-white/5 bg-black/40 flex flex-col shrink-0">
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
             <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Events: {currentDate.toLocaleDateString('en-US')}</h2>
             <button onClick={() => setShowAdd(true)} className="p-1.5 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-all"><Plus size={16}/></button>

@@ -63,7 +63,7 @@ export default function PomodoroApp() {
       <div className="z-10 flex flex-col items-center gap-8 w-full max-w-sm">
         
         {/* Progress Ring Layout */}
-        <div className="relative w-64 h-64 flex items-center justify-center">
+        <div className="relative w-full sm:w-64 h-64 flex items-center justify-center">
           <svg className="w-full h-full -rotate-90">
             <circle cx="128" cy="128" r="120" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-white/5" />
             <circle 

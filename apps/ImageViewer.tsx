@@ -26,7 +26,7 @@ export default function ImageViewer({ windowId }: { windowId: string }) {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header / Controls */}
-      <div className="h-16 px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10">
+      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-accent/20 rounded-lg text-accent">
             <Image size={20} />
@@ -89,7 +89,7 @@ export default function ImageViewer({ windowId }: { windowId: string }) {
 
       {/* Thumbnails Strip */}
       {images.length > 0 && (
-        <div className="h-24 border-t border-white/5 bg-black/40 flex items-center gap-3 px-6 overflow-x-auto custom-scrollbar shrink-0">
+        <div className="h-24 border-t border-white/5 bg-black/40 flex items-center gap-3 px-4 sm:px-6 overflow-x-auto custom-scrollbar shrink-0">
           {images.map((img, i) => (
             <button 
               key={i}
