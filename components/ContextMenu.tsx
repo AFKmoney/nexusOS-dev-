@@ -535,7 +535,11 @@ export default function ContextMenu() {
     void fn();
   };
 
-  const MenuItem = ({ icon: Icon, label, onClick, danger = false, disabled = false, shortcut }: MenuItemProps) => (
+  const resolveIcon = (icon: unknown) => (typeof icon === 'function' ? icon : Sparkles);
+
+  const MenuItem = ({ icon, label, onClick, danger = false, disabled = false, shortcut }: MenuItemProps) => {
+    const Icon = resolveIcon(icon);
+    return (
     <button 
         type="button"
         onPointerDown={(e) => fireItem(e, onClick, disabled)}
@@ -546,13 +550,14 @@ export default function ContextMenu() {
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
     >
-        <div className="flex items-center gap-3">
-            <Icon size={18} /> 
-            <span>{label}</span>
+        <div className="flex items-center gap-3 min-w-0">
+            <Icon size={16} className="shrink-0" /> 
+            <span className="truncate">{label}</span>
         </div>
-        {shortcut && <span className="text-xs text-zinc-600 font-mono">{shortcut}</span>}
+        {shortcut && <span className="text-xs text-zinc-600 font-mono shrink-0">{shortcut}</span>}
     </button>
   );
+  }
 
   const NeuralItem = ({ icon: Icon, label, onClick }: NeuralItemProps) => (
       <button 
@@ -574,7 +579,7 @@ export default function ContextMenu() {
   return (
     <div 
       ref={menuRef}
-      className="context-menu fixed z-[2147483000] min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto pointer-events-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5"
+      className="context-menu fixed z-[2147483000] min-w-[260px] max-w-[320px] max-h-[75vh] overflow-y-auto pointer-events-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5"
       style={{ left: position.x, top: position.y }}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
@@ -758,18 +763,19 @@ export default function ContextMenu() {
                 <MenuItem icon={Trash2} label="Empty Trash" onClick={handleEmptyTrash} danger />
                 <Separator />
                 <SubHeader label="Add App to Desktop" />
-                <div className="max-h-32 overflow-y-auto custom-scrollbar">
-                    {registry.filter(a => !a.hidden).slice(0, 12).map(app => {
-                        const AppIcon = app.icon;
-                        return (
+                <div className="max-h-56 overflow-y-auto custom-scrollbar px-0">
+                    {registry
+                      .filter(a => !a.hidden)
+                      .slice()
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map(app => (
                             <MenuItem
                                 key={app.id}
-                                icon={AppIcon}
+                                icon={app.icon}
                                 label={app.name}
                                 onClick={() => handleAddAppToDesktop(app.id)}
                             />
-                        );
-                    })}
+                      ))}
                 </div>
                 
                 <Separator />
