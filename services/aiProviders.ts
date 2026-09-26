@@ -348,6 +348,11 @@ function getProxyUrl(path: string = '/api/ai/proxy'): string {
   return `http://localhost:3000${path}`;
 }
 
+function looksLikeHtml(body: string): boolean {
+  const s = (body || '').trimStart().slice(0, 32).toLowerCase();
+  return s.startsWith('<!doctype') || s.startsWith('<html') || s.startsWith('<head') || s.startsWith('<!--');
+}
+
 export class AIProviderGateway {
   private static instance: AIProviderGateway;
   private providers: AIProvider[] = [];
@@ -710,6 +715,10 @@ export class AIProviderGateway {
       }));
       bodyObj.tool_choice = 'auto';
     }
+    if (provider.id === 'z-ai' || (model || '').includes('glm-5.3')) {
+      bodyObj.thinking = { type: 'enabled' };
+      bodyObj.reasoning_effort = 'low';
+    }
     const bodyStr = JSON.stringify(bodyObj);
 
     // Local parser: extracts text and (if hasTools) tool_calls from an
@@ -791,6 +800,17 @@ export class AIProviderGateway {
             body: bodyObj,
           }),
         });
+        const probe = await res.clone().text();
+        const html = looksLikeHtml(probe);
+        if (html || !res.ok && probe.trimStart().startsWith('<')) {
+          // Host served the SPA (or an HTML error page) instead of the Node proxy.
+          res = await fetch(url, {
+            method: 'POST',
+            headers,
+            signal: controller.signal,
+            body: bodyStr,
+          });
+        }
       } else {
         res = await fetch(url, {
           method: 'POST',
@@ -831,8 +851,15 @@ export class AIProviderGateway {
     if (stream) {
       return res.body!;
     } else {
-      const data = await res.json();
-      return parseOpenAIResponse(data);
+      const raw = await res.text();
+      if (looksLikeHtml(raw)) {
+        throw new Error(`${provider.name} returned a web page instead of JSON. Direct endpoint: ${url}`);
+      }
+      try {
+        return parseOpenAIResponse(JSON.parse(raw));
+      } catch {
+        throw new Error(`${provider.name} sent non-JSON: ${raw.slice(0, 120)}`);
+      }
     }
   }
 
