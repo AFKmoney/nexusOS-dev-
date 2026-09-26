@@ -125,6 +125,20 @@
           var k2 = KEY[d.key];
           if (k2 !== undefined) emu.keyUp(k2);
         }
+        if (d.cmd === 'save') {
+          var blob = null;
+          if (typeof emu.exportSave === 'function') blob = emu.exportSave();
+          else if (emu.saves && typeof emu.saves.exportSave === 'function') blob = emu.saves.exportSave();
+          var u8 = blob ? toU8(blob) : new Uint8Array(0);
+          post('save', { ok: u8.length > 0, size: u8.length, bytes: Array.from(u8), name: d.name || '' });
+        }
+        if (d.cmd === 'loadsave') {
+          var saveBytes = toU8(d.bytes);
+          if (typeof emu.importSave === 'function') emu.importSave(saveBytes);
+          else if (typeof emu.attachSAVE === 'function') emu.attachSAVE(saveBytes);
+          else if (emu.saves && typeof emu.saves.importSave === 'function') emu.saves.importSave(saveBytes);
+          post('loadsave', { ok: true, size: saveBytes.length });
+        }
       } catch (err) {
         post('error', { message: String(err && err.message ? err.message : err) });
       }
