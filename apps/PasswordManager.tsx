@@ -128,9 +128,9 @@ export default function PasswordManager() {
         </button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         {/* Sidebar / Search */}
-        <div className="w-full sm:w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-72 border-b sm:border-b-0 sm:border-r border-white/5 flex flex-col shrink-0 bg-black/20 max-h-[36%] sm:max-h-none">
           <div className="p-4 border-b border-white/5">
             <div className="relative group">
               <Search className="absolute left-3 top-2.5 text-zinc-600 group-focus-within:text-amber-400 transition-colors" size={14} />
@@ -156,10 +156,10 @@ export default function PasswordManager() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-10 bg-[#0a0a0c]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-10 bg-[#0a0a0c]">
           <div className="max-w-3xl mx-auto">
             {showAdd ? (
-              <form onSubmit={addEntry} className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 animate-in slide-in-from-bottom-4 duration-300">
+              <form onSubmit={addEntry} className="bg-zinc-900/50 border border-white/10 rounded-3xl p-4 sm:p-8 animate-in slide-in-from-bottom-4 duration-300">
                 <h2 className="text-xl font-black uppercase tracking-widest mb-8 text-white">Secure New Credentials</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="col-span-2">
@@ -198,7 +198,7 @@ export default function PasswordManager() {
                           <a href={e.url} className="text-[10px] text-zinc-600 hover:text-amber-400 transition-colors font-mono">{e.url}</a>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button onClick={() => deleteEntry(e.id)} className="p-2 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={18} /></button>
                       </div>
                     </div>

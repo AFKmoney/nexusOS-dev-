@@ -158,7 +158,7 @@ export default function MusicPlayerApp() {
               <span className="text-[10px] text-zinc-500 font-mono w-8 text-right">{fmt(progress)}</span>
               <div className="flex-1 h-1.5 bg-zinc-800 rounded-full cursor-pointer group" onClick={seek}>
                 <div className="h-full bg-accent rounded-full relative transition-all" style={{ width: duration ? `${(progress / duration) * 100}%` : '0%' }}>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition" />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition" />
                 </div>
               </div>
               <span className="text-[10px] text-zinc-500 font-mono w-8">{fmt(duration)}</span>

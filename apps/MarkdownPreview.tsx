@@ -62,12 +62,12 @@ export default function MarkdownPreview() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         {/* Editor Side */}
         {view === 'split' && (
           <div className="flex-1 border-r border-white/5 bg-[#0a0a0c] relative">
             <textarea 
-              className="w-full h-full p-8 bg-transparent text-sm font-mono text-emerald-100/70 outline-none resize-none selection:bg-accent/20 leading-relaxed custom-scrollbar"
+              className="w-full h-full p-4 sm:p-8 bg-transparent text-sm font-mono text-emerald-100/70 outline-none resize-none selection:bg-accent/20 leading-relaxed custom-scrollbar"
               spellCheck={false}
               value={content}
               onChange={e => setContent(e.target.value)}
@@ -79,7 +79,7 @@ export default function MarkdownPreview() {
         )}
 
         {/* Preview Side */}
-        <div className={`flex-1 overflow-y-auto custom-scrollbar p-10 bg-black/40 ${view === 'preview' ? 'max-w-4xl mx-auto' : ''}`}>
+        <div className={`flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-10 bg-black/40 ${view === 'preview' ? 'max-w-4xl mx-auto' : ''}`}>
           <div className="relative">
             <div className="absolute top-0 right-0 opacity-20 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest pointer-events-none mb-8">
               <Sparkles size={12} className="text-accent" /> Visual Manifest

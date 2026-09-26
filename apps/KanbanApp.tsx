@@ -153,7 +153,7 @@ export default function KanbanApp() {
               
               {col.tasks.map(task => (
                 <div key={task.id} className="bg-zinc-900 border border-white/10 hover:border-violet-500/50 rounded-xl p-4 transition-all group shadow-sm hover:shadow-[0_5px_15px_rgba(139,92,246,0.15)] relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-violet-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-0 left-0 w-1 h-full bg-violet-500/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" />
                   
                   <div className="text-sm text-zinc-200 font-medium leading-snug mb-3 pr-6 break-words">{task.title}</div>
                   

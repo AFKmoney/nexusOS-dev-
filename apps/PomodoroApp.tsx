@@ -56,7 +56,7 @@ export default function PomodoroApp() {
   const progress = mode === 'work' ? (1 - timeLeft / (25 * 60)) * 100 : (1 - timeLeft / (5 * 60)) * 100;
 
   return (
-    <div className="h-full bg-[#050508] text-white flex flex-col items-center justify-center p-8 relative overflow-hidden">
+    <div className="h-full bg-[#050508] text-white flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
       {/* Background Pulse */}
       <div className={`absolute inset-0 opacity-10 transition-colors duration-1000 ${isActive ? (mode === 'work' ? 'bg-red-500' : 'bg-accent') : 'bg-transparent'}`} />
       

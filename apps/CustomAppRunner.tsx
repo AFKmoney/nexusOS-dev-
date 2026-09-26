@@ -121,7 +121,7 @@ export default function CustomAppRunner({ windowId, onBack, appId }: { windowId:
              <span className="text-white font-semibold">Error</span>
            </div>
         )}
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 text-center">
           <AlertTriangle size={48} className="text-red-500 mb-4" />
           <h3 className="text-white font-bold mb-2">Application Link Error</h3>
           <p className="text-zinc-500 text-sm mb-6">{error}</p>

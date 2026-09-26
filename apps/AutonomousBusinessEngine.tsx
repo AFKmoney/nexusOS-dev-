@@ -78,7 +78,7 @@ export default function AutonomousBusinessEngine() {
 
   if (!goal) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 bg-[#09090d] text-white">
+      <div className="h-full flex flex-col items-center justify-center p-4 sm:p-8 bg-[#09090d] text-white">
         <div className="w-16 h-16 rounded-2xl bg-accent/20 border border-accent/40 flex items-center justify-center text-accent mb-4 shadow-[0_0_30px_rgba(var(--nx-accent-rgb),0.3)]">
           <Rocket size={32} />
         </div>

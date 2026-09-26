@@ -128,7 +128,7 @@ export default function VoiceRecorder() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black/20 relative overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 bg-black/20 relative overflow-hidden">
         {/* Recording Visualizer */}
         {isRecording && (
           <div className="flex items-end gap-1 h-32 mb-12">
@@ -186,7 +186,7 @@ export default function VoiceRecorder() {
                   <div className="text-[9px] text-zinc-600 font-mono uppercase">{formatTime(r.duration)} · {new Date(r.date).toLocaleDateString('en-US')}</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 <a href={r.url} download={r.name} className="p-2 text-zinc-500 hover:text-accent hover:bg-accent/10 rounded-lg transition-all"><Download size={16}/></a>
                 <button onClick={() => deleteRecording(r.id)} className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash2 size={16}/></button>
               </div>

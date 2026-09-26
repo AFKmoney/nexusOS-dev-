@@ -54,7 +54,7 @@ export default function AccessibilityPanel() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-black/20">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 bg-black/20">
         <div className="max-w-2xl mx-auto space-y-8">
           
           <section>
@@ -90,7 +90,7 @@ export default function AccessibilityPanel() {
             <h2 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
               <Type size={12} /> Interface Scaling
             </h2>
-            <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 text-center">
+            <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-4 sm:p-8 text-center">
               <div className="text-4xl font-black mb-2 text-white font-mono">{Math.round(uiScale * 100)}%</div>
               <div className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] mb-8">Current Resolution Multiplier</div>
 

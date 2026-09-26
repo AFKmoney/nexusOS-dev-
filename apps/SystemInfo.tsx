@@ -66,7 +66,7 @@ export default function SystemInfoApp() {
   );
 
   return (
-    <div className="h-full bg-[#050508] text-zinc-100 p-8 overflow-y-auto custom-scrollbar relative">
+    <div className="h-full bg-[#050508] text-zinc-100 p-4 sm:p-8 overflow-y-auto custom-scrollbar relative">
       <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
       
       <div className="flex items-center gap-4 mb-10">

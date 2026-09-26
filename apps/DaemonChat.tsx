@@ -241,7 +241,7 @@ export default function DaemonChat() {
                   )}
                   {formatContent(msg.content)}
                   {msg.isStreaming && msg.content && <span className="animate-pulse ml-0.5 text-accent">▊</span>}
-                  <button onClick={() => copyMsg(msg.content)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all text-zinc-600 hover:text-zinc-300 p-0.5">
+                  <button onClick={() => copyMsg(msg.content)} className="absolute top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all text-zinc-600 hover:text-zinc-300 p-0.5">
                     <Copy size={12} />
                   </button>
                 </div>

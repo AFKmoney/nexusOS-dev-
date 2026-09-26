@@ -122,7 +122,7 @@ export default function HabitTracker() {
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); deleteHabit(h.id); }}
-                    className="p-2 opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    className="p-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                   >
                     <Trash2 size={16} />
                   </button>

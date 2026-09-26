@@ -78,10 +78,10 @@ export default function ScreenshotTool() {
               <div key={s.id} className="group relative bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
                 <div className="aspect-video bg-black flex items-center justify-center relative overflow-hidden">
                   <img src={s.data} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" />
                   
                   {/* Actions Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
+                  <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
                     <a href={s.data} download={`nexus_shot_${s.id}.png`} className="p-3 bg-accent text-black rounded-full shadow-xl hover:scale-110 transition-transform"><Download size={20}/></a>
                     <button onClick={() => deleteShot(s.id)} className="p-3 bg-red-500 text-white rounded-full shadow-xl hover:scale-110 transition-transform"><Trash2 size={20}/></button>
                   </div>

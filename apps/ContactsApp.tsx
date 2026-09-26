@@ -113,7 +113,7 @@ export default function ContactsApp() {
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-10 relative min-h-0">
           <div className="max-w-2xl mx-auto">
             {showAdd ? (
-              <form onSubmit={addContact} className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 animate-in zoom-in-95 duration-200">
+              <form onSubmit={addContact} className="bg-zinc-900/50 border border-white/10 rounded-3xl p-4 sm:p-8 animate-in zoom-in-95 duration-200">
                 <h2 className="text-xl font-black uppercase tracking-widest mb-8 text-white">Register New Entity</h2>
                 <div className="space-y-6">
                   <div>
@@ -161,7 +161,7 @@ export default function ContactsApp() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <button onClick={() => toggleFavorite(c.id)} className={`p-2 rounded-xl transition-all ${c.favorite ? 'text-accent bg-accent/10' : 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5'}`}><Star size={18} fill={c.favorite ? 'currentColor' : 'none'} /></button>
                           <button onClick={() => deleteContact(c.id)} className="p-2 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={18} /></button>
                         </div>

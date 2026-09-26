@@ -41,9 +41,9 @@ export default function ViralApp() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         {/* Sidebar */}
-        <div className="w-full sm:w-64 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-64 border-b sm:border-b-0 sm:border-r border-white/5 flex flex-col shrink-0 bg-black/20 max-h-[34%] sm:max-h-none">
           <div className="p-4 space-y-1">
             {[
               { id: 'broadcast', label: 'Broadcast', icon: Globe },
@@ -63,7 +63,7 @@ export default function ViralApp() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-10 relative bg-black/40">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-10 relative bg-black/40">
           <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
           
           <div className="max-w-2xl mx-auto">
@@ -119,7 +119,7 @@ export default function ViralApp() {
 
             {activeTab === 'stats' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="col-span-2 p-8 bg-white/[0.02] border border-white/5 rounded-3xl text-center">
+                <div className="col-span-2 p-4 sm:p-8 bg-white/[0.02] border border-white/5 rounded-3xl text-center">
                   <div className="text-6xl font-black text-white font-mono tracking-tighter mb-2">{nodes.toLocaleString('en-US')}</div>
                   <div className="text-xs font-black uppercase tracking-[0.3em] text-accent">Active Global Nodes</div>
                 </div>

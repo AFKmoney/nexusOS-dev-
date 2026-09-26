@@ -217,7 +217,7 @@ export default function CipherVaultApp({ windowId }: { windowId: string }) {
 
   if (locked) {
       return (
-          <div className="h-full flex flex-col items-center justify-center bg-zinc-950 text-white p-8">
+          <div className="h-full flex flex-col items-center justify-center bg-zinc-950 text-white p-4 sm:p-8">
               <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mb-6 border border-zinc-800 shadow-2xl">
                   <Shield size={32} className="text-accent" />
               </div>
@@ -365,7 +365,7 @@ export default function CipherVaultApp({ windowId }: { windowId: string }) {
 
                 {/* Detail View */}
                 {view === 'detail' && selectedItem && (
-                    <div className="flex-1 p-8 overflow-y-auto">
+                    <div className="flex-1 p-4 sm:p-8 overflow-y-auto">
                         <div className="max-w-md mx-auto space-y-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">{selectedItem.title}</h2>
@@ -426,7 +426,7 @@ export default function CipherVaultApp({ windowId }: { windowId: string }) {
 
                 {/* Create View */}
                 {view === 'create' && (
-                     <div className="flex-1 p-8 overflow-y-auto">
+                     <div className="flex-1 p-4 sm:p-8 overflow-y-auto">
                         <div className="max-w-md mx-auto space-y-4">
                             <h2 className="text-xl font-bold text-white mb-6">New Secure Entry</h2>
                             

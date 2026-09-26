@@ -89,7 +89,7 @@ export default function TaskManager() {
           <tbody>
             {processes.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center p-8 text-zinc-600">No active processes monitored.</td>
+                <td colSpan={6} className="text-center p-4 sm:p-8 text-zinc-600">No active processes monitored.</td>
               </tr>
             )}
             {processes.map(p => (

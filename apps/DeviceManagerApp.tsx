@@ -36,7 +36,7 @@ export default function DeviceManagerApp() {
 
   if (hwInfo?.error) {
     return (
-      <div className="flex items-center justify-center p-8 h-full bg-[#111] text-red-500 font-mono text-sm text-center leading-relaxed">
+      <div className="flex items-center justify-center p-4 sm:p-8 h-full bg-[#111] text-red-500 font-mono text-sm text-center leading-relaxed">
         Hardware connection failed.<br/>{hwInfo.error}<br/><br/>
         <span className="text-zinc-500 text-xs">Ensure NexusOS is running via Electron wrapper for physical hardware access.</span>
       </div>

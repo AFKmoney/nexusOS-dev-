@@ -403,7 +403,7 @@ Do not invent page contents that cannot be supported. Prefer accuracy over narra
                   </button>
                 </div>
 
-                <div className="grid grid-cols-4 gap-3 mb-8">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
                   {QUICK_LINKS.map((l) => (
                     <button key={l.url} onClick={() => void navigate(l.url)} className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-zinc-900/50 border border-white/5 hover:border-white/15 hover:bg-zinc-800/80 transition-all group">
                       <span className="text-xl">{l.icon}</span>
@@ -435,7 +435,7 @@ Do not invent page contents that cannot be supported. Prefer accuracy over narra
                 </div>
               )}
               {!isLoading && aiContent && (
-                <div className="max-w-3xl mx-auto px-6 py-6">
+                <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 text-sm text-zinc-600">
                       <Sparkles size={13} className="text-accent" />

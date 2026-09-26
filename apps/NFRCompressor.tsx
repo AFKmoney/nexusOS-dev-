@@ -230,10 +230,10 @@ export default function NFRCompressorApp({ windowId }: { windowId: string }) {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         
         {/* Left: File Browser */}
-        <div className="w-full sm:w-64 bg-black/50 border-r border-zinc-800 flex flex-col">
+        <div className="w-full sm:w-64 bg-black/50 border-b sm:border-b-0 sm:border-r border-zinc-800 flex flex-col max-h-[30%] sm:max-h-none shrink-0">
             <div className="p-2 border-b border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-2">
                 <HardDrive size={14} /> Local Storage
             </div>

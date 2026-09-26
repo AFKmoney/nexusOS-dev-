@@ -99,7 +99,7 @@ export default function StickyNotes() {
             className={`absolute w-full sm:w-56 min-h-[160px] ${note.color} rounded-2xl shadow-2xl flex flex-col p-4 transition-all hover:scale-[1.02] animate-in zoom-in-95 duration-200 group`}
             style={{ left: note.x, top: note.y, zIndex: 10 }}
           >
-            <div className="flex items-center justify-between mb-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center justify-between mb-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
               <button onClick={() => changeColor(note.id)} className="p-1 hover:bg-black/10 rounded transition-colors"><Palette size={12} className="text-black/60" /></button>
               <button onClick={() => deleteNote(note.id)} className="p-1 hover:bg-black/10 rounded transition-colors text-black/60 hover:text-red-600"><Trash2 size={12} /></button>
             </div>

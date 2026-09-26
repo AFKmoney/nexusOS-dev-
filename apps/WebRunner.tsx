@@ -736,7 +736,7 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
                   </button>
                 </div>
 
-                <div className="grid grid-cols-4 gap-3 mb-8">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
                   {HOMEPAGE_LINKS.map(l => (
                     <button
                       key={l.url}
@@ -767,7 +767,7 @@ export default function WebRunnerApp({ windowId, initialUrl: propUrl }: { window
               <div className="text-xs text-cyan-300 font-mono bg-slate-900/90 px-3 py-1 rounded-lg border border-slate-800 max-w-md truncate">{currentUrl}</div>
             </div>
           ) : loadError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 p-8">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 p-4 sm:p-8">
               <AlertTriangle size={48} className="text-amber-400 mb-4 animate-bounce" />
               <h3 className="text-xl font-bold text-white mb-2">Cannot Display This Page</h3>
               <p className="text-slate-200 text-sm mb-3 text-center max-w-md bg-slate-900/80 p-3 rounded-xl border border-slate-800">{loadError}</p>

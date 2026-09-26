@@ -285,7 +285,7 @@ export default function WallpaperApp() {
                       {preset.category === 'Custom' && (
                         <button
                           onClick={(e) => deleteWallpaper(e, preset.code)}
-                          className={`absolute top-2 left-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg transition-opacity z-20 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                          className={`absolute top-2 left-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg transition-opacity z-20 ${isMobile ? 'opacity-100' : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'}`}
                           title="Delete"
                         >
                           <Trash2 size={12} />
