@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { hydrateOSRegistry, useOS } from './store/osStore';
+import { memory } from './kernel/memory';
+import { sessions } from './kernel/sessions';
 import { vfs } from './kernel/fileSystem';
 import { kernelLog } from './kernel/log';
 import { WALLPAPER_LIBRARY } from './kernel/wallpaperLibrary';
@@ -14,6 +16,18 @@ import { autoPilot } from './kernel/autoPilot';
 // scraping the DOM. Harmless in production: it is a read/write view of state the
 // user already controls in their own browser tab.
 (window as any).__NEXUS_OS__ = useOS;
+
+const persistedUser = useOS.getState().currentUser?.id;
+if (useOS.getState().isLoggedIn && persistedUser) {
+  memory.switchUser(persistedUser);
+  sessions.switchUser(persistedUser);
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
 
 // CRITICAL: Hydrate app registry before first render
 hydrateOSRegistry().catch(e => kernelLog.error('[SYSTEM] Registry hydration failed:', e));

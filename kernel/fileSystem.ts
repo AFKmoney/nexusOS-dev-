@@ -79,6 +79,23 @@ const INITIAL_FS: { [key: string]: FileNode } = {
             children: {}
           }
         }
+      },
+      admin: {
+        name: 'admin',
+        type: 'directory',
+        permissions: 'rwx',
+        created: Date.now(),
+        modified: Date.now(),
+        children: {
+          Desktop: {
+            name: 'Desktop',
+            type: 'directory',
+            permissions: 'rwx',
+            created: Date.now(),
+            modified: Date.now(),
+            children: {}
+          }
+        }
       }
     }
   },

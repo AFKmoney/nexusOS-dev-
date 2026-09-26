@@ -3,7 +3,9 @@ import { KernelRules, UserProfile } from '../types.ts';
 export const STORE_PERSIST_KEY = 'nexus-pro-ultimate-state-v4';
 
 export const DEFAULT_PROFILES: UserProfile[] = [
-  { id: 'daemon', name: 'DAEMON Core', themeColor: '#10b981', isAdmin: true }
+  { id: 'daemon', name: 'DAEMON Core', themeColor: '#10b981', isAdmin: true },
+  { id: 'admin', name: 'Administrator', themeColor: '#38bdf8', isAdmin: true },
+  { id: 'user', name: 'Personal', themeColor: '#a78bfa', isAdmin: false }
 ];
 
 export const DEFAULT_PINNED_APPS = ['welcome', 'explorer', 'hyperide', 'terminal', 'netrunner'];

@@ -3,7 +3,12 @@
  */
 import { uuid } from '../utils/uuid';
 
-const SESSIONS_KEY = 'nexus_sessions_v1';
+const LEGACY_SESSIONS_KEY = 'nexus_sessions_v1';
+const SESSIONS_PREFIX = 'lazysiren_sessions_v1:';
+
+function sessionsKey(userId: string) {
+  return SESSIONS_PREFIX + (userId || 'guest');
+}
 
 export interface SavedWindow {
   appId: string;
@@ -25,20 +30,31 @@ export interface Session {
 
 class SessionsManager {
   private sessions: Session[] = [];
+  private userId = 'guest';
 
   constructor() {
     this.load();
   }
 
+  public switchUser(userId: string | null | undefined) {
+    const next = userId || 'guest';
+    if (next === this.userId) return;
+    this.persist();
+    this.userId = next;
+    this.load();
+  }
+
   private load() {
     try {
-      const raw = localStorage.getItem(SESSIONS_KEY);
-      if (raw) this.sessions = JSON.parse(raw);
-    } catch {}
+      const raw = localStorage.getItem(sessionsKey(this.userId)) || (this.userId !== 'guest' ? localStorage.getItem(LEGACY_SESSIONS_KEY) : null);
+      this.sessions = raw ? JSON.parse(raw) : [];
+    } catch {
+      this.sessions = [];
+    }
   }
 
   private persist() {
-    localStorage.setItem(SESSIONS_KEY, JSON.stringify(this.sessions));
+    localStorage.setItem(sessionsKey(this.userId), JSON.stringify(this.sessions));
   }
 
   /** Save current window state as a session */

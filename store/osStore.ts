@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import { Box } from 'lucide-react';
 import { KernelRules } from '../types.ts';
 import { localBrain } from '../services/localBrain';
+import { memory } from '../kernel/memory';
+import { sessions } from '../kernel/sessions';
 import { kernelLog } from '../kernel/log';
 import { DEFAULT_KERNEL_RULES, DEFAULT_PINNED_APPS, DEFAULT_PROFILES, STORE_PERSIST_KEY } from './osStoreConstants';
 import {
@@ -47,6 +49,8 @@ export function createDefaultStoreState() {
 
 const partializeOSState = (state: OSState) => ({
   hasSeenIntro: state.hasSeenIntro,
+  isLoggedIn: state.isLoggedIn,
+  currentUser: state.currentUser,
   kernelRules: state.kernelRules,
   pinnedApps: state.pinnedApps,
   wallpaper: state.wallpaper,
@@ -120,12 +124,18 @@ export const useOS = create<OSState>()(
       },
       login: (profileId) => {
         const profile = get().profiles.find(p => p.id === profileId) ?? get().profiles[0] ?? null;
+        memory.switchUser(profile?.id || 'guest');
+        sessions.switchUser(profile?.id || 'guest');
         set({ isLoggedIn: true, currentUser: profile });
         setTimeout(() => {
           void localBrain.initialize().catch(e => kernelLog.warn('[WARM-START] Brain init deferred:', e));
         }, 500);
       },
-      logout: () => set({ isLoggedIn: false, currentUser: null, windows: [], isStartMenuOpen: false }),
+      logout: () => {
+        memory.switchUser('guest');
+        sessions.switchUser('guest');
+        set({ isLoggedIn: false, currentUser: null, windows: [], isStartMenuOpen: false });
+      },
       ...createWindowActions(set, get),
       updateKernelRules: (updates) => set(state => ({ kernelRules: { ...state.kernelRules, ...updates } })),
       ...createNotificationAndAutonomyActions(set),

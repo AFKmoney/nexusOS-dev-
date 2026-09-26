@@ -1,6 +1,11 @@
 import { MemoryEntry, MemoryCategory } from '../types';
 
-const MEMORY_KEY = 'nexus_memory_v2';
+const LEGACY_MEMORY_KEY = 'nexus_memory_v2';
+const MEMORY_PREFIX = 'lazysiren_memory_v1:';
+
+function memoryKey(userId: string) {
+  return MEMORY_PREFIX + (userId || 'guest');
+}
 const MAX_ENTRIES = 500; // Increased to allow more context
 const MAX_CONTENT_LEN = 4000; // Hard cap per entry increased significantly
 
@@ -30,30 +35,62 @@ function jaccardSimilarity(a: string, b: string): number {
 export class MemorySystem {
   private entries: MemoryEntry[] = [];
   private _tokenBudget: number = 2000; // Max tokens for memory context
+  private userId = 'guest';
 
   constructor() {
+    this.load();
+  }
+
+  private parse(raw: string | null): MemoryEntry[] {
+    if (!raw) return [];
     try {
-      const saved = localStorage.getItem(MEMORY_KEY);
-      if (saved) {
-        this.entries = JSON.parse(saved).map((e: any) => ({
-          ...e,
-          category: e.category || 'episodic',
-          importance: e.importance ?? 0.5,
-          // Retroactively truncate overly long entries
-          content: (e.content || '').slice(0, MAX_CONTENT_LEN)
-        }));
-      }
+      return JSON.parse(raw).map((e: any) => ({
+        ...e,
+        category: e.category || 'episodic',
+        importance: e.importance ?? 0.5,
+        content: (e.content || '').slice(0, MAX_CONTENT_LEN)
+      }));
     } catch {
-      this.entries = [];
+      return [];
     }
+  }
+
+  private load() {
+    const scoped = this.parse(localStorage.getItem(memoryKey(this.userId)));
+    if (scoped.length) {
+      this.entries = scoped;
+      return;
+    }
+    // One-time migration of the old global bucket into the first real user.
+    if (this.userId !== 'guest') {
+      const legacy = this.parse(localStorage.getItem(LEGACY_MEMORY_KEY));
+      if (legacy.length) {
+        this.entries = legacy;
+        this.save();
+        return;
+      }
+    }
+    this.entries = [];
+  }
+
+  public currentUserId() {
+    return this.userId;
+  }
+
+  public switchUser(userId: string | null | undefined) {
+    const next = userId || 'guest';
+    if (next === this.userId) return;
+    this.save();
+    this.userId = next;
+    this.load();
   }
 
   public save() {
     try {
-      localStorage.setItem(MEMORY_KEY, JSON.stringify(this.entries));
+      localStorage.setItem(memoryKey(this.userId), JSON.stringify(this.entries));
     } catch {
       this.prune(Math.floor(this.entries.length * 0.5));
-      try { localStorage.setItem(MEMORY_KEY, JSON.stringify(this.entries)); } catch {}
+      try { localStorage.setItem(memoryKey(this.userId), JSON.stringify(this.entries)); } catch {}
     }
   }
 
