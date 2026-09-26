@@ -488,7 +488,8 @@ export default function App() {
 
   const handleGlobalClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (!target.closest('.start-menu') && isStartMenuOpen) toggleStartMenu();
+    if (target.closest('.context-menu')) return;
+    if (!target.closest('.start-menu') && !target.closest('.taskbar') && isStartMenuOpen) toggleStartMenu();
     if (useOS.getState().contextMenu.isOpen) useOS.getState().closeContextMenu();
 
     // 3DS Parallax: tap = tilt impulsif when clicking/tapping on desktop substrate
@@ -579,9 +580,10 @@ export default function App() {
 
         <StartMenu />
         <TaskSwitcher />
-        <ContextMenu />
         <Taskbar />
       </div>
+
+      <ContextMenu />
 
       {locked && <LockScreen onUnlock={() => unlockShell()} />}
 

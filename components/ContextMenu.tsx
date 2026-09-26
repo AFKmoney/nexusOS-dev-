@@ -65,15 +65,18 @@ export default function ContextMenu() {
   }, [contextMenu.isOpen, contextMenu.x, contextMenu.y]);
 
   useEffect(() => {
+    if (!contextMenu.isOpen) return;
     const handleClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        closeContextMenu();
-      }
+      if (menuRef.current && menuRef.current.contains(e.target as Node)) return;
+      closeContextMenu();
     };
-    if (contextMenu.isOpen) {
+    const timer = window.setTimeout(() => {
       window.addEventListener('mousedown', handleClick);
-    }
-    return () => window.removeEventListener('mousedown', handleClick);
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('mousedown', handleClick);
+    };
   }, [contextMenu.isOpen, closeContextMenu]);
 
   if (!contextMenu.isOpen) return null;
@@ -525,9 +528,18 @@ export default function ContextMenu() {
 
   const Separator = () => <div className="h-px bg-white/10 my-1 mx-2" />;
   
+  const fireItem = (e: React.SyntheticEvent, fn: () => void | Promise<void>, disabled?: boolean) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (disabled) return;
+    void fn();
+  };
+
   const MenuItem = ({ icon: Icon, label, onClick, danger = false, disabled = false, shortcut }: MenuItemProps) => (
     <button 
-        onClick={onClick} 
+        type="button"
+        onPointerDown={(e) => fireItem(e, onClick, disabled)}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         disabled={disabled}
         className={`w-full flex items-center justify-between px-3 py-1.5 text-[13px] text-left transition-colors
         ${danger ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}
@@ -544,7 +556,9 @@ export default function ContextMenu() {
 
   const NeuralItem = ({ icon: Icon, label, onClick }: NeuralItemProps) => (
       <button 
-        onClick={onClick}
+        type="button"
+        onPointerDown={(e) => fireItem(e, onClick)}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         className="w-full flex items-center gap-3 px-3 py-1.5 text-[13px] text-left transition-colors text-purple-200 hover:bg-purple-500/20 hover:text-white group relative overflow-hidden"
       >
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -560,8 +574,11 @@ export default function ContextMenu() {
   return (
     <div 
       ref={menuRef}
-      className="fixed z-[9999] min-w-[240px] bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5"
+      className="context-menu fixed z-[2147483000] min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto pointer-events-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5"
       style={{ left: position.x, top: position.y }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
         {/* Hidden File Input for Custom Icons */}
         <input 
