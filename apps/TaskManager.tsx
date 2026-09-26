@@ -100,27 +100,22 @@ export default function TaskManager() {
                   {p.name}
                 </td>
                 <td className="p-3 hidden sm:table-cell">
-                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
-                      p.state === 'running' ? 'bg-accent/10 text-accent border border-accent/20' : 
-                      p.state === 'minimized' ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' :
-                      'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                    }`}>
+                  <>
+                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${p.state === 'running' ? 'bg-accent/10 text-accent border border-accent/20' : p.state === 'minimized' ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`
+                    }>
                       {p.state}
                     </span>
-                    <span className={`text-[9px] uppercase font-bold tracking-widest ${
-                      p.priority === 'real-time' ? 'text-purple-400' :
-                      p.priority === 'high' ? 'text-red-400' :
-                      p.priority === 'idle' ? 'text-zinc-500' : 'text-accent'
-                    }`}>
+                    <span className={`text-[9px] uppercase font-bold tracking-widest ${p.priority === 'real-time' ? 'text-purple-400' : p.priority === 'high' ? 'text-red-400' : p.priority === 'idle' ? 'text-zinc-500' : 'text-accent'}`
+                    }>
                       PRIO: {p.priority}
                     </span>
-                  </div>
+                  </>
                 </td>
                 <td className="p-3 text-right text-xs text-accent font-bold">{p.cpuEstimate}%</td>
                 <td className="p-3 text-right text-xs text-zinc-400 hidden sm:table-cell">{getUptime(p.windowId)}</td>
                 <td className="p-3 text-right text-xs text-accent">{(p.memoryEstimate / 1024).toFixed(1)} MB</td>
                 <td className="p-3 text-center">
-                   <button 
+                   <button
                       onClick={() => handleKill(p.windowId)}
                       className="p-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white active:bg-red-500 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                       title="Kill Process"
