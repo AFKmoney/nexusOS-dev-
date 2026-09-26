@@ -58,9 +58,35 @@ async function xFetch(method: 'GET' | 'POST', url: string, token: string, body?:
   return data;
 }
 
+export function openRealX(url = 'https://x.com/home'): string {
+  const target = url || 'https://x.com/home';
+  eventBus.emit(OS_EVENTS.X_COMMAND, { action: 'open', path: target });
+  try {
+    useOS.getState().openWindow('x', { path: target });
+  } catch { /* store may be unbound in tests */ }
+
+  if (typeof window === 'undefined' || typeof document === 'undefined') return target;
+
+  const android = /Android/i.test(navigator.userAgent);
+  const intent = android
+    ? `intent://${target.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.twitter.android;S.browser_fallback_url=${encodeURIComponent(target)};end`
+    : target;
+
+  const a = document.createElement('a');
+  a.href = intent;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  try { window.open(target, '_blank', 'noopener'); } catch { /* popup may be blocked */ }
+  return target;
+}
+
 export function openXSurface(path?: string): void {
-  useOS.getState().openWindow('x', path ? { path } : undefined);
-  eventBus.emit(OS_EVENTS.X_COMMAND, { action: 'open', path });
+  openRealX(path || 'https://x.com/home');
 }
 
 export function xComposeUrl(text: string): string {
