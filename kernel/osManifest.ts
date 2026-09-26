@@ -39,7 +39,13 @@ function getCoreContext(): string {
     if (p) ai = p.id;
   } catch {}
 
-  return `[OS] NexusOS|ai:${ai}|apps:${store?.registry?.length || 0}|open:${openApps}`;
+  const gen = (store?.registry || [])
+    .filter((a: any) => a.isCustom || String(a.id || '').startsWith('gen_'))
+    .map((a: any) => a.id)
+    .slice(0, 8)
+    .join(',') || 'none';
+
+  return `[OS] NexusOS|ai:${ai}|apps:${store?.registry?.length || 0}|open:${openApps}|gen:${gen}`;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -104,10 +110,16 @@ OS::SET_ACCENT:<#hex>
 OS::PLAY_AUDIO:<path>
 OS::TAKE_SCREENSHOT
 OS::IDE_OPEN_FILE:<path>
+OS::FORGE_SKILL:<name>|<description>|[EXPOSE_NAME]|<code>
 OS::CALL_SKILL:<name>:<json-args>
-OS::FORGE_SKILL:<name>|<description>|<code>
 OS::LIST_SKILLS
 OS::DELETE_SKILL:<name>
+OS::LIST_APPS
+OS::USE_APP:<appId>|<focus|click|set|read|eval>|<selector>|<value>
+OS::X_OPEN
+OS::X_SEARCH:<q>
+OS::X_POST:<text>
+OS::GBA_COMMAND:<play|pause|load|press|open>:<key>:<rom>
 OS::ADD_GOAL:<description>
 OS::GET_GOALS
 OS::COMPLETE_GOAL:<id>
@@ -142,7 +154,7 @@ function getVFSCompact(): string {
 // ═══════════════════════════════════════════════════════════════
 // TIER 5: FEW-SHOT — Ultra-compressed, 2 examples max (~60 tokens)
 // ═══════════════════════════════════════════════════════════════
-const EXAMPLES_COMPACT = `[EX] "open editor"→OS::OPEN_APP:hyperide | "make readme"→OS::WRITE_FILE:/home/user/README.md:# Title\\nContent`;
+const EXAMPLES_COMPACT = `[EX] "open editor"→open_app hyperide | "make a notes app then type hi"→build_app then use_app set #pad hi | "new OS command"→forge_skill exposeAs`;
 
 // ═══════════════════════════════════════════════════════════════
 // MEMORY COMPRESSION — Deduplicate and truncate
@@ -177,7 +189,7 @@ type ManifestTier = 'minimal' | 'standard' | 'full';
 function detectTier(query: string): ManifestTier {
   const q = query.toLowerCase();
   // If query mentions files, apps, or system operations → full context
-  if (/\b(file|folder|open|create|build|app|install|delete|move|search|terminal|code|ide|forge)\b/.test(q)) {
+  if (/\b(file|folder|open|create|build|app|install|delete|move|search|terminal|code|ide|forge|skill|command|x\.com|gba|emulator)\b/.test(q)) {
     return 'full';
   }
   // If query is about OS state, settings, or system → standard
