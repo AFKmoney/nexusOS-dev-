@@ -102,7 +102,7 @@ export const useOS = create<OSState>()(
         activeTrustTierOverride: null,
       },
       clipboard: null,
-      wallpaper: 'nexus://procedural/nebula',
+      wallpaper: 'nexus://procedural/lazysiren',
       accentColor: '#10b981',
       wallpaperEffect: 'nebula',
       wallpaperMotionStrength: 0.6,

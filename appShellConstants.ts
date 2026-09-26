@@ -1,6 +1,9 @@
+import { LAZYSIRN_WALLPAPER_HTML, LAZYSIRN_WALLPAPER_ID } from './kernel/wallpaperLazySiren';
+
 export const DESKTOP_DIR_FALLBACK_USER = 'user';
 
 export const PROCEDURAL_WALLPAPERS: Record<string, string> = {
+  [LAZYSIRN_WALLPAPER_ID]: LAZYSIRN_WALLPAPER_HTML,
   // 1. COSMIC NEBULA 3D - True Volumetric 3D Celestial Universe
   'nexus://procedural/nebula': `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;background:#020208"><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');

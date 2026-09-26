@@ -154,6 +154,7 @@ export default function SettingsApp() {
   };
 
   const WALLPAPERS = [
+    { name: 'LazySiren', id: 'nexus://procedural/lazysiren', category: 'Brand' },
     { name: 'Cosmic Nebula 3D', id: 'nexus://procedural/nebula', category: 'Deep Cosmos' },
     { name: 'Neon Grid Horizon 3D', id: 'nexus://procedural/neon-grid', category: 'Synthwave' },
     { name: 'Cyber City 3D', id: 'nexus://procedural/cyber-city', category: 'Cyberpunk' },
