@@ -1,6 +1,18 @@
-import React, { useId } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 
 type Variant = 'icon' | 'splash' | 'boot';
+
+function sinePath(phase: number) {
+  const steps = 48;
+  const pts: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const u = i / steps;
+    const y = 8 + u * 84;
+    const x = 50 + Math.sin(u * Math.PI * 2 + phase) * 16;
+    pts.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`);
+  }
+  return pts.join(' ');
+}
 
 export default function LazySirenMark({
   variant = 'icon',
@@ -11,10 +23,23 @@ export default function LazySirenMark({
 }) {
   const uid = useId().replace(/:/g, '');
   const compact = variant === 'icon';
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    let raf = 0;
+    let t = 0;
+    const tick = () => {
+      t += 0.012;
+      setPhase(t * 0.55);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   return (
     <div className={`relative flex flex-col items-center justify-center ${className}`}>
       <style>{`
-        @keyframes ls-dash { to { stroke-dashoffset: 0; } }
         @keyframes ls-glow { 0%,100% { box-shadow: 0 0 0 1px rgba(16,185,129,.18), 0 0 40px rgba(16,185,129,.12); } 50% { box-shadow: 0 0 0 1px rgba(16,185,129,.4), 0 0 64px rgba(16,185,129,.28); } }
       `}</style>
 
@@ -36,16 +61,11 @@ export default function LazySirenMark({
             </linearGradient>
           </defs>
           <path
-            d="M62 14 C78 22 78 40 58 48 C36 56 36 70 54 78 C68 84 72 90 64 94"
+            d={sinePath(phase)}
             stroke={`url(#ls-${uid})`}
             strokeWidth="4.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{
-              strokeDasharray: 240,
-              strokeDashoffset: 240,
-              animation: 'ls-dash 1.4s ease-out forwards',
-            }}
           />
         </svg>
       </div>
