@@ -26,7 +26,7 @@ export default function ImageViewer({ windowId }: { windowId: string }) {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col font-sans overflow-hidden">
       {/* Header / Controls */}
-      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10">
+      <div className="min-h-12 sm:h-16 px-3 sm:px-6 py-2 border-b border-white/5 flex flex-wrap items-center justify-between gap-2 bg-black/40 backdrop-blur-xl shrink-0 z-10">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-accent/20 rounded-lg text-accent">
             <Image size={20} />
@@ -52,7 +52,7 @@ export default function ImageViewer({ windowId }: { windowId: string }) {
       </div>
 
       {/* Viewport */}
-      <div className="flex-1 relative flex items-center justify-center bg-black/60 p-10 group">
+      <div className="flex-1 relative flex items-center justify-center bg-black/60 p-2 sm:p-10 group">
         {activeImage ? (
           <>
             <div 
@@ -70,10 +70,10 @@ export default function ImageViewer({ windowId }: { windowId: string }) {
             {/* Navigation Overlays */}
             {images.length > 1 && (
               <>
-                <button onClick={prevImg} className="absolute left-6 p-4 rounded-full bg-black/40 border border-white/5 text-white opacity-0 group-hover:opacity-100 hover:bg-black/60 transition-all shadow-2xl active:scale-90">
+                <button onClick={prevImg} className="absolute left-2 sm:left-6 p-3 sm:p-4 rounded-full bg-black/40 border border-white/5 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-black/60 transition-all shadow-2xl active:scale-90">
                   <ChevronLeft size={32} />
                 </button>
-                <button onClick={nextImg} className="absolute right-6 p-4 rounded-full bg-black/40 border border-white/5 text-white opacity-0 group-hover:opacity-100 hover:bg-black/60 transition-all shadow-2xl active:scale-90">
+                <button onClick={nextImg} className="absolute right-2 sm:right-6 p-3 sm:p-4 rounded-full bg-black/40 border border-white/5 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-black/60 transition-all shadow-2xl active:scale-90">
                   <ChevronRight size={32} />
                 </button>
               </>

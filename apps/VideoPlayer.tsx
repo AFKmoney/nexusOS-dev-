@@ -66,7 +66,7 @@ export default function VideoPlayer() {
       </div>
 
       {/* Controls Bar */}
-      <div className="h-20 bg-gradient-to-t from-black to-black/40 px-4 sm:px-6 flex flex-col justify-center gap-2 shrink-0 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="h-20 bg-gradient-to-t from-black to-black/40 px-4 sm:px-6 flex flex-col justify-center gap-2 shrink-0 border-t border-white/5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
         
         {/* Progress Slider */}
         <input 
@@ -103,7 +103,7 @@ export default function VideoPlayer() {
       </div>
 
       {/* Floating Info Overlay */}
-      <div className="absolute top-6 left-6 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
         <div className="p-2 bg-black/60 backdrop-blur-md rounded-lg border border-white/10">
           <MonitorPlay size={16} className="text-accent" />
         </div>

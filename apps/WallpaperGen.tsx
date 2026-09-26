@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useOS } from '../store/osStore';
+import { useMobileDetection } from '../hooks/useMobileDetection';
 import { vfs, SYSTEM_VFS_APP_ID } from '../kernel/fileSystem';
 import { aiService } from '../services/puterService';
 import { Paintbrush, Loader2, Check, Wand2, Sparkles, Dices, Zap, Star, Trash2 } from 'lucide-react';
@@ -71,13 +72,16 @@ function WallpaperPreview({ code, preview, isHovered }: { code: string; preview:
 }
 
 export default function WallpaperApp() {
-  const { setWallpaper, kernelRules, addNotification, wallpaper: currentWallpaper } = useOS();
+  const { setWallpaper, kernelRules, addNotification, wallpaper: currentWallpaper, isMobileView } = useOS();
+  const { isMobile: detectedMobile } = useMobileDetection();
+  const isMobile = isMobileView || detectedMobile;
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [userWallpapers, setUserWallpapers] = useState<any[]>([]);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [showForge, setShowForge] = useState(false);
 
   const categories = ['All', 'Neural', 'Space', 'Cyberpunk', 'Hacker', 'Abstract', 'Interactive', 'Custom'];
 
@@ -192,26 +196,37 @@ export default function WallpaperApp() {
   return (
     <div className="h-full bg-[#050508] text-white flex flex-col overflow-hidden font-sans">
       {/* Compact Header */}
-      <div className="px-5 py-3 border-b border-white/5 shrink-0 bg-gradient-to-b from-white/5 to-transparent flex items-center gap-3">
+      <div className={`px-4 sm:px-5 py-2.5 sm:py-3 border-b border-white/5 shrink-0 bg-gradient-to-b from-white/5 to-transparent flex items-center gap-3`}>
         <div className="p-2 bg-accent/15 rounded-xl text-accent border border-accent/20">
           <Paintbrush size={18} />
         </div>
         <div className="flex-1">
           <h1 className="text-sm font-black uppercase tracking-[0.2em]">Wallpaper Engine</h1>
-          <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-widest">AI Wallpaper Generator · {allPresets.length} presets</p>
+          <p className="text-zinc-500 text-[10px] font-mono uppercase tracking-widest">
+            {isMobile ? 'Tap preview · tap again to apply' : `AI Wallpaper Generator · ${allPresets.length} presets`}
+          </p>
         </div>
+        {isMobile && (
+          <button
+            type="button"
+            onClick={() => setShowForge((v) => !v)}
+            className={`h-9 px-3 rounded-xl text-[10px] font-black uppercase tracking-widest border ${showForge ? 'bg-accent text-black border-accent' : 'bg-white/5 border-white/10 text-zinc-300'}`}
+          >
+            <span className="inline-flex items-center gap-1"><Sparkles size={12} /> Forge</span>
+          </button>
+        )}
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
         {/* Left: Wallpaper Grid */}
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/20 min-h-0">
           {/* Category bar */}
-          <div className="sticky top-0 z-10 bg-[#050508]/95 backdrop-blur-sm px-5 py-3 border-b border-white/5 flex items-center justify-between gap-3">
+          <div className="sticky top-0 z-10 bg-[#050508]/95 backdrop-blur-sm px-3 sm:px-5 py-2.5 sm:py-3 border-b border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-2 text-accent shrink-0">
               <Zap size={14} />
               <span className="text-[10px] font-black uppercase tracking-[0.25em]">{filtered.length} Wallpapers</span>
             </div>
-            <div className="flex gap-1 overflow-x-auto custom-scrollbar">
+            <div className="flex gap-1 overflow-x-auto no-scrollbar">
               {categories.map(cat => (
                 <button
                   key={cat}
@@ -229,22 +244,29 @@ export default function WallpaperApp() {
 
           {/* Grid */}
           <div className="p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className={`grid gap-2.5 sm:gap-3 ${isMobile ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'}`}>
               {filtered.map(preset => {
                 const isActive = currentWallpaper === preset.code;
                 return (
                   <button
                     key={preset.id}
-                    onClick={() => setWallpaper(preset.code)}
-                    onMouseEnter={() => setHoveredId(preset.id)}
-                    onMouseLeave={() => setHoveredId(null)}
+                    onClick={() => {
+                      if (isMobile) {
+                        if (hoveredId === preset.id) setWallpaper(preset.code);
+                        else setHoveredId(preset.id);
+                      } else {
+                        setWallpaper(preset.code);
+                      }
+                    }}
+                    onMouseEnter={() => !isMobile && setHoveredId(preset.id)}
+                    onMouseLeave={() => !isMobile && setHoveredId(null)}
                     className={`group relative rounded-xl overflow-hidden border transition-colors text-left ${isActive
                       ? 'border-accent ring-2 ring-accent/30'
                       : 'border-white/5 hover:border-white/20'
                     }`}
                   >
                     {/* Preview thumbnail — 16:9 aspect ratio */}
-                    <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16 / 9' }}>
+                    <div className="relative w-full overflow-hidden" style={{ aspectRatio: isMobile ? '9 / 14' : '16 / 9' }}>
                       <WallpaperPreview code={preset.code} preview={preset.preview} isHovered={hoveredId === preset.id} />
 
                       {/* LIVE badge */}
@@ -263,7 +285,7 @@ export default function WallpaperApp() {
                       {preset.category === 'Custom' && (
                         <button
                           onClick={(e) => deleteWallpaper(e, preset.code)}
-                          className="absolute top-2 left-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                          className={`absolute top-2 left-2 p-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg transition-opacity z-20 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                           title="Delete"
                         >
                           <Trash2 size={12} />
@@ -291,7 +313,7 @@ export default function WallpaperApp() {
         </div>
 
         {/* Right: AI Generator Panel */}
-        <div className="w-full md:w-72 border-t md:border-t-0 md:border-l border-white/5 bg-[#030305] flex flex-col shrink-0 max-h-[46%] md:max-h-none">
+        <div className={`w-full md:w-72 border-t md:border-t-0 md:border-l border-white/5 bg-[#030305] flex flex-col shrink-0 ${isMobile ? (showForge ? 'max-h-[42%]' : 'hidden') : 'max-h-none'}`}>
           <div className="p-4 border-b border-white/5">
             <div className="flex items-center gap-2 text-accent">
               <Sparkles size={16} />
@@ -342,7 +364,7 @@ export default function WallpaperApp() {
                   <Star size={10} /> System Capabilities
                 </div>
                 <div className="text-[10px] text-zinc-500 leading-relaxed">
-                  Generates real-time HTML5/Canvas wallpapers. Hover a card to preview. All wallpapers are saved to the VFS and persist across reboots.
+                  Generates live HTML5/Canvas wallpapers. {isMobile ? 'Tap a card to preview, tap again to apply.' : 'Hover a card to preview.'} Saved to VFS.
                 </div>
               </div>
             </div>

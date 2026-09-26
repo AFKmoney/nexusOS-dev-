@@ -118,7 +118,7 @@ export const MobileHomeScreen: React.FC<MobileHomeScreenProps> = ({ onOpenApp })
 
   return (
     <div
-      className="absolute inset-0 pt-11 pb-20 px-3.5 flex flex-col overflow-y-auto no-scrollbar select-none z-10"
+      className="absolute inset-0 pt-11 pb-3 px-3.5 flex flex-col overflow-hidden select-none z-10"
       style={{
         transform: `translate3d(${iconOffsetX * 0.7}px, ${iconOffsetY * 0.7}px, 0)`,
         transition: 'transform 0.08s ease-out',
@@ -201,7 +201,7 @@ export const MobileHomeScreen: React.FC<MobileHomeScreenProps> = ({ onOpenApp })
       )}
 
       {/* 4. Mobile Apps Grid */}
-      <div className="flex-1 min-h-[220px]">
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
         {filteredApps.length === 0 ? (
           <div className="py-12 flex flex-col items-center justify-center text-center">
             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 mb-2">
