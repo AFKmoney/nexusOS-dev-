@@ -152,8 +152,8 @@ export const PROVIDER_PRESETS: Omit<AIProvider, 'apiKey' | 'enabled'>[] = [
     name: 'Zhipu AI (GLM)',
     type: 'openai-compatible',
     baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-    defaultModel: 'glm-4-plus',
-    models: ['glm-4-plus', 'glm-4-air', 'glm-4-airx', 'glm-4-flash', 'glm-4-flashx', 'glm-4-long', 'glm-4', 'glm-4v-plus', 'glm-4v', 'codegeex-4'],
+    defaultModel: 'glm-5.3-flash',
+    models: ['glm-5.3-flash', 'glm-5.3-flashx', 'glm-5.3', 'glm-4-plus', 'glm-4-air', 'glm-4-flash', 'glm-4'],
     maxTokens: 4096,
   },
   {
@@ -281,23 +281,19 @@ export const PROVIDER_PRESETS: Omit<AIProvider, 'apiKey' | 'enabled'>[] = [
   },
   {
     id: 'z-ai',
-    name: 'Z.AI Coding Plan',
+    name: 'Z.ai',
     type: 'openai-compatible',
-    baseUrl: 'https://api.z-ai.org/v1',
-    defaultModel: 'zai-org/GLM-5.1',
+    baseUrl: 'https://api.z.ai/api/paas/v4',
+    defaultModel: 'glm-5.3-flash',
     models: [
-      'zai-org/GLM-5',
-      'zai-org/GLM-5-Coding',
-      'zai-org/GLM-5-Turbo',
-      'zai-org/GLM-5-Turbo-Coding',
-      'zai-org/GLM-5.1',
-      'zai-org/GLM-5.1-Coding',
-      'zai-org/GLM-5.1-Turbo',
-      'zai-org/GLM-5.1-Turbo-Coding',
-      'zai-org/GLM-5.2',
-      'zai-org/GLM-5.2-Coding',
-      'zai-org/GLM-5.2-Turbo',
-      'zai-org/GLM-5.2-Turbo-Coding',
+      'glm-5.3-flash',
+      'glm-5.3-flashx',
+      'glm-5.3',
+      'glm-5.2',
+      'glm-4.7',
+      'glm-4.6',
+      'glm-4.5',
+      'glm-4.5-flash',
     ],
     maxTokens: 32768,
   },
@@ -435,6 +431,23 @@ export class AIProviderGateway {
       const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(PROVIDERS_STORAGE_KEY) : null;
       if (raw) {
         this.providers = JSON.parse(raw);
+
+        // Official Z.ai (GLM-5.3-Flash). Old preset pointed at api.z-ai.org which does not resolve.
+        const zaiPreset = PROVIDER_PRESETS.find(p => p.id === 'z-ai');
+        if (zaiPreset) {
+          const zai = this.providers.find(p => p.id === 'z-ai');
+          if (!zai) {
+            this.providers.push({ ...zaiPreset, apiKey: '', enabled: false });
+          } else {
+            zai.name = zaiPreset.name;
+            zai.baseUrl = zaiPreset.baseUrl;
+            zai.models = zaiPreset.models;
+            if (!zai.defaultModel || zai.defaultModel.startsWith('zai-org/') || zai.defaultModel === 'glm-4-plus') {
+              zai.defaultModel = 'glm-5.3-flash';
+            }
+          }
+          this.saveProviders();
+        }
 
         // Ensure NVIDIA NIM provider is updated with valid endpoint & active model
         const nvidia = this.providers.find(p => p.id === 'nvidia');
