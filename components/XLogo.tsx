@@ -4,7 +4,7 @@ type IconProps = {
   size?: number | string;
   className?: string;
   color?: string;
-  style?: React.CSSProperties;
+  style?: object;
 };
 
 export const XLogo = forwardRef<SVGSVGElement, IconProps>(function XLogo(
