@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useOS } from '../store/osStore';
 import {
   Sparkles, Copy, ClipboardPaste, Scissors, Maximize2,
@@ -49,36 +50,32 @@ export default function ContextMenu() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useLayoutEffect(() => {
-    if (contextMenu.isOpen && menuRef.current) {
-        const { innerWidth, innerHeight } = window;
-        const { width, height } = menuRef.current.getBoundingClientRect();
-        let { x, y } = contextMenu;
-        
-        // Edge Collision Detection
-        if (x + width > innerWidth) x = Math.max(8, innerWidth - width - 8);
-        if (y + height > innerHeight) y = Math.max(8, innerHeight - height - 8);
-        if (x < 8) x = 8;
-        if (y < 8) y = 8;
-
-        setPosition({ x, y });
-    }
-  }, [contextMenu.isOpen, contextMenu.x, contextMenu.y]);
+    if (!contextMenu.isOpen || !menuRef.current) return;
+    const pad = 8;
+    const { innerWidth, innerHeight } = window;
+    const { width, height } = menuRef.current.getBoundingClientRect();
+    let x = contextMenu.x;
+    let y = contextMenu.y;
+    if (x + width > innerWidth - pad) x = Math.max(pad, innerWidth - width - pad);
+    if (y + height > innerHeight - pad) y = Math.max(pad, innerHeight - height - pad);
+    if (x < pad) x = pad;
+    if (y < pad) y = pad;
+    setPosition({ x, y });
+  }, [contextMenu.isOpen, contextMenu.x, contextMenu.y, isMobile]);
 
   useEffect(() => {
     if (!contextMenu.isOpen) return;
-    const handleOutside = (e: Event) => {
-      const node = e.target as Node | null;
-      if (menuRef.current && node && menuRef.current.contains(node)) return;
+    const handleOutside = (e: PointerEvent) => {
+      const path = e.composedPath();
+      if (menuRef.current && path.includes(menuRef.current)) return;
       closeContextMenu();
     };
     const timer = window.setTimeout(() => {
-      window.addEventListener('mousedown', handleOutside);
-      window.addEventListener('touchstart', handleOutside, { passive: true });
-    }, 350);
+      document.addEventListener('pointerdown', handleOutside);
+    }, 200);
     return () => {
       window.clearTimeout(timer);
-      window.removeEventListener('mousedown', handleOutside);
-      window.removeEventListener('touchstart', handleOutside);
+      document.removeEventListener('pointerdown', handleOutside);
     };
   }, [contextMenu.isOpen, closeContextMenu]);
 
@@ -554,7 +551,7 @@ export default function ContextMenu() {
             <Icon size={18} /> 
             <span>{label}</span>
         </div>
-        {shortcut && <span className="text-xs text-zinc-600 font-mono">{shortcut}</span>}
+        {shortcut && !isMobile && <span className="text-xs text-zinc-600 font-mono">{shortcut}</span>}
     </button>
   );
 
@@ -577,15 +574,17 @@ export default function ContextMenu() {
      <div className="px-3 py-1.5 text-xs font-bold text-zinc-600 uppercase tracking-widest mt-1">{label}</div>
   );
 
-  return (
+  return createPortal(
     <div 
       ref={menuRef}
-      className={`context-menu fixed z-[9999] pointer-events-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5 ${
-        isMobile
-          ? 'inset-x-2 bottom-16 top-auto max-h-[70vh] w-auto min-w-0 rounded-2xl overflow-y-auto'
-          : 'min-w-[240px] max-h-[min(80vh,640px)] overflow-y-auto rounded-lg'
-      }`}
-      style={isMobile ? undefined : { left: position.x, top: position.y }}
+      className="context-menu fixed z-[2147483000] pointer-events-auto bg-[#111113]/98 backdrop-blur-xl border border-white/12 shadow-[0_12px_40px_rgba(0,0,0,0.65)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5 rounded-xl overflow-y-auto"
+      style={{
+        left: position.x,
+        top: position.y,
+        width: isMobile ? 228 : 252,
+        maxHeight: isMobile ? '46vh' : 'min(72vh, 560px)',
+      }}
+      onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
@@ -913,6 +912,7 @@ export default function ContextMenu() {
             </>
         )}
 
-    </div>
+    </div>,
+    document.body
   );
 }
