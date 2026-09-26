@@ -228,17 +228,6 @@ export default function StartMenu() {
                   key={app.id}
                   onClick={() => { openWindow(app.id); toggleStartMenu(); }}
                   onContextMenu={(e) => handleAppRightClick(e, app.id)}
-                  onTouchStart={(e) => {
-                    const t = e.touches[0];
-                    const x = t?.clientX ?? 0;
-                    const y = t?.clientY ?? 0;
-                    const handle = window.setTimeout(() => {
-                      openContextMenu({ isOpen: true, x, y, targetType: 'app-icon', appId: app.id });
-                    }, 480);
-                    const cancel = () => window.clearTimeout(handle);
-                    e.currentTarget.addEventListener('touchend', cancel, { once: true });
-                    e.currentTarget.addEventListener('touchmove', cancel, { once: true });
-                  }}
                   title={`${app.name}`}
                   className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-colors group hover:bg-white/10 active:bg-white/15 border border-transparent hover:border-white/10"
                 >

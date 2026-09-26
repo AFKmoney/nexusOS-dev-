@@ -1,5 +1,4 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useOS } from '../store/osStore';
 import {
   Sparkles, Copy, ClipboardPaste, Scissors, Maximize2,
@@ -50,33 +49,31 @@ export default function ContextMenu() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useLayoutEffect(() => {
-    if (!contextMenu.isOpen || !menuRef.current) return;
-    const pad = 8;
-    const { innerWidth, innerHeight } = window;
-    const { width, height } = menuRef.current.getBoundingClientRect();
-    let x = contextMenu.x;
-    let y = contextMenu.y;
-    if (x + width > innerWidth - pad) x = Math.max(pad, innerWidth - width - pad);
-    if (y + height > innerHeight - pad) y = Math.max(pad, innerHeight - height - pad);
-    if (x < pad) x = pad;
-    if (y < pad) y = pad;
-    setPosition({ x, y });
-  }, [contextMenu.isOpen, contextMenu.x, contextMenu.y, isMobile]);
+    if (contextMenu.isOpen && menuRef.current) {
+        const { innerWidth, innerHeight } = window;
+        const { width, height } = menuRef.current.getBoundingClientRect();
+        let { x, y } = contextMenu;
+        
+        // Edge Collision Detection
+        if (x + width > innerWidth) x = Math.max(8, innerWidth - width - 8);
+        if (y + height > innerHeight) y = Math.max(8, innerHeight - height - 8);
+        if (x < 8) x = 8;
+        if (y < 8) y = 8;
+
+        setPosition({ x, y });
+    }
+  }, [contextMenu.isOpen, contextMenu.x, contextMenu.y]);
 
   useEffect(() => {
-    if (!contextMenu.isOpen) return;
-    const handleOutside = (e: PointerEvent) => {
-      const path = e.composedPath();
-      if (menuRef.current && path.includes(menuRef.current)) return;
-      closeContextMenu();
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        closeContextMenu();
+      }
     };
-    const timer = window.setTimeout(() => {
-      document.addEventListener('pointerdown', handleOutside);
-    }, 200);
-    return () => {
-      window.clearTimeout(timer);
-      document.removeEventListener('pointerdown', handleOutside);
-    };
+    if (contextMenu.isOpen) {
+      window.addEventListener('mousedown', handleClick);
+    }
+    return () => window.removeEventListener('mousedown', handleClick);
   }, [contextMenu.isOpen, closeContextMenu]);
 
   if (!contextMenu.isOpen) return null;
@@ -528,21 +525,11 @@ export default function ContextMenu() {
 
   const Separator = () => <div className="h-px bg-white/10 my-1 mx-2" />;
   
-  const runItem = (e: React.SyntheticEvent, fn: () => void | Promise<void>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    void fn();
-  };
-
   const MenuItem = ({ icon: Icon, label, onClick, danger = false, disabled = false, shortcut }: MenuItemProps) => (
     <button 
-        type="button"
-        onPointerDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-        onClick={(e) => { if (!disabled) runItem(e, onClick); }}
+        onClick={onClick} 
         disabled={disabled}
-        className={`w-full flex items-center justify-between px-3 ${isMobile ? 'py-3' : 'py-1.5'} text-[13px] text-left transition-colors
+        className={`w-full flex items-center justify-between px-3 py-1.5 text-[13px] text-left transition-colors
         ${danger ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
@@ -551,17 +538,13 @@ export default function ContextMenu() {
             <Icon size={18} /> 
             <span>{label}</span>
         </div>
-        {shortcut && !isMobile && <span className="text-xs text-zinc-600 font-mono">{shortcut}</span>}
+        {shortcut && <span className="text-xs text-zinc-600 font-mono">{shortcut}</span>}
     </button>
   );
 
   const NeuralItem = ({ icon: Icon, label, onClick }: NeuralItemProps) => (
       <button 
-        type="button"
-        onPointerDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-        onClick={(e) => runItem(e, onClick)}
+        onClick={onClick}
         className="w-full flex items-center gap-3 px-3 py-1.5 text-[13px] text-left transition-colors text-purple-200 hover:bg-purple-500/20 hover:text-white group relative overflow-hidden"
       >
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -574,19 +557,11 @@ export default function ContextMenu() {
      <div className="px-3 py-1.5 text-xs font-bold text-zinc-600 uppercase tracking-widest mt-1">{label}</div>
   );
 
-  return createPortal(
+  return (
     <div 
       ref={menuRef}
-      className="context-menu fixed z-[2147483000] pointer-events-auto bg-[#111113]/98 backdrop-blur-xl border border-white/12 shadow-[0_12px_40px_rgba(0,0,0,0.65)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5 rounded-xl overflow-y-auto"
-      style={{
-        left: position.x,
-        top: position.y,
-        width: isMobile ? 228 : 252,
-        maxHeight: isMobile ? '46vh' : 'min(72vh, 560px)',
-      }}
-      onPointerDown={(e) => e.stopPropagation()}
-      onClick={(e) => e.stopPropagation()}
-      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+      className="fixed z-[9999] min-w-[240px] bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5"
+      style={{ left: position.x, top: position.y }}
     >
         {/* Hidden File Input for Custom Icons */}
         <input 
@@ -912,7 +887,6 @@ export default function ContextMenu() {
             </>
         )}
 
-    </div>,
-    document.body
+    </div>
   );
 }
