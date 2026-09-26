@@ -183,7 +183,7 @@ export default function AutonomousBusinessEngine() {
       </div>
 
       {/* ── METRICS STRIP ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-2.5 p-4 bg-black/20 border-b border-white/5 shrink-0">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-4 bg-black/20 border-b border-white/5 shrink-0">
         <div className="bg-white/5 border border-white/5 p-3 rounded-xl flex items-center justify-between">
           <div>
             <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Revenue Generated</div>

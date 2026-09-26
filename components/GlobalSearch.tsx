@@ -69,11 +69,11 @@ export default function GlobalSearch() {
   if (!isSearchOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={toggleSearch} />
 
-      <div className="relative w-full max-w-2xl bg-black/80 border border-white/20 rounded-2xl shadow-2xl flex flex-col font-sans overflow-hidden" 
+      <div className="relative w-full max-w-2xl bg-black/80 border border-white/20 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col font-sans overflow-hidden max-h-[85vh] sm:max-h-none" 
            style={{ boxShadow: '0 0 50px rgba(16, 185, 129, 0.1)' }}>
         
         {/* Search Bar */}
@@ -91,7 +91,7 @@ export default function GlobalSearch() {
               }
             }}
             placeholder="Search VFS, Host, or type / to command DAEMON..."
-            className={`flex-1 bg-transparent border-none outline-none text-xl font-light placeholder-white/30 ${isCommandMode ? 'text-accent font-mono tracking-widest' : 'text-white'}`}
+            className={`flex-1 bg-transparent border-none outline-none text-base sm:text-xl font-light placeholder-white/30 ${isCommandMode ? 'text-accent font-mono tracking-widest' : 'text-white'}`}
           />
           {query && <button onClick={() => setQuery('')} className="p-1 rounded hover:bg-white/10 text-white/50"><X size={20}/></button>}
         </div>

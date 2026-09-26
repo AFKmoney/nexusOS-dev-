@@ -137,7 +137,7 @@ export default function NotepadApp({ windowId }: { windowId: string }) {
             <File size={12} className={activeTabId === tab.id ? 'text-accent' : 'text-zinc-600'} />
             <span className="text-xs truncate flex-1">{tab.path.split('/').pop() || 'Untitled'}</span>
             {tab.content !== tab.savedContent && <div className="w-1.5 h-1.5 rounded-full bg-accent" />}
-            <button onClick={(e) => closeTab(e, tab.id)} className={`p-0.5 rounded-md hover:bg-white/10 ${activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            <button onClick={(e) => closeTab(e, tab.id)} className="p-0.5 rounded-md hover:bg-white/10 opacity-100">
               <X size={10} />
             </button>
           </div>
@@ -181,7 +181,7 @@ export default function NotepadApp({ windowId }: { windowId: string }) {
       {/* Editor Area */}
       <div className="flex-1 flex overflow-hidden bg-[#0A0A0C]">
         {/* Line Numbers Gutter */}
-        <div ref={linesRef} className="w-10 bg-zinc-900/50 border-r border-white/5 text-right pr-2 py-4 text-xs font-mono text-zinc-600 overflow-hidden select-none shrink-0" style={{ lineHeight: '1.5' }}>
+        <div ref={linesRef} className="hidden sm:block w-10 bg-zinc-900/50 border-r border-white/5 text-right pr-2 py-4 text-xs font-mono text-zinc-600 overflow-hidden select-none shrink-0" style={{ lineHeight: '1.5' }}>
           {Array.from({ length: linesCount }, (_, i) => (
             <div key={i}>{i + 1}</div>
           ))}

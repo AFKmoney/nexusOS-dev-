@@ -137,7 +137,7 @@ export default function DashboardApp() {
 
       <div className="flex-1 p-3 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar">
         {/* ── Top Stats Grid ────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           {[
             { label: 'Apps', value: registry.length, icon: Box, color: 'text-accent', bg: 'bg-accent/10' },
             { label: 'Windows', value: windows.length, icon: Monitor, color: 'text-accent', bg: 'bg-accent/10' },
