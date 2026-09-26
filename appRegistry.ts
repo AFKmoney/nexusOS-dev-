@@ -54,6 +54,7 @@ const GovernanceDashboardApp = lazy(() => import('./apps/GovernanceDashboard'));
 const PluginMarketApp = lazy(() => import('./apps/PluginMarket'));
 const AutonomousBusinessEngineApp = lazy(() => import('./apps/AutonomousBusinessEngine'));
 const GbaEmulatorApp = lazy(() => import('./apps/GbaEmulator'));
+const XApp = lazy(() => import('./apps/XApp'));
 import { XLogo } from './components/XLogo';
 
 import {
