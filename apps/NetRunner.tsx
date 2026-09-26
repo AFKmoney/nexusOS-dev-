@@ -22,6 +22,7 @@ import { aiService } from '../services/puterService';
 import DOMPurify from 'dompurify';
 import WebRunnerApp from './WebRunner';
 import { browserBridge, type BrowserState } from '../kernel/browserBridge';
+import { eventBus } from '../kernel/eventBus';
 
 const QUICK_LINKS = [
   { icon: '🔍', label: 'Google', url: 'https://www.google.com' },
@@ -64,6 +65,10 @@ export default function NetRunnerApp({ windowId }: { windowId: string }) {
     chatScrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMsgs]);
 
+  useEffect(() => {
+    return eventBus.on('browser:prefer-chromium', () => setMode('chromium'));
+  }, []);
+
   // ─── Browser bridge registration (AI mode only) ───────────────────
   // When NetRunner is in AI mode, it is the active browser surface.
   // When in Chromium mode, the embedded WebRunner registers itself.
@@ -101,10 +106,9 @@ export default function NetRunnerApp({ windowId }: { windowId: string }) {
           case 'click':
           case 'input':
           case 'scroll':
+            browserBridge.enqueue(cmd);
             setMode('chromium');
-            // Wait for mode switch to take effect, then let WebRunner
-            // handle the command when it registers.
-            return `Switched to Chromium mode for ${cmd.kind}. Retry the command.`;
+            return `Switched NetRunner to Chromium and queued ${cmd.kind}.`;
           case 'extract':
             return {
               url,

@@ -15,34 +15,20 @@ export { bindOsStore };
 type ChatMode = 'chat' | 'coder' | 'json' | 'raw' | 'architect' | 'analyst' | 'debugger' | 'executor' | 'forge' | 'ide' | 'wallpaper';
 
 // ─── COMPRESSED PERSONAS (~60% fewer tokens than v1) ─────────
-const NEXUS_PRIME_DNA = `You are NEXUS.PRIME, the central AI operating system of NexusOS.
-Root access. High intelligence, concise, precise, empowering.
+const NEXUS_PRIME_DNA = `You are NEXUS.PRIME, the AI kernel of NexusOS. Full control of the OS and NetRunner.
 
-CONVERSATION VS. SYSTEM ACTIONS:
-- GREETINGS & CASUAL CHAT: When the user greets (e.g. "hi", "bonjour", "salut", "hello", "hey"), asks casual questions, or converses, respond directly, fluidly, and naturally in plain text. DO NOT emit any OS:: commands. DO NOT call any skills.
-- OS ACTIONS: ONLY execute actions via the OS:: protocol on their own line when the user EXPLICITLY requests an OS operation:
-OS::OPEN_APP:<appId>
-OS::CLOSE_APP:<appId>
-OS::WRITE_FILE:<path>:<content>
-OS::READ_FILE:<path>
-OS::DELETE_FILE:<path>
-OS::LIST_DIR:<path>
-OS::BUILD_APP:<description>
-OS::NOTIFY:<title>:<message>
-OS::RUN_COMMAND:<cmd>
-OS::EXECUTE_JS:<code>
-OS::SET_WALLPAPER:<id>
-OS::SET_THEME:<theme>
-OS::SET_ACCENT:<hexColor>
+CONVERSATION VS ACTIONS:
+- Greetings and small talk: reply in plain text. No tools.
+- Anything the user wants DONE in the OS or on the web: CALL native function tools. Do not ask permission. Do not wait.
+- Prefer function tools over OS:: text. OS:: lines are fallback only.
 
-When asked to create an app from chat, emit OS::BUILD_APP:<description>. Never invent fake action syntax.`;
+YOU CAN: open/close/focus any app, read/write/move VFS files, notify, wallpaper/theme, clipboard, screenshot, GBA, git, skills, autopilot, spawn agents, browse the web.
+NETRUNNER: browse_navigate opens the browser if needed. Then browse_extract, browse_click, browse_input, browse_scroll, browse_state. After a navigate, extract before clicking.
 
-const DAEMON_DNA = `You are DAEMON, the high-performance AI engine of NexusOS. Max info density per token.
-Direct, analytical, adaptive. Match user expertise.
+When asked to create an app, call build_app. Never invent fake action syntax.`;
 
-CONVERSATION VS. SYSTEM ACTIONS:
-- GREETINGS & CHAT: When the user greets (e.g. "hi", "bonjour", "salut", "hello"), asks a question, or chats, reply directly and fluidly with a clear answer. DO NOT trigger OS:: commands or skills.
-- OS ACTIONS: ONLY emit OS:: commands on their own lines when the user explicitly asks to control the OS, build an app, manipulate files, or run system tasks.`;
+const DAEMON_DNA = `You are DAEMON, the action engine of NexusOS. Dense, precise, full OS + NetRunner control via native function tools.
+Small talk = plain text. Tasks = tools immediately. Prefer tools over OS:: text.`;
 
 const EXECUTOR_DNA = `You are EXECUTOR, the autonomous action core of NexusOS. You produce commands — never explanations. Every response MUST contain at least one concrete command. No reflection. No prose. No analysis. Commands only.`;
 
@@ -272,8 +258,20 @@ export class PuterService {
 
         let result = response;
         if (toolCalls.length > 0) {
-          const toolResults = await toolForge.executeToolCalls(toolCalls);
-          result = result ? (result + '\n' + toolResults) : toolResults;
+          const MAX_TOOL_ROUNDS = 8;
+          let roundCalls = toolCalls;
+          let follow = contextualPrompt;
+          const traces: string[] = [];
+          for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+            const toolResults = await toolForge.executeToolCalls(roundCalls);
+            traces.push(toolResults);
+            follow = `${contextualPrompt}\n\n[TOOL RESULTS]\n${traces.join('\n')}\n\nContinue. Call more tools if the task is incomplete. If done, reply with a short status only.`;
+            const next = await aiGateway.generateWithTools(fullSystemPrompt, follow, tools);
+            if (next.text) traces.push(next.text);
+            if (!next.toolCalls.length) break;
+            roundCalls = next.toolCalls;
+          }
+          result = result ? `${result}\n${traces.join('\n')}` : traces.join('\n');
         } else {
           // No tool calls — fall back to text parsing for backward
           // compat. Some providers may still emit OS:: lines even when

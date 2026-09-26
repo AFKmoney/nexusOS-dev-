@@ -28,6 +28,7 @@
 
 import { eventBus } from './eventBus';
 import { kernelLog } from './log';
+import { useOS } from '../store/osStore';
 
 export interface BrowserState {
   url: string;
@@ -69,6 +70,47 @@ interface BrowserSurface {
 class BrowserBridge {
   private surfaces = new Map<BrowserSurfaceId, BrowserSurface>();
   private activeId: BrowserSurfaceId | null = null;
+  private pending: BrowserCommand[] = [];
+  private ensuring = false;
+
+  /** Open NetRunner if no surface is attached. Wait until one registers. */
+  async ensureReady(preferChromium = false): Promise<boolean> {
+    if (preferChromium) eventBus.emit('browser:prefer-chromium');
+    if (this.activeId) return true;
+    if (this.ensuring) {
+      const deadline = Date.now() + 5000;
+      while (!this.activeId && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 80));
+      }
+      return !!this.activeId;
+    }
+    this.ensuring = true;
+    try {
+      try {
+        useOS.getState().openWindow('netrunner');
+      } catch (e) {
+        kernelLog.warn('[BrowserBridge] could not open NetRunner', e);
+      }
+      const deadline = Date.now() + 5000;
+      while (!this.activeId && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 80));
+      }
+      return !!this.activeId;
+    } finally {
+      this.ensuring = false;
+    }
+  }
+
+  enqueue(command: BrowserCommand): void {
+    this.pending.push(command);
+  }
+
+  private flushPending(): void {
+    if (!this.pending.length || !this.activeId) return;
+    const queued = this.pending.splice(0);
+    void Promise.allSettled(queued.map((cmd) => this.dispatch(cmd)));
+  }
+
   private currentState: BrowserState = {
     url: '',
     title: '',
@@ -85,6 +127,7 @@ class BrowserBridge {
     this.currentState = surface.getState();
     eventBus.emit('browser:surface-changed', { activeId: surface.id, count: this.surfaces.size });
     kernelLog.info(`[BrowserBridge] surface registered: ${surface.id} (active)`);
+    this.flushPending();
 
     return () => this.unregister(surface.id);
   }
@@ -121,13 +164,17 @@ class BrowserBridge {
 
   /** Dispatch a command to the active surface. Returns its result. */
   async dispatch(command: BrowserCommand): Promise<unknown> {
-    if (!this.activeId) {
-      const err = 'No active browser surface. Open NetRunner first.';
-      kernelLog.warn(`[BrowserBridge] command rejected: ${err}`);
+    const needsDom = command.kind === 'click' || command.kind === 'input' || command.kind === 'scroll';
+    const ready = await this.ensureReady(needsDom);
+    if (!ready || !this.activeId) {
+      this.enqueue(command);
+      const err = 'No active browser surface yet — queued for NetRunner.';
+      kernelLog.warn(`[BrowserBridge] ${err}`);
       throw new Error(err);
     }
     const surface = this.surfaces.get(this.activeId);
     if (!surface) {
+      this.enqueue(command);
       throw new Error(`Active surface ${this.activeId} not found.`);
     }
     kernelLog.info(`[BrowserBridge] dispatch ${command.kind} → ${this.activeId}`);

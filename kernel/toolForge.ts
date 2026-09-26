@@ -385,10 +385,18 @@ export class ToolForge {
 
         case 'OPEN_URL': {
           const url = clampLength(toStringArg(action.args[0]), 2_048);
-          if (this._osActionHandler) {
-            result = await this._osActionHandler({ ...action, args: [url] });
-          } else {
-            result = `[OS::OPEN_URL] → NetRunner navigating to ${url}`;
+          if (url) {
+            try {
+              const { browserBridge } = await import('./browserBridge');
+              await browserBridge.navigate(url);
+              result = `[OS::OPEN_URL] → ✅ NetRunner → ${url}`;
+            } catch (e: unknown) {
+              if (this._osActionHandler) {
+                result = await this._osActionHandler({ ...action, args: [url] });
+              } else {
+                result = `[OS::OPEN_URL] → ⚠ ${e instanceof Error ? e.message : String(e)}`;
+              }
+            }
           }
           break;
         }
