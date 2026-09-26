@@ -47,7 +47,8 @@ export default function StartMenu() {
     'All': [],
     'System': ['dashboard', 'settings', 'monitor', 'task_manager', 'clipboard', 'notifications', 'device_manager', 'recyclebin'],
     'AI & Dev': ['business_autonomy', 'hyperide', 'forge', 'daemon_chat', 'aion_agent', 'model_manager', 'nfr', 'terminal', 'ubuntu', 'snippets'],
-    'Media': ['paint', 'video_player', 'image_viewer', 'music', 'wallpaper', 'fractal'],
+    'Media': ['paint', 'video_player', 'image_viewer', 'music', 'wallpaper', 'fractal', 'gba'],
+    'Games': ['gba'],
     'Productivity': ['notepad', 'explorer', 'calculator', 'calendar', 'rich_editor', 'kanban', 'pomodoro', 'habits', 'contacts'],
     'Utilities': ['appstore', 'silence', 'native_zip', 'sticky_notes', 'vault', 'voice_recorder', 'markdown', 'rss', 'accessibility', 'screenshot', 'sysinfo', 'weather'],
   };
@@ -97,12 +98,9 @@ export default function StartMenu() {
         openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'nexus-menu' });
       }}
     >
-      {/* Mobile drag handle */}
       {isMobile && (
         <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-1 shrink-0" />
       )}
-
-      {/* Search Header */}
       <div className="px-3.5 sm:px-4 py-2.5 sm:py-3 shrink-0 border-b border-white/5 relative z-10">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" size={17} />
@@ -115,9 +113,7 @@ export default function StartMenu() {
           />
         </div>
       </div>
-
       <div className="flex-1 flex flex-col overflow-hidden relative z-10 min-h-0">
-        {/* Category Navigation */}
         <div className="px-3.5 sm:px-4 pt-2.5 pb-2 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
           {categoriesList.map(cat => (
             <button
@@ -140,8 +136,6 @@ export default function StartMenu() {
             <MonitorCog size={14} />
           </button>
         </div>
-
-        {/* Collapsible Controls */}
         {showControls && (
           <div className="px-3.5 sm:px-4 pb-2">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -161,7 +155,6 @@ export default function StartMenu() {
                   <div className="text-[10px] text-zinc-500 truncate">{wallpaperEffect === 'aurora' ? 'Aurora' : 'Cycle'}</div>
                 </div>
               </button>
-              
               <button onClick={() => setThemePreset(themePreset === 'midnight-cyan' ? 'obsidian-emerald' : 'midnight-cyan')}
                 className="flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition-colors text-left">
                 <Palette size={14} className="text-accent shrink-0" />
@@ -170,7 +163,6 @@ export default function StartMenu() {
                   <div className="text-[10px] text-zinc-500 truncate">{themePreset === 'midnight-cyan' ? 'Cyan' : 'Emerald'}</div>
                 </div>
               </button>
-
               <button onClick={() => {
                   const currentHex = useOS.getState().accentColor.toLowerCase();
                   const currentIndex = ACCENTS.findIndex(a => a.color.toLowerCase() === currentHex);
@@ -195,10 +187,7 @@ export default function StartMenu() {
             </div>
           </div>
         )}
-
-        {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar px-3.5 sm:px-4 pb-4 min-h-0">
-          {/* Recent Files */}
           {!search && activeCategory === 'All' && recentFiles.length > 0 && !isMobile && (
             <div className="mb-3.5">
               <div className="flex items-center gap-2 mb-2">
@@ -224,8 +213,6 @@ export default function StartMenu() {
               </div>
             </div>
           )}
-
-          {/* App Grid Header */}
           <div className="flex items-center gap-2 mb-2.5 mt-1">
             <div className="w-1.5 h-1.5 rounded-full bg-accent" />
             <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">
@@ -233,8 +220,6 @@ export default function StartMenu() {
             </span>
             <span className="text-[10px] text-zinc-400 font-mono ml-auto">{displayedApps.length} apps</span>
           </div>
-
-          {/* App Grid — 4 cols on mobile, 5 on desktop */}
           <div className={`grid ${isMobile ? 'grid-cols-4 gap-2.5' : 'grid-cols-5 gap-2'} pb-2`}>
             {displayedApps.map(app => {
               const Icon = app.icon;
@@ -256,7 +241,6 @@ export default function StartMenu() {
               );
             })}
           </div>
-
           {displayedApps.length === 0 && (
             <div className="col-span-full text-center py-12 flex flex-col items-center gap-2">
               <Search size={24} className="text-zinc-600" />
@@ -265,8 +249,6 @@ export default function StartMenu() {
           )}
         </div>
       </div>
-
-      {/* Footer — Profile + System Controls */}
       <div className="bg-black/60 backdrop-blur-xl px-3.5 sm:px-4 py-2.5 sm:py-3 border-t border-white/10 flex items-center justify-between shrink-0 relative z-20">
         <button
           className="flex items-center gap-2.5 sm:gap-3 hover:bg-white/5 p-1.5 sm:p-2 -ml-1 rounded-xl transition-colors group"
@@ -286,44 +268,14 @@ export default function StartMenu() {
             </span>
           </div>
         </button>
-
         <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-black/60 rounded-xl border border-white/10">
-          <button
-            onClick={() => { lockShell(); toggleStartMenu(); }}
-            className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
-            title="Lock"
-            aria-label="Lock screen"
-          >
-            <Lock size={15} />
-          </button>
-          <button
-            onClick={() => { openWindow('appstore'); toggleStartMenu(); }}
-            className="w-8 h-8 flex items-center justify-center hover:bg-accent/20 hover:text-emerald-300 rounded-lg text-zinc-400 transition-colors"
-            title="App Store"
-            aria-label="App store"
-          >
-            <Store size={15} />
-          </button>
-          <button
-            onClick={() => { logout(); toggleStartMenu(); }}
-            className="w-8 h-8 flex items-center justify-center hover:bg-amber-500/20 hover:text-amber-400 rounded-lg text-zinc-400 transition-colors"
-            title="Logout"
-            aria-label="Logout"
-          >
-            <LogOut size={15} />
-          </button>
+          <button onClick={() => { lockShell(); toggleStartMenu(); }} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors" title="Lock" aria-label="Lock screen"><Lock size={15} /></button>
+          <button onClick={() => { openWindow('appstore'); toggleStartMenu(); }} className="w-8 h-8 flex items-center justify-center hover:bg-accent/20 hover:text-emerald-300 rounded-lg text-zinc-400 transition-colors" title="App Store" aria-label="App store"><Store size={15} /></button>
+          <button onClick={() => { logout(); toggleStartMenu(); }} className="w-8 h-8 flex items-center justify-center hover:bg-amber-500/20 hover:text-amber-400 rounded-lg text-zinc-400 transition-colors" title="Logout" aria-label="Logout"><LogOut size={15} /></button>
           <div className="w-px h-5 bg-white/10 mx-0.5" />
-          <button
-            onClick={() => systemReset(false)}
-            className="w-8 h-8 flex items-center justify-center bg-red-500/10 hover:bg-red-500 hover:text-white rounded-lg text-red-400 transition-colors"
-            title="Restart"
-            aria-label="Restart system"
-          >
-            <Power size={15} />
-          </button>
+          <button onClick={() => systemReset(false)} className="w-8 h-8 flex items-center justify-center bg-red-500/10 hover:bg-red-500 hover:text-white rounded-lg text-red-400 transition-colors" title="Restart" aria-label="Restart system"><Power size={15} /></button>
         </div>
       </div>
     </div>
   );
 }
-
