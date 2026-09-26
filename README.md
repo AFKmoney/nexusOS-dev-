@@ -29,6 +29,19 @@ Open the local URL. Settings → AI Providers → paste a key (Z.ai, OpenAI, or 
 
 React 19, Vite, Zustand, IndexedDB VFS. Optional Electron.
 
-## License
+## Android APK
 
-See `LICENSE`.
+This is a web OS. The APK is a Capacitor shell around `vite build`.
+
+```bash
+npm install
+npm install @capacitor/core @capacitor/cli @capacitor/android --save
+npx cap add android
+npm run apk:sync
+npm run apk:open
+```
+
+In Android Studio: Build → Build APK. First install needs a keystore you create once.
+
+Until that machine exists, install as PWA from Chrome (Add to Home screen). Same OS, no Play Store.
+

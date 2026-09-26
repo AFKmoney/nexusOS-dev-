@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "npx tsx kernel/tests/runTests.ts",
-    "start": "node dist/server.cjs"
+    "start": "node dist/server.cjs",
+    "apk:sync": "vite build && npx cap sync android",
+    "apk:open": "npx cap open android"
   },
   "dependencies": {
     "@google/genai": "^1.34.0",
