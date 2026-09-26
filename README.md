@@ -15,7 +15,9 @@ npm install
 npm run dev
 ```
 
-Open the local URL. Settings → AI Providers → paste a key (Z.ai, OpenAI, or whatever you use). Talk to DAEMON.
+Open the local URL. Add an API key in **Settings → AI Providers**. Talk to DAEMON.
+
+Live site (after Pages is on): https://afkmoney.github.io/nexusOS-dev-/
 
 ## What it actually does
 
