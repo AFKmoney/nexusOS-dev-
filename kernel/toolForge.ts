@@ -374,7 +374,6 @@ export class ToolForge {
             try {
               const { appGenerator } = await import('./appGenerator');
               const app = await appGenerator.generate(desc);
-              useOS.getState().openWindow(app.appId);
               result = `[OS::BUILD_APP] → ✅ Generated "${app.name}" with ${app.files.length} files at ${app.path}\nFiles:\n${app.files.map(f => `  • ${f}`).join('\n')}`;
             } catch (e: any) {
               result = `[OS::BUILD_APP] → ⚠ ${e?.message || 'Generation failed'}`;

@@ -167,10 +167,26 @@ export async function hydrateOSRegistry(): Promise<void> {
     // Add custom manifests if they aren't already there (to avoid duplicates)
     customManifests.forEach(custom => {
        if (!fullRegistry.find(a => a.id === custom.id)) {
-          // Re-attach icon component (forged apps use Box by default)
-          fullRegistry.push({ ...custom, icon: Box });
+          fullRegistry.push({ ...custom, icon: Box, isCustom: true });
        }
     });
+
+    try {
+      const { appGenerator } = await import('../kernel/appGenerator');
+      appGenerator.list().forEach((m) => {
+        if (fullRegistry.find(a => a.id === m.id)) return;
+        fullRegistry.push({
+          id: m.id,
+          name: m.name,
+          description: m.description,
+          icon: Box,
+          permissions: ['vfs.read', 'vfs.write', 'network'],
+          isCustom: true,
+          sourcePath: `/system/apps/${m.id}/index.html`,
+          defaultSize: { width: 420, height: 720 },
+        } as any);
+      });
+    } catch {}
 
     const systemIds = SYSTEM_APPS.map((app) => app.id);
     const mergedInstalled = installedApps.length === 0

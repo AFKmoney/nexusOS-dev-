@@ -447,8 +447,14 @@ export default function App() {
         }
         case 'BUILD_APP': {
           const [desc] = action.args;
-          store.openWindow('forge', { prompt: desc });
-          return `[OS::BUILD_APP] -> ✅ NeuralForge launched for: "${desc}"`;
+          try {
+            const { appGenerator } = await import('./kernel/appGenerator');
+            const app = await appGenerator.generate(String(desc || 'Untitled app'));
+            return `[OS::BUILD_APP] -> ✅ "${app.name}" live (${app.appId})`;
+          } catch (e: any) {
+            store.openWindow('forge', { prompt: desc });
+            return `[OS::BUILD_APP] -> ⚠ fell back to Forge: ${e?.message || 'failed'}`;
+          }
         }
         case 'OPEN_URL': {
           const [url] = action.args;

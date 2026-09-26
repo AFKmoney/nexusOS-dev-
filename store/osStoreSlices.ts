@@ -174,9 +174,9 @@ export const createRegistryActions = (
   registerCustomApp: (manifest: AppManifest) =>
     set(state => {
       const iconComponent = typeof manifest.icon === 'function' ? manifest.icon : Box;
-      const cleanManifest = { ...manifest, icon: iconComponent };
+      const cleanManifest = { ...manifest, icon: iconComponent, isCustom: true };
       return {
-        registry: [...state.registry, cleanManifest],
+        registry: [...state.registry.filter(a => a.id !== manifest.id), cleanManifest],
         installedApps: Array.from(new Set([...state.installedApps, manifest.id])),
         customManifests: [...state.customManifests.filter(m => m.id !== manifest.id), cleanManifest]
       };
