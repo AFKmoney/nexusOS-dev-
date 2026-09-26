@@ -34,6 +34,13 @@ export default function BootScreen() {
   const [showBios, setShowBios] = useState(false);
 
   useEffect(() => {
+    const force = setTimeout(() => {
+      if (!useOS.getState().booted) setBooted(true);
+    }, 2500);
+    return () => clearTimeout(force);
+  }, [setBooted]);
+
+  useEffect(() => {
     if (bootPhase < BOOT_MESSAGES.length) {
       const t = setTimeout(() => {
         const nextMessage = BOOT_MESSAGES[bootPhase];
@@ -47,18 +54,18 @@ export default function BootScreen() {
     }
 
     const t = setTimeout(() => {
-      sounds.boot();
+      try { sounds.boot(); } catch { /* webview audio lock */ }
+      setBooted(true);
       setTimeout(() => {
-        setBooted(true);
-        setTimeout(() => {
+        try {
           useOS.getState().addNotification({
             title: 'LazySiren',
             message: 'System ready. All modules loaded.',
             type: 'success'
           });
-        }, 2000);
-      }, 300);
-    }, 600);
+        } catch { /* store not ready */ }
+      }, 800);
+    }, 400);
 
     return () => clearTimeout(t);
   }, [bootPhase, setBooted]);
