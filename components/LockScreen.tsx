@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Lock, Shield, Cpu, Sparkles, Fingerprint, ChevronUp, Terminal } from 'lucide-react';
+import { Shield, Cpu, Sparkles, Fingerprint, ChevronUp, Terminal } from 'lucide-react';
 import { sounds } from '../kernel/sounds';
+import LazySirenMark from './LazySirenMark';
 
 export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
   const [time, setTime] = useState(new Date());
@@ -105,10 +106,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       {/* Center Digital Clock HUD */}
       <div className="flex flex-col items-center my-auto z-10 text-center">
         {/* Lock Icon Pulsing */}
-        <div className="mb-6 p-4 rounded-3xl bg-accent/10 border border-accent/25 backdrop-blur-xl shadow-lg shadow-accent/10 relative group">
-          <div className="absolute -inset-1 rounded-3xl bg-accent/20 blur opacity-60 animate-pulse" />
-          <Lock size={28} className="text-accent relative z-10" />
-        </div>
+        <LazySirenMark variant="splash" className="w-56 h-52 mb-6" />
 
         {/* Time with Seconds HUD */}
         <div className="flex items-baseline justify-center font-extralight tracking-tight text-white mb-2 font-mono">

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Zap, Users, Lock } from 'lucide-react';
+import { Users, Lock } from 'lucide-react';
+import LazySirenMark from './LazySirenMark';
 
 type LoginScreenProps = {
   profiles: Array<{
@@ -26,10 +27,8 @@ export default function LoginScreen({
       }} />
 
       <div className="z-10 flex flex-col items-center">
-        <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-6 shadow-accent">
-          <Zap className="text-accent" size={32} />
-        </div>
-        <h1 className="text-3xl font-extralight text-white tracking-[0.25em] uppercase mb-2 drop-shadow-lg" style={{ color: 'white' }}>NexusOS</h1>
+        <LazySirenMark variant="icon" className="mb-6" />
+        <h1 className="text-3xl font-extralight text-white tracking-[0.25em] uppercase mb-2 drop-shadow-lg" style={{ color: 'white' }}>LAZYSIREN</h1>
         <div className="text-xs text-zinc-600 tracking-[0.2em] uppercase mb-12">Select Profile</div>
 
         <div className="flex flex-wrap justify-center gap-6 sm:gap-8 px-4 max-w-sm sm:max-w-none">

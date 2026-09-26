@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useOS } from '../store/osStore';
 import { sounds } from '../kernel/sounds';
-import { Zap } from 'lucide-react';
+import LazySirenMark from './LazySirenMark';
 import BiosScreen from './BiosScreen';
 
 const BOOT_MESSAGES = [
@@ -80,14 +80,9 @@ export default function BootScreen() {
         background: 'radial-gradient(ellipse at center, rgba(16,185,129,0.08) 0%, transparent 60%)',
       }} />
 
-      <div className="relative mb-8">
-        <div className="w-20 h-20 rounded-3xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-4 shadow-accent">
-          <Zap className="text-accent animate-pulse" size={36} />
-        </div>
-        <div className="text-white font-black tracking-[0.4em] text-2xl text-center" style={{ color: 'white' }}>
-          NEXUS<span className="text-accent">OS</span>
-        </div>
-        <div className="text-zinc-600 text-xs text-center tracking-[0.3em] mt-1 uppercase">AI-Native Operating System</div>
+      <div className="relative mb-8 w-full flex flex-col items-center">
+        <LazySirenMark variant="boot" className="w-64 h-56 mb-2" />
+        <div className="text-zinc-600 text-[10px] text-center tracking-[0.32em] uppercase">kernel · nexus drawer stays</div>
       </div>
 
       <div className="w-full max-w-xs px-6 mb-6">
