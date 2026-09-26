@@ -650,11 +650,15 @@ export class ToolForge {
         }
 
         case 'BROWSE_EXTRACT': {
-          // Optional first arg = CSS selector (default: 'body')
-          // Optional second arg = max chars (default: 8000)
-          const selector = clampLength(toStringArg(actionArgs[0] ?? 'body'), 256) || 'body';
-          const maxCharsArg = parseInt(toStringArg(actionArgs[1] ?? '8000'), 10);
-          const maxChars = Number.isFinite(maxCharsArg) && maxCharsArg > 0 ? Math.min(maxCharsArg, 50_000) : 8000;
+          const raw = getArg(actionArgs[0], 'body');
+          const colonIdx = raw.lastIndexOf(':');
+          let selector = raw;
+          let maxChars = 8000;
+          if (colonIdx > 0 && /^\d+$/.test(raw.slice(colonIdx + 1))) {
+            selector = raw.slice(0, colonIdx) || 'body';
+            maxChars = Math.min(parseInt(raw.slice(colonIdx + 1), 10) || 8000, 50_000);
+          }
+          selector = clampLength(selector || 'body', 256);
           try {
             const { browserBridge } = await import('./browserBridge');
             const extracted = await browserBridge.extract(selector, maxChars);
@@ -865,12 +869,22 @@ export class ToolForge {
 
         // ─── Phase 2: Multi-agent + vision + voice ─────────────────
         case 'SPAWN_AGENT': {
-          const goal = clampLength(toStringArg(actionArgs[0]), 2000);
-          if (goal) {
+          const rawGoal = clampLength(toStringArg(actionArgs[0]), 2000);
+          if (rawGoal) {
+            let role = '';
+            let goal = rawGoal;
+            const pipeIdx = rawGoal.indexOf('|');
+            if (pipeIdx > 0 && pipeIdx < 24) {
+              const maybeRole = rawGoal.slice(0, pipeIdx).trim().toLowerCase();
+              if (['planner', 'coder', 'reviewer', 'tester', 'researcher', 'architect', 'debugger'].includes(maybeRole)) {
+                role = maybeRole;
+                goal = rawGoal.slice(pipeIdx + 1).trim() || rawGoal;
+              }
+            }
+            const labeled = role ? `[${role}] ${goal}` : goal;
             try {
-              result = `[OS::SPAWN_AGENT] → Agent orchestrator launched for: "${goal}". Task running in background. Results will appear in the audit log.`;
-              // Run in background — don't block the response
-              void agentOrchestrator.run(goal).catch(e => {
+              result = `[OS::SPAWN_AGENT] → Agent orchestrator launched for: "${labeled}". Task running in background. Results will appear in the audit log.`;
+              void agentOrchestrator.run(labeled).catch(e => {
                 const msg = e instanceof Error ? e.message : String(e);
                 kernelLog.error('[Agent] Background task failed:', msg);
               });
@@ -1255,6 +1269,39 @@ export class ToolForge {
           break;
         }
 
+        case 'CLIPBOARD_COPY': {
+          const text = clampLength(toStringArg(actionArgs[0]), 20_000);
+          if (text) {
+            try {
+              if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(text);
+                result = `[OS::CLIPBOARD_COPY] → ✅ Copied ${text.length} chars`;
+              } else {
+                result = `[OS::CLIPBOARD_COPY] → ⚠ Clipboard API unavailable; text held (${text.slice(0, 80)})`;
+              }
+            } catch (e: unknown) {
+              result = `[OS::CLIPBOARD_COPY] → ⚠ ${e instanceof Error ? e.message : String(e)}`;
+            }
+          }
+          break;
+        }
+
+        case 'GBA_COMMAND': {
+          const raw = toStringArg(actionArgs[0]);
+          const [actionName = '', key = '', rom = ''] = raw.split(':');
+          try {
+            const { dispatchGbaCommand } = await import('./gbaBridge');
+            result = dispatchGbaCommand({
+              action: actionName,
+              key: key || undefined,
+              rom: rom || undefined,
+            });
+          } catch (e: unknown) {
+            result = `[OS::GBA_COMMAND] → ⚠ ${e instanceof Error ? e.message : String(e)}`;
+          }
+          break;
+        }
+
         default:
           result = `[OS::${action.type}] → Unknown action type`;
       }
@@ -1286,17 +1333,38 @@ export class ToolForge {
         case 'delete_file':
           osAction = `OS::DELETE_FILE:${args.path}`;
           break;
+        case 'move_file':
+          osAction = `OS::MOVE_FILE:${args.src}:${args.dest}`;
+          break;
+        case 'copy_file':
+          osAction = `OS::COPY_FILE:${args.src}:${args.dest}`;
+          break;
         case 'list_dir':
           osAction = `OS::LIST_DIR:${args.path}`;
           break;
         case 'create_folder':
           osAction = `OS::CREATE_FOLDER:${args.path}`;
           break;
+        case 'search_files':
+          osAction = `OS::SEARCH_FILES:${args.query}`;
+          break;
+        case 'empty_trash':
+          osAction = `OS::EMPTY_TRASH`;
+          break;
         case 'open_app':
           osAction = `OS::OPEN_APP:${args.appId}`;
           break;
         case 'close_app':
           osAction = `OS::CLOSE_APP:${args.appId}`;
+          break;
+        case 'focus_app':
+          osAction = `OS::FOCUS_APP:${args.appId}`;
+          break;
+        case 'minimize_all':
+          osAction = `OS::MINIMIZE_ALL`;
+          break;
+        case 'ide_open_file':
+          osAction = `OS::IDE_OPEN_FILE:${args.path}`;
           break;
         case 'notify':
           osAction = `OS::NOTIFY:${args.title}:${args.message}`;
@@ -1313,20 +1381,125 @@ export class ToolForge {
         case 'set_accent':
           osAction = `OS::SET_ACCENT:${args.hex}`;
           break;
-        case 'search_files':
-          osAction = `OS::SEARCH_FILES:${args.query}`;
+        case 'clipboard_copy':
+          osAction = `OS::CLIPBOARD_COPY:${args.text}`;
+          break;
+        case 'take_screenshot':
+          osAction = `OS::TAKE_SCREENSHOT`;
+          break;
+        case 'analyze_screen':
+          osAction = `OS::ANALYZE_SCREEN:${args.question || ''}`;
+          break;
+        case 'play_audio':
+          osAction = `OS::PLAY_AUDIO:${args.path}`;
+          break;
+        case 'speak':
+          osAction = `OS::SPEAK:${args.text}`;
+          break;
+        case 'listen':
+          osAction = `OS::LISTEN`;
+          break;
+        case 'index_docs':
+          osAction = `OS::INDEX_DOCS:${args.path}`;
+          break;
+        case 'search_rag':
+          osAction = `OS::SEARCH_RAG:${args.query}`;
           break;
         case 'web_search':
           osAction = `OS::WEB_SEARCH:${args.query}`;
           break;
+        case 'open_url':
+          osAction = `OS::OPEN_URL:${args.url}`;
+          break;
         case 'browse_navigate':
           osAction = `OS::BROWSE_NAVIGATE:${args.url}`;
           break;
+        case 'browse_back':
+          osAction = `OS::BROWSE_BACK`;
+          break;
+        case 'browse_forward':
+          osAction = `OS::BROWSE_FORWARD`;
+          break;
+        case 'browse_reload':
+          osAction = `OS::BROWSE_RELOAD`;
+          break;
+        case 'browse_extract':
+          osAction = `OS::BROWSE_EXTRACT:${args.selector || 'body'}:${args.maxChars || '8000'}`;
+          break;
+        case 'browse_click':
+          osAction = `OS::BROWSE_CLICK:${args.selector}`;
+          break;
+        case 'browse_input':
+          osAction = `OS::BROWSE_INPUT:${args.selector}:${args.value}`;
+          break;
+        case 'browse_scroll':
+          osAction = `OS::BROWSE_SCROLL:${args.deltaX || '0'}:${args.deltaY || '400'}`;
+          break;
+        case 'browse_state':
+          osAction = `OS::BROWSE_STATE`;
+          break;
+        case 'run_command':
+          osAction = `OS::RUN_COMMAND:${args.command}`;
+          break;
+        case 'run_native':
+          osAction = `OS::RUN_NATIVE:${args.command}`;
+          break;
+        case 'execute_js':
+          osAction = `OS::EXECUTE_JS:${args.code}`;
+          break;
+        case 'exec_code':
+          osAction = `OS::EXEC_CODE:${args.language}:${args.code}`;
+          break;
+        case 'schedule_task':
+          osAction = `OS::SCHEDULE_TASK:${args.seconds}:${args.command}`;
+          break;
+        case 'emit_event':
+          osAction = `OS::EMIT_EVENT:${args.event}:${args.data || '{}'}`;
+          break;
+        case 'git_init':
+          osAction = `OS::GIT_INIT:${args.path}`;
+          break;
+        case 'git_add':
+          osAction = `OS::GIT_ADD:${args.path}:${args.file}`;
+          break;
+        case 'git_add_all':
+          osAction = `OS::GIT_ADD_ALL:${args.path}`;
+          break;
+        case 'git_commit':
+          osAction = `OS::GIT_COMMIT:${args.path}:${args.message}`;
+          break;
+        case 'git_log':
+          osAction = `OS::GIT_LOG:${args.path}`;
+          break;
+        case 'git_diff':
+          osAction = `OS::GIT_DIFF:${args.path}`;
+          break;
+        case 'git_status':
+          osAction = `OS::GIT_STATUS:${args.path}`;
+          break;
+        case 'git_branch':
+          osAction = `OS::GIT_BRANCH:${args.path}`;
+          break;
+        case 'git_checkout':
+          osAction = `OS::GIT_CHECKOUT:${args.path}:${args.ref}`;
+          break;
         case 'spawn_agent':
-          osAction = `OS::SPAWN_AGENT:${args.goal}`;
+          osAction = args.role ? `OS::SPAWN_AGENT:${args.role}|${args.goal}` : `OS::SPAWN_AGENT:${args.goal}`;
+          break;
+        case 'agent_message':
+          osAction = `OS::AGENT_MESSAGE:${args.toId}:${args.message}`;
           break;
         case 'add_goal':
           osAction = `OS::ADD_GOAL:${args.priority || 'normal'}|${args.description}`;
+          break;
+        case 'get_goals':
+          osAction = `OS::GET_GOALS`;
+          break;
+        case 'complete_goal':
+          osAction = `OS::COMPLETE_GOAL:${args.goalId}`;
+          break;
+        case 'set_autopilot':
+          osAction = `OS::SET_AUTOPILOT:${args.mode}`;
           break;
         case 'forge_skill':
           osAction = `OS::FORGE_SKILL:${args.name}|${args.description}|${args.code}`;
@@ -1334,17 +1507,26 @@ export class ToolForge {
         case 'call_skill':
           osAction = `OS::CALL_SKILL:${args.name}:${args.args ? JSON.stringify(args.args) : ''}`;
           break;
+        case 'list_skills':
+          osAction = `OS::LIST_SKILLS`;
+          break;
+        case 'delete_skill':
+          osAction = `OS::DELETE_SKILL:${args.name}`;
+          break;
         case 'build_app':
           osAction = `OS::BUILD_APP:${args.description}`;
           break;
-        case 'execute_js':
-          osAction = `OS::EXECUTE_JS:${args.code}`;
+        case 'self_evolve':
+          osAction = `OS::SELF_EVOLVE:${args.directive || ''}`;
           break;
-        case 'clipboard_copy':
-          osAction = `OS::CLIPBOARD_COPY:${args.text}`;
+        case 'cluster_scan':
+          osAction = `OS::CLUSTER_SCAN`;
           break;
-        case 'take_screenshot':
-          osAction = `OS::TAKE_SCREENSHOT`;
+        case 'cluster_status':
+          osAction = `OS::CLUSTER_STATUS`;
+          break;
+        case 'gba_command':
+          osAction = `OS::GBA_COMMAND:${args.action}:${args.key || ''}:${args.rom || ''}`;
           break;
         default:
           results.push(`[Unknown tool: ${call.name}]`);
