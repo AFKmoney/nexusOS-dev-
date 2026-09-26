@@ -54,7 +54,7 @@ const GovernanceDashboardApp = lazy(() => import('./apps/GovernanceDashboard'));
 const PluginMarketApp = lazy(() => import('./apps/PluginMarket'));
 const AutonomousBusinessEngineApp = lazy(() => import('./apps/AutonomousBusinessEngine'));
 const GbaEmulatorApp = lazy(() => import('./apps/GbaEmulator'));
-const XApp = lazy(() => import('./apps/XApp'));
+import { XLogo } from './components/XLogo';
 
 import {
   Terminal, FileText, Activity, Grid, Image, Cpu, FolderOpen, Globe,
@@ -63,7 +63,7 @@ import {
   Clipboard, Bell, StickyNote, Calculator, Calendar, Music, Pen,
   Search, MonitorDot, Trash2, Server, FileArchive,
   Palette, Video, Cloud, Info, FileCode, Users, Timer, LayoutGrid,
-  Key, Mic, Rss, Accessibility, Target, Camera, Package, Rocket, Gamepad2, AtSign
+  Key, Mic, Rss, Accessibility, Target, Camera, Package, Rocket, Gamepad2
 } from 'lucide-react';
 
 export const CORE_APP_IDS = ['welcome', 'dashboard', 'explorer', 'terminal', 'notepad', 'settings', 'netrunner'] as const;
@@ -122,5 +122,5 @@ export const SYSTEM_APPS: AppManifest[] = [
   { id: 'habits', name: 'Habit Tracker', icon: Target, component: HabitTrackerApp, permissions: [], defaultSize: { width: 640, height: 500 }, description: 'Daily protocol monitoring and streak tracking.' },
   { id: 'screenshot', name: 'Screenshot', icon: Camera, component: ScreenshotToolApp, permissions: [], defaultSize: { width: 600, height: 400 }, description: 'Capture visual states of the NexusOS environment.' },
   { id: 'gba', name: 'GBA Station', icon: Gamepad2, component: GbaEmulatorApp, permissions: ['vfs.read', 'vfs.write'], defaultSize: { width: 720, height: 640 }, description: 'Game Boy Advance station. DAEMON can play; notifications preempt the cart.' },
-  { id: 'x', name: 'X', icon: AtSign, component: XApp, permissions: ['network'], defaultSize: { width: 1100, height: 720 }, description: 'X (Twitter). DAEMON can search, open profiles, and post when a local token is saved.' },
+  { id: 'x', name: 'X', icon: XLogo, component: XApp, permissions: ['network'], defaultSize: { width: 420, height: 720 }, description: 'X. DAEMON opens the real site/app and can post when a local token is saved.' },
 ];
