@@ -93,6 +93,36 @@ function DesktopIconGrid({
   }, [accentColor]);
   const desktopRef = useRef<HTMLDivElement>(null);
 
+  const bindIconMenu = (itemPath: string) => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let sx = 0, sy = 0;
+    return {
+      onPointerDown: (e: React.PointerEvent) => {
+        if (e.pointerType === 'mouse') return;
+        sx = e.clientX; sy = e.clientY;
+        timer = setTimeout(() => {
+          openContextMenu({ isOpen: true, x: sx, y: sy, targetType: 'icon', filePath: itemPath });
+        }, 650);
+      },
+      onPointerMove: (e: React.PointerEvent) => {
+        if (!timer) return;
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (dx * dx + dy * dy > 196) { clearTimeout(timer); timer = null; }
+      },
+      onPointerUp: () => { if (timer) { clearTimeout(timer); timer = null; } },
+      onPointerCancel: () => { if (timer) { clearTimeout(timer); timer = null; } },
+      onContextMenu: (e: React.MouseEvent) => {
+        const ne = e.nativeEvent as MouseEvent & { pointerType?: string; sourceCapabilities?: { firesTouchEvents?: boolean } };
+        const fromTouch = ne.pointerType === 'touch' || ne.sourceCapabilities?.firesTouchEvents === true;
+        if (fromTouch) { e.preventDefault(); e.stopPropagation(); return; }
+        e.preventDefault();
+        e.stopPropagation();
+        openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'icon', filePath: itemPath });
+      },
+    };
+  };
+
+
   // Persisted icon positions — survive reboot. Keyed by filename.
   const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>(() => {
     try {
@@ -255,11 +285,7 @@ function DesktopIconGrid({
                 if (isMobile) handleFileOpen(itemPath);
               }}
               onDoubleClick={() => handleFileOpen(itemPath)}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'icon', filePath: itemPath });
-              }}
+              {...bindIconMenu(itemPath)}
             >
               <div className={`${isMobile ? 'w-11 h-11' : 'w-12 h-12'} bg-zinc-900/60 rounded-xl flex items-center justify-center border border-white/8 group-hover:border-accent/30 group-active:scale-95 transition-all shadow-md group-hover:shadow-accent`}>
                 {getSmartIcon(itemPath, isMobile ? 22 : 24)}
@@ -286,11 +312,7 @@ function DesktopIconGrid({
             className="absolute flex flex-col items-center p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors"
             style={{ left: pos.x, top: pos.y, width: 96 }}
             onDoubleClick={() => handleFileOpen(itemPath)}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'icon', filePath: itemPath });
-            }}
+            {...bindIconMenu(itemPath)}
           >
             <div className="w-12 h-12 bg-zinc-900/50 rounded-xl flex items-center justify-center border border-white/5 group-hover:border-accent/30 transition-all shadow-md group-hover:shadow-accent">
               {getSmartIcon(itemPath, 24)}
@@ -536,9 +558,48 @@ export default function App() {
       return;
     }
 
+    const ne = e.nativeEvent as MouseEvent & { pointerType?: string; sourceCapabilities?: { firesTouchEvents?: boolean } };
+    const fromTouch = ne.pointerType === 'touch' || ne.sourceCapabilities?.firesTouchEvents === true;
     e.preventDefault();
     e.stopPropagation();
+    if (fromTouch || isMobile) return;
     openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'desktop' });
+  };
+
+  const desktopLongPress = useRef<{ timer: ReturnType<typeof setTimeout> | null; x: number; y: number }>({ timer: null, x: 0, y: 0 });
+  const handleGlobalPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') return;
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('.taskbar') ||
+      target.closest('.start-menu') ||
+      target.closest('.window-frame') ||
+      target.closest('.context-menu') ||
+      target.closest('button') ||
+      target.closest('input') ||
+      target.closest('textarea')
+    ) return;
+    desktopLongPress.current.x = e.clientX;
+    desktopLongPress.current.y = e.clientY;
+    if (desktopLongPress.current.timer) clearTimeout(desktopLongPress.current.timer);
+    desktopLongPress.current.timer = setTimeout(() => {
+      openContextMenu({ isOpen: true, x: desktopLongPress.current.x, y: desktopLongPress.current.y, targetType: 'desktop' });
+    }, 650);
+  };
+  const handleGlobalPointerMove = (e: React.PointerEvent) => {
+    if (!desktopLongPress.current.timer) return;
+    const dx = e.clientX - desktopLongPress.current.x;
+    const dy = e.clientY - desktopLongPress.current.y;
+    if (dx * dx + dy * dy > 196) {
+      clearTimeout(desktopLongPress.current.timer);
+      desktopLongPress.current.timer = null;
+    }
+  };
+  const handleGlobalPointerUp = () => {
+    if (desktopLongPress.current.timer) {
+      clearTimeout(desktopLongPress.current.timer);
+      desktopLongPress.current.timer = null;
+    }
   };
 
   if (!booted && !bootTimedOut) {
@@ -554,6 +615,10 @@ export default function App() {
       className="h-screen w-screen overflow-hidden relative"
       onClick={handleGlobalClick}
       onTouchStart={handleGlobalTouchStart}
+      onPointerDown={handleGlobalPointerDown}
+      onPointerMove={handleGlobalPointerMove}
+      onPointerUp={handleGlobalPointerUp}
+      onPointerCancel={handleGlobalPointerUp}
       onContextMenu={handleGlobalContextMenu}
     >
       <DesktopWallpaper wallpaper={wallpaper} />

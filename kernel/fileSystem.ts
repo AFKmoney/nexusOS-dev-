@@ -524,6 +524,7 @@ export class VirtualFileSystem {
       modified: Date.now()
     };
     this.save();
+    eventBus.emit('VFS_FILE_CREATED', { path: linkPath, appId });
     return true;
   }
 

@@ -67,8 +67,32 @@ export default function StartMenu() {
   });
 
   const handleAppRightClick = (e: React.MouseEvent, appId: string) => {
+    const ne = e.nativeEvent as MouseEvent & { pointerType?: string; sourceCapabilities?: { firesTouchEvents?: boolean } };
+    const fromTouch = ne.pointerType === 'touch' || ne.sourceCapabilities?.firesTouchEvents === true;
     e.preventDefault(); e.stopPropagation();
+    if (fromTouch) return;
     openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'app-icon', appId });
+  };
+
+  const bindAppLongPress = (appId: string) => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let sx = 0, sy = 0;
+    return {
+      onPointerDown: (e: React.PointerEvent) => {
+        if (e.pointerType === 'mouse') return;
+        sx = e.clientX; sy = e.clientY;
+        timer = setTimeout(() => {
+          openContextMenu({ isOpen: true, x: sx, y: sy, targetType: 'app-icon', appId });
+        }, 650);
+      },
+      onPointerMove: (e: React.PointerEvent) => {
+        if (!timer) return;
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (dx * dx + dy * dy > 196) { clearTimeout(timer); timer = null; }
+      },
+      onPointerUp: () => { if (timer) { clearTimeout(timer); timer = null; } },
+      onPointerCancel: () => { if (timer) { clearTimeout(timer); timer = null; } },
+    };
   };
 
   const ACCENTS = [
@@ -93,8 +117,11 @@ export default function StartMenu() {
         if (target.closest('button[title*="Right-click"]') || target.closest('button[title*="Add to Desktop"]')) {
           return;
         }
+        const ne = e.nativeEvent as MouseEvent & { pointerType?: string; sourceCapabilities?: { firesTouchEvents?: boolean } };
+        const fromTouch = ne.pointerType === 'touch' || ne.sourceCapabilities?.firesTouchEvents === true;
         e.preventDefault();
         e.stopPropagation();
+        if (fromTouch) return;
         openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'nexus-menu' });
       }}
     >
@@ -228,6 +255,7 @@ export default function StartMenu() {
                   key={app.id}
                   onClick={() => { openWindow(app.id); toggleStartMenu(); }}
                   onContextMenu={(e) => handleAppRightClick(e, app.id)}
+                  {...bindAppLongPress(app.id)}
                   title={`${app.name}`}
                   className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-colors group hover:bg-white/10 active:bg-white/15 border border-transparent hover:border-white/10"
                 >

@@ -66,16 +66,16 @@ export default function ContextMenu() {
 
   useEffect(() => {
     if (!contextMenu.isOpen) return;
-    const handleClick = (e: MouseEvent) => {
+    const handleOutside = (e: Event) => {
       if (menuRef.current && menuRef.current.contains(e.target as Node)) return;
       closeContextMenu();
     };
     const timer = window.setTimeout(() => {
-      window.addEventListener('mousedown', handleClick);
-    }, 250);
+      window.addEventListener('pointerdown', handleOutside);
+    }, 400);
     return () => {
       window.clearTimeout(timer);
-      window.removeEventListener('mousedown', handleClick);
+      window.removeEventListener('pointerdown', handleOutside);
     };
   }, [contextMenu.isOpen, closeContextMenu]);
 
@@ -253,21 +253,39 @@ export default function ContextMenu() {
 
   const handleAddAppToDesktop = (appId: string) => {
       const app = registry.find(a => a.id === appId);
-      if (!app) return;
-      const desktopPath = getDesktopPath(currentUser?.id ?? null);
-      if (!vfs.resolveNode(desktopPath)) {
-        vfs.createDirRecursive(desktopPath, SYSTEM_VFS_APP_ID);
+      if (!app) {
+        addNotification({ title: 'Add to Desktop', message: 'App not found.', type: 'error' });
+        closeContextMenu();
+        return;
       }
-      const shortcutName = `${app.name}.lnk`;
-      const destPath = `${desktopPath}/${shortcutName}`;
-      // Create a .lnk file that the desktop handler recognizes as an app shortcut
-      vfs.writeFile(destPath, `NEXUSOS_APP_SHORTCUT:${appId}`, SYSTEM_VFS_APP_ID);
+      const desktopPath = getDesktopPath(currentUser?.id ?? null);
+      vfs.createDirRecursive(desktopPath, SYSTEM_VFS_APP_ID);
+      let shortcutName = `${app.name}.lnk`;
+      let destPath = `${desktopPath}/${shortcutName}`;
+      let n = 2;
+      while (vfs.stat(destPath)) {
+        const existing = vfs.readFile(destPath, SYSTEM_VFS_APP_ID);
+        if (existing === `NEXUSOS_APP_SHORTCUT:${appId}`) {
+          addNotification({ title: 'Already on Desktop', message: `"${app.name}" is already on the desktop.`, type: 'info' });
+          closeContextMenu();
+          return;
+        }
+        shortcutName = `${app.name} ${n}.lnk`;
+        destPath = `${desktopPath}/${shortcutName}`;
+        n += 1;
+      }
+      const ok = vfs.writeFile(destPath, `NEXUSOS_APP_SHORTCUT:${appId}`, SYSTEM_VFS_APP_ID);
+      if (!ok) {
+        addNotification({ title: 'Add to Desktop failed', message: 'Could not write the shortcut.', type: 'error' });
+        closeContextMenu();
+        return;
+      }
       eventBus.emit('VFS_FILE_CREATED', { path: destPath, appId: SYSTEM_VFS_APP_ID });
       eventBus.emit('app:shortcut-created', { appId, path: destPath });
-      addNotification({ 
-        title: 'Desktop Shortcut Created', 
-        message: `"${app.name}" was added to your desktop.`, 
-        type: 'success' 
+      addNotification({
+        title: 'Added to Desktop',
+        message: `"${app.name}" is on the desktop.`,
+        type: 'success'
       });
       closeContextMenu();
   };
@@ -528,10 +546,14 @@ export default function ContextMenu() {
 
   const Separator = () => <div className="h-px bg-white/10 my-1 mx-2" />;
   
+  const movedRef = useRef(false);
+  const startRef = useRef({ x: 0, y: 0 });
+
   const fireItem = (e: React.SyntheticEvent, fn: () => void | Promise<void>, disabled?: boolean) => {
     e.preventDefault();
     e.stopPropagation();
     if (disabled) return;
+    if (movedRef.current) return;
     void fn();
   };
 
@@ -542,10 +564,19 @@ export default function ContextMenu() {
     return (
     <button 
         type="button"
-        onPointerDown={(e) => fireItem(e, onClick, disabled)}
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          startRef.current = { x: e.clientX, y: e.clientY };
+          movedRef.current = false;
+        }}
+        onPointerMove={(e) => {
+          const dx = e.clientX - startRef.current.x;
+          const dy = e.clientY - startRef.current.y;
+          if (dx * dx + dy * dy > 100) movedRef.current = true;
+        }}
+        onClick={(e) => fireItem(e, onClick, disabled)}
         disabled={disabled}
-        className={`w-full flex items-center justify-between px-3 py-1.5 text-[13px] text-left transition-colors
+        className={`w-full flex items-center justify-between px-3 ${isMobile ? 'py-3 text-[15px]' : 'py-1.5 text-[13px]'} text-left transition-colors
         ${danger ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
@@ -562,9 +593,18 @@ export default function ContextMenu() {
   const NeuralItem = ({ icon: Icon, label, onClick }: NeuralItemProps) => (
       <button 
         type="button"
-        onPointerDown={(e) => fireItem(e, onClick)}
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-        className="w-full flex items-center gap-3 px-3 py-1.5 text-[13px] text-left transition-colors text-purple-200 hover:bg-purple-500/20 hover:text-white group relative overflow-hidden"
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          startRef.current = { x: e.clientX, y: e.clientY };
+          movedRef.current = false;
+        }}
+        onPointerMove={(e) => {
+          const dx = e.clientX - startRef.current.x;
+          const dy = e.clientY - startRef.current.y;
+          if (dx * dx + dy * dy > 100) movedRef.current = true;
+        }}
+        onClick={(e) => fireItem(e, onClick)}
+        className={`w-full flex items-center gap-3 px-3 ${isMobile ? 'py-3 text-[15px]' : 'py-1.5 text-[13px]'} text-left transition-colors text-purple-200 hover:bg-purple-500/20 hover:text-white group relative overflow-hidden`}
       >
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <Icon size={18} className="text-purple-400 group-hover:animate-pulse relative z-10" /> 
@@ -579,12 +619,24 @@ export default function ContextMenu() {
   return (
     <div 
       ref={menuRef}
-      className="context-menu fixed z-[2147483000] min-w-[260px] max-w-[320px] max-h-[75vh] overflow-y-auto pointer-events-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5"
-      style={{ left: position.x, top: position.y }}
+      className={`context-menu fixed z-[2147483000] pointer-events-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5 overscroll-contain ${
+        isMobile
+          ? 'inset-x-0 bottom-0 max-h-[70vh] w-full max-w-none rounded-t-2xl rounded-b-none'
+          : 'min-w-[260px] max-w-[320px] max-h-[75vh] rounded-lg'
+      }`}
+      style={isMobile ? undefined : { left: position.x, top: position.y }}
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
       onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
+      {isMobile && (
+        <div className="flex justify-center pt-2 pb-1 shrink-0">
+          <div className="w-10 h-1 rounded-full bg-white/25" />
+        </div>
+      )}
+      <div className="overflow-y-auto overscroll-contain min-h-0 flex-1" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
         {/* Hidden File Input for Custom Icons */}
         <input 
             type="file" 
@@ -910,6 +962,7 @@ export default function ContextMenu() {
             </>
         )}
 
+      </div>
     </div>
   );
 }
