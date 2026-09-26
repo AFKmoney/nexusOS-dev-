@@ -51,18 +51,15 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
   const IconComponent = app?.icon || Box;
   let AppComponent = app?.component as ComponentType<{ windowId: string }> | undefined;
 
-  // Fallback for custom forged and generated apps
   if (!AppComponent && (app?.isCustom || windowState.appId?.startsWith('gen_') || app?.sourcePath)) {
     AppComponent = CustomAppRunner;
   }
 
   const isMinimized = !!windowState.isMinimized;
 
-  // Window drag bounds — keep title bar visible (top 40px) and within
-  // the desktop area (above the taskbar).
   const dragBounds = {
     top: 0,
-    left: -windowState.width + 100, // allow partial off-screen left, keep 100px visible
+    left: -windowState.width + 100,
     right: typeof window !== 'undefined' ? window.innerWidth - 100 : 1000,
     bottom: typeof window !== 'undefined' ? window.innerHeight - 48 : 700,
   };
@@ -101,6 +98,7 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
       minHeight={isMobile ? 180 : 200}
       bounds="parent"
       dragHandleClassName="window-title-bar"
+      cancel="button,input,textarea,select,a,[contenteditable],[role='button'],.window-app-content"
       style={{
         zIndex: alwaysOnTop ? 9999 : windowState.zIndex,
         display: isMinimized ? 'none' : 'flex',
@@ -124,7 +122,6 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
           transition: isOpening && !isMobile ? 'transform 0.2s ease-out, opacity 0.2s ease-out' : 'none',
         }}
       >
-        {/* Title Bar - mobile optimized height & touch targets */}
         <div
           onContextMenu={handleContextMenu}
           onDoubleClick={() => !isMobile && toggleMaximizeWindow(windowState.id)}
@@ -151,7 +148,6 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
           </div>
 
           <div className="flex items-center gap-1 shrink-0" onMouseDown={(e) => e.stopPropagation()}>
-            {/* Desktop only opacity & always-on-top toggles */}
             {!isMobile && (
               <>
                 <button
@@ -172,7 +168,6 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
               </>
             )}
 
-            {/* Minimize */}
             <button
               onClick={() => minimizeWindow(windowState.id)}
               className={`${isMobile ? 'w-9 h-9 active:bg-white/15' : 'w-8 h-8 hover:bg-white/10'} flex items-center justify-center rounded-lg text-zinc-400 hover:text-white transition-colors`}
@@ -182,7 +177,6 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
               <Minus size={isMobile ? 18 : 16} />
             </button>
 
-            {/* Maximize / Restore (Desktop only) */}
             {!isMobile && (
               <button
                 onClick={() => toggleMaximizeWindow(windowState.id)}
@@ -194,7 +188,6 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
               </button>
             )}
 
-            {/* Close */}
             <button
               onClick={handleClose}
               className={`${isMobile ? 'w-9 h-9 bg-red-500/10 active:bg-red-500 text-red-400' : 'w-8 h-8 hover:bg-red-500 text-zinc-400'} flex items-center justify-center hover:text-white rounded-lg transition-colors`}
@@ -206,9 +199,10 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
           </div>
         </div>
 
-        {/* Content Area */}
         <div
-          className="flex-1 overflow-auto relative bg-transparent min-h-0 custom-scrollbar overscroll-contain"
+          className="window-app-content flex-1 overflow-auto relative bg-transparent min-h-0 custom-scrollbar overscroll-contain"
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
           onContextMenu={(e) => {
             if (!(e.target as HTMLElement).closest('textarea, input, [contenteditable], .custom-context')) {
               e.preventDefault();
@@ -243,4 +237,3 @@ export const WindowFrame: React.FC<{ windowState: any }> = ({ windowState }) => 
     </Rnd>
   );
 };
-
