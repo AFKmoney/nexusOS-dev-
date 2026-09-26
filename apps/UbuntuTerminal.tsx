@@ -442,13 +442,13 @@ export default function UbuntuTerminalApp({ windowId }: { windowId: string }) {
           </div>
         ))}
         
-        <div className="flex items-center mt-1">
-          <div className="shrink-0 mr-2 whitespace-pre select-none">{getPrompt()}</div>
+        <div className="flex flex-wrap items-center mt-1 gap-x-2 gap-y-1">
+          <div className="shrink-0 whitespace-pre select-none overflow-x-auto max-w-full">{getPrompt()}</div>
           <input
             ref={inputRef}
             id="ubuntu-cli-input"
             type="text"
-            className="flex-1 bg-transparent text-white outline-none caret-[#8ae234] font-mono text-xs sm:text-sm"
+            className="flex-1 min-w-[6rem] bg-transparent text-white outline-none caret-[#8ae234] font-mono text-xs sm:text-sm"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={onKeyDown}

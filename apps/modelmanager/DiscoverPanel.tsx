@@ -52,7 +52,7 @@ export const DiscoverPanel: React.FC<DiscoverPanelProps> = (props) => {
         const isSelected = selectedModelKey === key;
         return (
           <div key={key} className={`p-4 rounded-xl border transition-all ${isSelected ? 'bg-accent/5 border-accent/25' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <div className="text-base font-bold text-white">{model.name}</div>
@@ -78,7 +78,7 @@ export const DiscoverPanel: React.FC<DiscoverPanelProps> = (props) => {
                   ))}
                 </div>
               </div>
-              <div className="shrink-0 flex flex-col items-end gap-2">
+              <div className="shrink-0 flex flex-row sm:flex-col items-stretch sm:items-end gap-2">
                 <button
                   onClick={() => onSelectModel(key)}
                   className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-widest border transition-all ${isSelected ? 'bg-accent/15 border-accent/30 text-accent' : 'bg-white/5 border-white/5 text-zinc-500 hover:text-zinc-300'}`}

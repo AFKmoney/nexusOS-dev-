@@ -56,7 +56,7 @@ export default function GovernanceDashboard() {
       <div className="px-4 sm:px-5 pt-3 sm:pt-4 pb-3 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-3 mb-1">
           <ShieldCheck size={16} className="text-accent shrink-0" />
-          <h1 className="text-sm font-bold tracking-widest uppercase text-white">Governance Dashboard</h1>
+          <h1 className="text-sm font-bold tracking-widest uppercase text-white truncate">Governance</h1>
           <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full border ${OVERRIDE_META[mode]?.cls ?? ''}`}>
             {OVERRIDE_META[mode]?.label ?? mode.toUpperCase()}
           </span>

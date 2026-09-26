@@ -152,7 +152,7 @@ export default function AutonomousBusinessEngine() {
                 : 'bg-emerald-500 text-black hover:bg-emerald-400'
             }`}
           >
-            {goal.status === 'running' ? <><Pause size={14} /> Pause Loop</> : <><Play size={14} /> Resume Loop</>}
+            {goal.status === 'running' ? <><Pause size={14} /> <span className="hidden sm:inline">Pause Loop</span><span className="sm:hidden">Pause</span></> : <><Play size={14} /> <span className="hidden sm:inline">Resume Loop</span><span className="sm:hidden">Run</span></>}
           </button>
 
           <button
@@ -161,7 +161,7 @@ export default function AutonomousBusinessEngine() {
             className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-medium text-zinc-300 transition-colors flex items-center gap-1.5 disabled:opacity-50"
             title="Step next single OODA tick manually"
           >
-            <ChevronRight size={14} /> Step Tick
+            <ChevronRight size={14} /> <span className="hidden sm:inline">Step Tick</span><span className="sm:hidden">Step</span>
           </button>
 
           <button
@@ -170,7 +170,7 @@ export default function AutonomousBusinessEngine() {
             className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
             title="Run Self-Healing Sentinel audit on generated assets"
           >
-            <Wrench size={14} className={isHealing ? 'animate-spin' : ''} /> Auto-Heal
+            <Wrench size={14} className={isHealing ? 'animate-spin' : ''} /> <span className="hidden sm:inline">Auto-Heal</span><span className="sm:hidden">Heal</span>
           </button>
 
           <button

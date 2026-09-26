@@ -101,7 +101,7 @@ interface VaultData {
 // --- COMPONENTS ---
 
 export default function CipherVaultApp({ windowId }: { windowId: string }) {
-  const { addNotification } = useOS();
+  const { addNotification, isMobileView } = useOS();
   const VAULT_PATH = '/home/user/.vault';
 
   // State
@@ -278,10 +278,10 @@ export default function CipherVaultApp({ windowId }: { windowId: string }) {
             </div>
         </div>
 
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
             {/* Sidebar */}
-            <div className="w-16 md:w-48 border-r border-zinc-800 bg-black/20 flex flex-col">
-                <div className="p-3 space-y-1">
+            <div className={`${isMobileView ? 'w-full border-b flex-row overflow-x-auto no-scrollbar' : 'w-16 md:w-48 border-r flex-col'} border-zinc-800 bg-black/20 flex shrink-0`}>
+                <div className={`p-2 sm:p-3 ${isMobileView ? 'flex gap-1' : 'space-y-1'}`}>
                     {[
                         { id: 'all', icon: Server, label: 'All Items' },
                         { id: 'login', icon: Key, label: 'Logins' },
@@ -291,16 +291,24 @@ export default function CipherVaultApp({ windowId }: { windowId: string }) {
                         <button 
                             key={cat.id}
                             onClick={() => { setFilter(cat.id); setView('list'); setSelectedItem(null); }}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                            className={`${isMobileView ? 'px-3 py-2 shrink-0' : 'w-full px-3 py-2'} flex items-center gap-3 rounded-lg text-sm font-medium transition-colors
                                 ${filter === cat.id ? 'bg-emerald-900/20 text-accent' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900'}
                             `}
                         >
                             <cat.icon size={16} />
-                            <span className="hidden md:inline">{cat.label}</span>
+                            <span className={isMobileView ? 'inline' : 'hidden md:inline'}>{cat.label}</span>
                         </button>
                     ))}
+                    {isMobileView && (
+                        <button
+                            onClick={() => { setView('create'); setFormData({}); setShowSecret(false); }}
+                            className="px-3 py-2 shrink-0 ml-auto flex items-center gap-1 rounded-lg bg-accent text-white text-sm font-bold"
+                        >
+                            <Plus size={16} /> New
+                        </button>
+                    )}
                 </div>
-                <div className="mt-auto p-3">
+                <div className={`${isMobileView ? 'hidden' : 'mt-auto p-3'}`}>
                     <button 
                         onClick={() => { setView('create'); setFormData({}); setShowSecret(false); }}
                         className="w-full bg-accent hover:bg-accent text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-900/20"

@@ -90,7 +90,7 @@ export default function BootScreen() {
         <div className="text-zinc-600 text-xs text-center tracking-[0.3em] mt-1 uppercase">AI-Native Operating System</div>
       </div>
 
-      <div className="w-72 mb-6">
+      <div className="w-full max-w-xs px-6 mb-6">
         <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
           <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-300 shadow-accent" style={{ width: `${progress}%` }} />
         </div>

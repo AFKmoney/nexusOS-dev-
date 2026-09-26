@@ -11,7 +11,7 @@ export default function RichEditorApp() {
   }, []);
 
   const ToolBtn = ({ icon: Icon, cmd, val, tip }: { icon: any; cmd: string; val?: string; tip: string }) => (
-    <button onClick={() => exec(cmd, val)} title={tip} className="p-1.5 hover:bg-white/10 rounded-lg transition text-zinc-400 hover:text-white">
+    <button onClick={() => exec(cmd, val)} title={tip} className="p-2.5 sm:p-1.5 hover:bg-white/10 rounded-lg transition text-zinc-400 hover:text-white">
       <Icon size={14} />
     </button>
   );
@@ -35,7 +35,7 @@ export default function RichEditorApp() {
   return (
     <div className="h-full flex flex-col bg-[#050508] text-zinc-100">
       {/* Header */}
-      <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
+      <div className="px-3 sm:px-5 py-2 sm:py-3 border-b border-white/5 flex items-center justify-between gap-2 bg-black/30 shrink-0">
         <div className="flex items-center gap-2">
           <FileText size={16} className="text-amber-400" />
           <input value={fileName} onChange={e => setFileName(e.target.value)} className="font-bold text-sm bg-transparent border-none outline-none text-white tracking-widest uppercase w-40" />

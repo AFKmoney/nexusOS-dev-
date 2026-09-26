@@ -69,13 +69,13 @@ export default function SystemInfoApp() {
     <div className="h-full bg-[#050508] text-zinc-100 p-4 sm:p-8 overflow-y-auto custom-scrollbar relative">
       <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
       
-      <div className="flex items-center gap-4 mb-10">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-2xl border border-white/10">
-          <Monitor size={32} className="text-white" />
+      <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-10">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-2xl border border-white/10 shrink-0">
+          <Monitor size={28} className="text-white" />
         </div>
-        <div>
-          <h1 className="text-2xl font-black uppercase tracking-[0.2em] text-white">System Diagnostics</h1>
-          <p className="text-zinc-500 text-xs font-mono uppercase tracking-widest">Host: {info.network.nodeId} // Status: Nominal</p>
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-black uppercase tracking-[0.15em] text-white">System Diagnostics</h1>
+          <p className="text-zinc-500 text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Host: {info.network.nodeId} // Status: Nominal</p>
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export default function SystemInfoApp() {
             {Object.entries(info.os).map(([k, v]) => (
               <div key={k} className="flex justify-between px-5 py-3 hover:bg-white/[0.02] transition-colors">
                 <span className="text-xs text-zinc-400 capitalize">{k}</span>
-                <span className="text-xs text-white font-bold">{v}</span>
+                <span className="text-xs text-white font-bold text-right break-all ml-3">{v}</span>
               </div>
             ))}
           </div>
@@ -109,7 +109,7 @@ export default function SystemInfoApp() {
             {Object.entries(info.hardware).map(([k, v]) => (
               <div key={k} className="flex justify-between px-5 py-3 hover:bg-white/[0.02] transition-colors">
                 <span className="text-xs text-zinc-400 capitalize">{k}</span>
-                <span className="text-xs text-white font-bold">{v}</span>
+                <span className="text-xs text-white font-bold text-right break-all ml-3">{v}</span>
               </div>
             ))}
           </div>
