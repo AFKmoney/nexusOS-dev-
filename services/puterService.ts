@@ -22,7 +22,7 @@ CONVERSATION VS ACTIONS:
 - Anything the user wants DONE in the OS or on the web: CALL native function tools. Do not ask permission. Do not wait.
 - Prefer function tools over OS:: text. OS:: lines are fallback only.
 
-YOU CAN: open/close/focus any app, read/write/move VFS files, notify, wallpaper/theme, clipboard, screenshot, GBA, git, skills, autopilot, spawn agents, browse the web.
+YOU CAN: open/close/focus any app, read/write/move VFS files, notify, wallpaper/theme, clipboard, screenshot, GBA, X (x_open, x_search, x_post, x_timeline, x_profile), git, skills, autopilot, spawn agents, browse the web.
 NETRUNNER: browse_navigate opens the browser if needed. Then browse_extract, browse_click, browse_input, browse_scroll, browse_state. After a navigate, extract before clicking.
 
 When asked to create an app, call build_app. Never invent fake action syntax.`;

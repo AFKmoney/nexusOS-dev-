@@ -32,7 +32,7 @@ function getValidAppIds(): Set<string> {
 
   // Fallback: minimal set of known app IDs
   _validAppIdsCache = new Set([
-    'hyperide', 'terminal', 'netrunner', 'explorer', 'forge',
+    'hyperide', 'terminal', 'netrunner', 'explorer', 'forge', 'x',
     'model_manager', 'notepad', 'dashboard', 'settings', 'calculator',
     'webrunner', 'ubuntu', 'wallpaper', 'daemon_chat', 'aion_agent',
     'monitor', 'paint', 'video_player', 'image_viewer', 'music',

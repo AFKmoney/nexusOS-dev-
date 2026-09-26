@@ -84,5 +84,10 @@ export function getOsActionTools(): AITool[] {
     { name: 'cluster_status', description: 'Read cluster status', parameters: { type: 'object', properties: {} } },
 
     { name: 'gba_command', description: 'Control GBA Station: play, pause, load a ROM, or press a key', parameters: { type: 'object', properties: { action: { type: 'string', enum: ['play', 'pause', 'load', 'press', 'open'] }, key: str('Pad key'), rom: str('ROM filename in /home/user/Roms') }, required: ['action'] } },
+    { name: 'x_open', description: 'Open the X app', parameters: { type: 'object', properties: {} } },
+    { name: 'x_search', description: 'Search X posts', parameters: { type: 'object', properties: { query: str('Search query') }, required: ['query'] } },
+    { name: 'x_post', description: 'Post to X. Uses saved local token, otherwise opens compose.', parameters: { type: 'object', properties: { text: str('Tweet text, max 280') }, required: ['text'] } },
+    { name: 'x_timeline', description: 'Open X home or saved handle timeline', parameters: { type: 'object', properties: {} } },
+    { name: 'x_profile', description: 'Open an X profile', parameters: { type: 'object', properties: { handle: str('Username without required @') }, required: ['handle'] } },
   ];
 }

@@ -1310,6 +1310,47 @@ export class ToolForge {
           break;
         }
 
+        case 'X_OPEN': {
+          const { openXSurface } = await import('./xBridge');
+          openXSurface();
+          result = `[OS::X_OPEN] → ✅ X app opened`;
+          break;
+        }
+        case 'X_SEARCH': {
+          const query = clampLength(toStringArg(actionArgs[0]), 280);
+          const { xSearch } = await import('./xBridge');
+          const res = await xSearch(query);
+          if (res.posts.length) {
+            result = `[OS::X_SEARCH: ${query}] → ${res.posts.length} posts\n` + res.posts.map(p => `- ${p.text.slice(0, 140)} ${p.url}`).join('\n');
+          } else {
+            result = `[OS::X_SEARCH: ${query}] → opened ${res.fallback || 'X search'}`;
+          }
+          break;
+        }
+        case 'X_POST': {
+          const text = clampLength(toStringArg(actionArgs[0]), 280);
+          const { xPost } = await import('./xBridge');
+          const res = await xPost(text);
+          result = res.ok
+            ? `[OS::X_POST] → ✅ ${res.id || 'posted'}`
+            : `[OS::X_POST] → ${res.error || 'compose opened'} ${res.fallback || ''}`;
+          break;
+        }
+        case 'X_TIMELINE': {
+          const { xTimeline } = await import('./xBridge');
+          const res = await xTimeline();
+          result = `[OS::X_TIMELINE] → ${res.fallback}`;
+          break;
+        }
+        case 'X_PROFILE': {
+          const handle = sanitizeActionArg(toStringArg(actionArgs[0]));
+          const { openXSurface, xProfileUrl } = await import('./xBridge');
+          const url = xProfileUrl(handle);
+          openXSurface(url);
+          result = `[OS::X_PROFILE] → ${url}`;
+          break;
+        }
+
         default:
           result = `[OS::${action.type}] → Unknown action type`;
       }
@@ -1535,6 +1576,21 @@ export class ToolForge {
           break;
         case 'gba_command':
           osAction = `OS::GBA_COMMAND:${args.action}:${args.key || ''}:${args.rom || ''}`;
+          break;
+        case 'x_open':
+          osAction = `OS::X_OPEN`;
+          break;
+        case 'x_search':
+          osAction = `OS::X_SEARCH:${args.query}`;
+          break;
+        case 'x_post':
+          osAction = `OS::X_POST:${args.text}`;
+          break;
+        case 'x_timeline':
+          osAction = `OS::X_TIMELINE`;
+          break;
+        case 'x_profile':
+          osAction = `OS::X_PROFILE:${args.handle}`;
           break;
         default:
           results.push(`[Unknown tool: ${call.name}]`);

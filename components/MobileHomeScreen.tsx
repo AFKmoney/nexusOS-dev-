@@ -53,6 +53,7 @@ export const MobileHomeScreen: React.FC<MobileHomeScreenProps> = ({ onOpenApp })
     'calendar',
     'music',
     'gba',
+    'x',
     'terminal',
     'dashboard',
   ];
@@ -78,7 +79,7 @@ export const MobileHomeScreen: React.FC<MobileHomeScreenProps> = ({ onOpenApp })
       label: 'Multimédia',
       icon: Palette,
       filter: (id) =>
-        ['music', 'paint', 'image_viewer', 'video_player', 'wallpaper', 'fractal', 'rss', 'gba'].includes(id),
+        ['music', 'paint', 'image_viewer', 'video_player', 'wallpaper', 'fractal', 'rss', 'gba', 'x'].includes(id),
     },
     system: {
       label: 'Système & IA',

@@ -83,4 +83,7 @@ export const OS_EVENTS = {
   GBA_RELEASE: 'os:gba:release',
   GBA_LOAD: 'os:gba:load',
   GBA_COMMAND: 'os:gba:command',
+  X_COMMAND: 'os:x:command',
+  X_STATUS: 'os:x:status',
+  X_RESULTS: 'os:x:results',
 } as const;
