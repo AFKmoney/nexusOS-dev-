@@ -120,7 +120,7 @@ export default function MusicPlayerApp() {
     <div className="h-full flex flex-col bg-[#050508] text-zinc-100">
       <audio ref={audioRef} onTimeUpdate={onTimeUpdate} onEnded={onEnded} crossOrigin="anonymous" />
 
-      <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
+      <div className="px-4 sm:px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
         <div className="flex items-center gap-2">
           <Music size={16} className="text-accent" />
           <span className="font-bold text-sm tracking-widest uppercase">Music</span>
@@ -131,11 +131,11 @@ export default function MusicPlayerApp() {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
         {/* Main Player */}
         <div className="flex-1 flex flex-col">
           {/* Visualizer */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative min-h-[160px] sm:min-h-0">
             <canvas ref={canvasRef} className="w-full h-full" />
             {!currentTrack && (
               <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
@@ -188,7 +188,7 @@ export default function MusicPlayerApp() {
 
         {/* Playlist */}
         {showPlaylist && (
-          <div className="w-52 border-l border-white/5 overflow-y-auto bg-black/20">
+          <div className="w-full sm:w-52 max-h-44 sm:max-h-none border-t sm:border-t-0 sm:border-l border-white/5 overflow-y-auto bg-black/20 shrink-0">
             <div className="p-3 text-xs text-zinc-500 uppercase tracking-wider border-b border-white/5">Playlist ({tracks.length})</div>
             {tracks.map((t, i) => (
               <button key={t.id} onClick={() => playTrack(i)}

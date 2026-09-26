@@ -69,7 +69,7 @@ export default function RecycleBin({ windowId }: { windowId: string }) {
   return (
     <div className="h-full flex flex-col bg-[#0a0a0f] text-slate-200">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-zinc-800/50">
             <Trash2 size={20} className="text-zinc-400" />

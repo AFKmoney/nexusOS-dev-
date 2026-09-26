@@ -150,7 +150,7 @@ export default function PaintApp() {
   return (
     <div className="h-full flex flex-col bg-[#050508] text-zinc-100 font-sans select-none overflow-hidden">
       {/* Top Toolbar */}
-      <div className="h-14 bg-black/40 backdrop-blur-xl border-b border-white/5 flex items-center px-4 justify-between shrink-0 shadow-lg z-10">
+      <div className="min-h-14 bg-black/40 backdrop-blur-xl border-b border-white/5 flex flex-wrap items-center px-2 sm:px-4 py-2 gap-2 justify-between shrink-0 shadow-lg z-10">
         
         {/* Tools */}
         <div className="flex items-center gap-1.5 bg-black/50 p-1 rounded-xl border border-white/5">
@@ -199,7 +199,7 @@ export default function PaintApp() {
           <button onClick={handleUndo} disabled={historyIdx <= 0} className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg disabled:opacity-30 transition-all"><Undo size={16} /></button>
           <button onClick={handleRedo} disabled={historyIdx >= history.length - 1} className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg disabled:opacity-30 transition-all"><Redo size={16} /></button>
           <div className="w-px h-6 bg-white/10 mx-1" />
-          <button onClick={downloadCanvas} className="flex items-center gap-2 px-4 py-1.5 bg-accent/20 text-accent border border-accent/30 hover:bg-accent hover:text-black rounded-lg text-xs font-bold uppercase tracking-wider transition-all"><Download size={14} /> Export</button>
+          <button onClick={downloadCanvas} className="flex items-center gap-2 px-3 sm:px-4 py-1.5 bg-accent/20 text-accent border border-accent/30 hover:bg-accent hover:text-black rounded-lg text-xs font-bold uppercase tracking-wider transition-all"><Download size={14} /> <span className="hidden sm:inline">Export</span></button>
         </div>
 
       </div>

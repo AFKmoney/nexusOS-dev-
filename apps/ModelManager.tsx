@@ -230,7 +230,7 @@ export default function ModelManager({ windowId }: { windowId: string }) {
   // ─── Render ────────────────────────────────────────────────────────
   return (
     <div className="h-full flex flex-col bg-[#050508] text-slate-200 font-sans select-none overflow-hidden">
-      <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-white/5 bg-black/30 flex items-center justify-between gap-2 shrink-0">
+      <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-white/5 bg-black/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="p-2 bg-accent/10 rounded-xl border border-accent/20 shrink-0">
             <Cpu size={18} className="text-accent" />

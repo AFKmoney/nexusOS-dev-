@@ -63,7 +63,7 @@ export default function TaskManager() {
       </div>
 
       {/* Process List */}
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-auto p-3 sm:p-4">
         <div className="flex items-center justify-between mb-4 px-2">
             <h2 className="text-white font-bold tracking-widest uppercase text-xs flex items-center gap-2">
                <Activity size={14} className="text-accent" />
@@ -79,9 +79,9 @@ export default function TaskManager() {
             <tr className="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-white/5 bg-zinc-900/50">
               <th className="p-3 font-medium">PID</th>
               <th className="p-3 font-medium">Process Name</th>
-              <th className="p-3 font-medium">Status / Priority</th>
+              <th className="p-3 font-medium hidden sm:table-cell">Status / Priority</th>
               <th className="p-3 font-medium text-right">CPU</th>
-              <th className="p-3 font-medium text-right">Uptime</th>
+              <th className="p-3 font-medium text-right hidden sm:table-cell">Uptime</th>
               <th className="p-3 font-medium text-right">Memory</th>
               <th className="p-3 font-medium text-center">Action</th>
             </tr>
@@ -99,8 +99,7 @@ export default function TaskManager() {
                   <div className="w-1.5 h-1.5 rounded-full bg-accent shadow-accent" />
                   {p.name}
                 </td>
-                <td className="p-3">
-                  <div className="flex flex-col gap-1 items-start">
+                <td className="p-3 hidden sm:table-cell">
                     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
                       p.state === 'running' ? 'bg-accent/10 text-accent border border-accent/20' : 
                       p.state === 'minimized' ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' :
@@ -118,7 +117,7 @@ export default function TaskManager() {
                   </div>
                 </td>
                 <td className="p-3 text-right text-xs text-accent font-bold">{p.cpuEstimate}%</td>
-                <td className="p-3 text-right text-xs text-zinc-400">{getUptime(p.windowId)}</td>
+                <td className="p-3 text-right text-xs text-zinc-400 hidden sm:table-cell">{getUptime(p.windowId)}</td>
                 <td className="p-3 text-right text-xs text-accent">{(p.memoryEstimate / 1024).toFixed(1)} MB</td>
                 <td className="p-3 text-center">
                    <button 

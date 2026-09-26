@@ -57,7 +57,7 @@ export default function ClipboardManagerApp() {
 
   return (
     <div className="h-full flex flex-col bg-[#050508] text-zinc-100">
-      <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30">
+      <div className="px-4 sm:px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30">
         <div className="flex items-center gap-2">
           <Clipboard size={16} className="text-violet-400" />
           <span className="font-bold text-sm tracking-widest uppercase">Clipboard</span>
@@ -87,7 +87,7 @@ export default function ClipboardManagerApp() {
               <div className="flex-1 text-xs text-zinc-300 font-mono whitespace-pre-wrap line-clamp-3 cursor-pointer" onClick={() => copyToClipboard(e.text)}>
                 {e.text}
               </div>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition shrink-0">
                 <button onClick={() => copyToClipboard(e.text)} className="p-1 hover:bg-accent/20 rounded" title="Copy">
                   <Copy size={12} className="text-accent" />
                 </button>

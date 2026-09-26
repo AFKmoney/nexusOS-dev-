@@ -94,7 +94,7 @@ export default function NativeZipApp() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto custom-scrollbar">
          
          {/* Instruction Banner */}
          <div className="p-4 bg-accent/10 border border-accent/20 rounded-xl text-xs text-blue-300 mb-6 flex gap-3">

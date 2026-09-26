@@ -418,7 +418,7 @@ export default function ForgeSystem({ windowId }: { windowId: string }) {
       <div className="flex-1 relative overflow-hidden bg-[#020204]">
         {/* Loading Overlay */}
         {isGenerating && !code && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black gap-6">
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black gap-4 sm:p-6">
             <div className="relative">
               <div className="w-20 h-20 rounded-full border-2 border-accent/10 border-t-emerald-500 animate-spin" />
               <Sparkles className="absolute inset-0 m-auto text-accent animate-pulse" size={28} />
@@ -435,7 +435,7 @@ export default function ForgeSystem({ windowId }: { windowId: string }) {
 
         {/* Code View */}
         <textarea
-          className={`w-full h-full bg-transparent p-6 text-xs text-zinc-400 outline-none resize-none font-mono leading-relaxed transition-opacity selection:bg-accent/20 ${view === 'code' ? 'opacity-100 relative z-10' : 'opacity-0 absolute pointer-events-none'}`}
+          className={`w-full h-full bg-transparent p-4 sm:p-6 text-xs text-zinc-400 outline-none resize-none font-mono leading-relaxed transition-opacity selection:bg-accent/20 ${view === 'code' ? 'opacity-100 relative z-10' : 'opacity-0 absolute pointer-events-none'}`}
           value={code}
           spellCheck={false}
           readOnly={isGenerating}

@@ -19,7 +19,7 @@ export default function NotificationCenterApp() {
 
   return (
     <div className="h-full flex flex-col bg-[#050508] text-zinc-100">
-      <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30">
+      <div className="px-4 sm:px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30">
         <div className="flex items-center gap-2">
           <Bell size={16} className="text-accent" />
           <span className="font-bold text-sm tracking-widest uppercase">Notifications</span>
@@ -28,7 +28,7 @@ export default function NotificationCenterApp() {
       </div>
 
       {/* Filters */}
-      <div className="px-4 py-2 border-b border-white/5 flex gap-2">
+      <div className="px-4 py-2 border-b border-white/5 flex gap-2 overflow-x-auto no-scrollbar">
         {(['all', 'info', 'warning', 'error'] as const).map(f => (
           <button
             key={f}

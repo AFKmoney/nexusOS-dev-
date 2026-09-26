@@ -35,7 +35,7 @@ export default function DaemonJournalApp() {
   return (
     <div className="h-full flex flex-col bg-[#050508] text-zinc-100">
       {/* Header */}
-      <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
+      <div className="px-4 sm:px-5 py-3 border-b border-white/5 flex flex-wrap items-center justify-between gap-2 bg-black/30 shrink-0">
         <div className="flex items-center gap-2">
           <BookOpen size={16} className="text-violet-400" />
           <span className="font-bold tracking-widest text-sm uppercase">DAEMON Journal</span>

@@ -198,7 +198,7 @@ export default function SettingsApp() {
       <div className="flex-1 flex overflow-hidden">
         {/* Desktop Sidebar */}
         {!isMobileView && (
-          <div className="w-56 border-r border-white/5 bg-black/40 p-4 space-y-1 shrink-0">
+          <div className="w-full sm:w-56 border-r border-white/5 bg-black/40 p-4 space-y-1 shrink-0">
             <div className="px-3 py-2 mb-2">
               <div className="text-xs font-black text-zinc-600 uppercase tracking-[0.2em] mb-4">Control Center</div>
               {tabs.map(({ id, label, icon: Icon }) => (
@@ -231,7 +231,7 @@ export default function SettingsApp() {
                 </button>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-4 sm:p-6 p-4 sm:p-6 rounded-3xl bg-white/[0.02] border border-white/5">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-2xl sm:text-3xl font-black text-white border border-white/20 shadow-2xl shrink-0">
                   {profileName?.[0] || 'A'}
                 </div>
@@ -252,7 +252,7 @@ export default function SettingsApp() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {kernelRules.activeLocalModel ? (
                   <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
                     <div className="text-[10px] text-zinc-500 uppercase font-black mb-2 tracking-widest">Active Model</div>
@@ -513,10 +513,10 @@ export default function SettingsApp() {
           {tab === 'appearance' && (
             <div className="max-w-2xl animate-in fade-in slide-in-from-bottom-4 space-y-6">
               <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Visual Interface</h2>
-              <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-6">
+              <div className="p-4 sm:p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-6">
                 <div>
                   <div className="text-[10px] text-zinc-500 uppercase font-black mb-4 tracking-widest">Accent Synchronization</div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                     {ACCENTS.map(acc => (
                       <button
                         key={acc.name}
@@ -552,7 +552,7 @@ export default function SettingsApp() {
                     <div className="text-[10px] text-zinc-500 uppercase font-black tracking-widest">Active Surface (Wallpapers 3D 3DS)</div>
                     <span className="text-[10px] text-accent font-mono uppercase tracking-wider">{WALLPAPERS.length} Wallpapers 3D</span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto custom-scrollbar p-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto custom-scrollbar p-1">
                     {WALLPAPERS.map(wp => {
                       const isActive = wallpaper === wp.id;
                       return (
@@ -639,7 +639,7 @@ export default function SettingsApp() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="p-6 rounded-3xl bg-accent/10 border border-accent/20 flex items-center gap-4">
+                  <div className="p-4 sm:p-6 rounded-3xl bg-accent/10 border border-accent/20 flex items-center gap-4">
                     <CheckCircle className="text-accent shrink-0" size={24} />
                     <div>
                       <div className="text-sm font-black text-white uppercase tracking-widest">DAEMON_CORE_ACTIVE</div>
@@ -662,12 +662,12 @@ export default function SettingsApp() {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-zinc-950 border border-white/5 rounded-2xl italic text-zinc-500 text-xs leading-relaxed text-center font-serif">
+                  <div className="p-4 sm:p-6 bg-zinc-950 border border-white/5 rounded-2xl italic text-zinc-500 text-xs leading-relaxed text-center font-serif">
                     "DAEMON is the integrated AI engine of NexusOS. It provides autonomous reasoning, app generation, code synthesis, and system management. Fully connected to the kernel with persistent memory and self-healing capabilities."
                   </div>
 
                   {!weightsDownloaded && (
-                    <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-4">
+                    <div className="p-4 sm:p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-4">
                         <div className="flex items-center gap-3 text-amber-400">
                             <AlertCircle size={20} />
                             <div className="text-sm font-bold uppercase tracking-widest">Neural Weights Missing</div>
@@ -858,7 +858,7 @@ function AIProvidersTab({ addNotification }: { addNotification: (n: any) => void
             <Plus size={12} /> Add Provider
           </button>
           {showAddMenu && (
-            <div className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-full sm:w-64 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
               {availablePresets.length === 0 ? (
                 <div className="p-4 text-xs text-zinc-500 text-center">All providers already added</div>
               ) : (
