@@ -531,9 +531,19 @@ export default function ContextMenu() {
 
   const Separator = () => <div className="h-px bg-white/10 my-1 mx-2" />;
   
+  const runItem = (e: React.SyntheticEvent, fn: () => void | Promise<void>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    void fn();
+  };
+
   const MenuItem = ({ icon: Icon, label, onClick, danger = false, disabled = false, shortcut }: MenuItemProps) => (
     <button 
-        onClick={onClick} 
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onClick={(e) => { if (!disabled) runItem(e, onClick); }}
         disabled={disabled}
         className={`w-full flex items-center justify-between px-3 ${isMobile ? 'py-3' : 'py-1.5'} text-[13px] text-left transition-colors
         ${danger ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}
@@ -550,7 +560,11 @@ export default function ContextMenu() {
 
   const NeuralItem = ({ icon: Icon, label, onClick }: NeuralItemProps) => (
       <button 
-        onClick={onClick}
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onClick={(e) => runItem(e, onClick)}
         className="w-full flex items-center gap-3 px-3 py-1.5 text-[13px] text-left transition-colors text-purple-200 hover:bg-purple-500/20 hover:text-white group relative overflow-hidden"
       >
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -566,7 +580,7 @@ export default function ContextMenu() {
   return (
     <div 
       ref={menuRef}
-      className={`context-menu fixed z-[9999] bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5 ${
+      className={`context-menu fixed z-[9999] pointer-events-auto bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5 ${
         isMobile
           ? 'inset-x-2 bottom-16 top-auto max-h-[70vh] w-auto min-w-0 rounded-2xl overflow-y-auto'
           : 'min-w-[240px] max-h-[min(80vh,640px)] overflow-y-auto rounded-lg'
