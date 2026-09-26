@@ -1,6 +1,6 @@
 {
-  "name": "NexusOS",
-  "short_name": "NexusOS",
+  "name": "LazySiren",
+  "short_name": "LazySiren",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",

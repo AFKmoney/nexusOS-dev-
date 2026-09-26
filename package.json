@@ -1,8 +1,8 @@
 {
-  "name": "nexusos",
+  "name": "lazysiren",
   "private": true,
   "version": "2.0.6",
-  "description": "The Sovereign Neural Operating System — Locally Inferenced, Globally Distributed.",
+  "description": "LazySiren — the OS that works while you watch.",
   "author": "Philippe-Antoine Robert",
   "type": "commonjs",
   "scripts": {

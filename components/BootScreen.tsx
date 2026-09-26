@@ -52,7 +52,7 @@ export default function BootScreen() {
         setBooted(true);
         setTimeout(() => {
           useOS.getState().addNotification({
-            title: 'NexusOS',
+            title: 'LazySiren',
             message: 'System ready. All modules loaded.',
             type: 'success'
           });

@@ -31,10 +31,10 @@ export default function WelcomeApp({ id }: { id: string }) {
             <Zap size={12} className="animate-pulse" /> System Online
           </div>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white mb-2">
-            NexusOS
+            LazySiren
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
-            AI-native operating system. Built for developers, designed for the future.
+            The OS that works while you watch. Nexus is the drawer.
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function WelcomeApp({ id }: { id: string }) {
 
         {/* Version */}
         <div className="text-center mt-5 sm:mt-6 text-[9px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
-          NexusOS v2.0.6 — Created by Philippe-Antoine Robert
+          LazySiren v2.0.6 — Created by Philippe-Antoine Robert
         </div>
       </div>
     </div>

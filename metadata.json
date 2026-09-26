@@ -1,6 +1,6 @@
 {
-  "name": "NexusOS",
-  "description": "A sentient web-based Operating System featuring NeuralCore, NeuralForge, and a persistent virtual filesystem.",
+  "name": "LazySiren",
+  "description": "LazySiren — AI-native OS. The model lives in the kernel.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
