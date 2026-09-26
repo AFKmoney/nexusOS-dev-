@@ -260,6 +260,21 @@ function DesktopIconGrid({
                 e.stopPropagation();
                 openContextMenu({ isOpen: true, x: e.clientX, y: e.clientY, targetType: 'icon', filePath: itemPath });
               }}
+              onTouchStart={(e) => {
+                const touch = e.touches[0];
+                const x = touch?.clientX ?? 0;
+                const y = touch?.clientY ?? 0;
+                const handle = window.setTimeout(() => {
+                  openContextMenu({ isOpen: true, x, y, targetType: 'icon', filePath: itemPath });
+                }, 480);
+                const cancel = () => {
+                  window.clearTimeout(handle);
+                  e.currentTarget.removeEventListener('touchend', cancel);
+                  e.currentTarget.removeEventListener('touchmove', cancel);
+                };
+                e.currentTarget.addEventListener('touchend', cancel, { once: true });
+                e.currentTarget.addEventListener('touchmove', cancel, { once: true });
+              }}
             >
               <div className={`${isMobile ? 'w-11 h-11' : 'w-12 h-12'} bg-zinc-900/60 rounded-xl flex items-center justify-center border border-white/8 group-hover:border-accent/30 group-active:scale-95 transition-all shadow-md group-hover:shadow-accent`}>
                 {getSmartIcon(itemPath, isMobile ? 22 : 24)}
@@ -488,7 +503,8 @@ export default function App() {
 
   const handleGlobalClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (!target.closest('.start-menu') && isStartMenuOpen) toggleStartMenu();
+    if (target.closest('.context-menu')) return;
+    if (!target.closest('.start-menu') && !target.closest('.taskbar') && isStartMenuOpen) toggleStartMenu();
     if (useOS.getState().contextMenu.isOpen) useOS.getState().closeContextMenu();
 
     // 3DS Parallax: tap = tilt impulsif when clicking/tapping on desktop substrate

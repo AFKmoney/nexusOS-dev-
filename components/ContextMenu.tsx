@@ -65,15 +65,21 @@ export default function ContextMenu() {
   }, [contextMenu.isOpen, contextMenu.x, contextMenu.y]);
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        closeContextMenu();
-      }
+    if (!contextMenu.isOpen) return;
+    const handleOutside = (e: Event) => {
+      const node = e.target as Node | null;
+      if (menuRef.current && node && menuRef.current.contains(node)) return;
+      closeContextMenu();
     };
-    if (contextMenu.isOpen) {
-      window.addEventListener('mousedown', handleClick);
-    }
-    return () => window.removeEventListener('mousedown', handleClick);
+    const timer = window.setTimeout(() => {
+      window.addEventListener('mousedown', handleOutside);
+      window.addEventListener('touchstart', handleOutside, { passive: true });
+    }, 350);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('mousedown', handleOutside);
+      window.removeEventListener('touchstart', handleOutside);
+    };
   }, [contextMenu.isOpen, closeContextMenu]);
 
   if (!contextMenu.isOpen) return null;
@@ -529,7 +535,7 @@ export default function ContextMenu() {
     <button 
         onClick={onClick} 
         disabled={disabled}
-        className={`w-full flex items-center justify-between px-3 py-1.5 text-[13px] text-left transition-colors
+        className={`w-full flex items-center justify-between px-3 ${isMobile ? 'py-3' : 'py-1.5'} text-[13px] text-left transition-colors
         ${danger ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
@@ -560,8 +566,14 @@ export default function ContextMenu() {
   return (
     <div 
       ref={menuRef}
-      className="fixed z-[9999] min-w-[240px] bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5"
-      style={{ left: position.x, top: position.y }}
+      className={`context-menu fixed z-[9999] bg-zinc-900/95 backdrop-blur-xl border border-zinc-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.5)] py-1 animate-in fade-in zoom-in-95 duration-100 select-none flex flex-col ring-1 ring-white/5 ${
+        isMobile
+          ? 'inset-x-2 bottom-16 top-auto max-h-[70vh] w-auto min-w-0 rounded-2xl overflow-y-auto'
+          : 'min-w-[240px] max-h-[min(80vh,640px)] overflow-y-auto rounded-lg'
+      }`}
+      style={isMobile ? undefined : { left: position.x, top: position.y }}
+      onClick={(e) => e.stopPropagation()}
+      onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
         {/* Hidden File Input for Custom Icons */}
         <input 
