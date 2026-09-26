@@ -15,8 +15,7 @@ function applyOp(left: number, right: number, op: Op): number {
 
 function formatNum(n: number): string {
   if (!Number.isFinite(n)) return 'Error';
-  const s = Number(n.toPrecision(12)).toString();
-  return s;
+  return Number(n.toPrecision(12)).toString();
 }
 
 function symbol(op: Op): string {
@@ -34,9 +33,10 @@ export default function CalculatorPro() {
   const [history, setHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  const tap = useCallback((fn: () => void) => (e: React.PointerEvent | React.MouseEvent) => {
+  const tap = useCallback((fn: () => void) => (e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (e.button !== undefined && e.button !== 0) return;
     fn();
   }, []);
 
@@ -126,7 +126,6 @@ export default function CalculatorPro() {
     <button
       type="button"
       onPointerDown={tap(onPress)}
-      onClick={tap(onPress)}
       className={`h-11 sm:h-14 rounded-xl sm:rounded-2xl ${color} ${textColor} text-base sm:text-lg font-bold hover:brightness-125 active:scale-95 transition-all shadow-md border border-white/5 flex items-center justify-center select-none touch-manipulation ${className}`}
     >
       {label}
