@@ -77,9 +77,9 @@ export default function SnippetsApp() {
         </button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         {/* Sidebar */}
-        <div className="w-full sm:w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-72 border-b sm:border-b-0 sm:border-r border-white/5 flex flex-col shrink-0 bg-black/20 max-h-[34%] sm:max-h-none">
           <div className="p-4 border-b border-white/5">
             <div className="relative">
               <Search className="absolute left-3 top-2.5 text-zinc-600" size={14} />
@@ -130,7 +130,7 @@ export default function SnippetsApp() {
               </div>
               <div className="flex-1 relative group">
                 <textarea 
-                  className="w-full h-full bg-transparent p-8 text-sm font-mono text-emerald-100/80 outline-none resize-none selection:bg-accent/20 leading-relaxed custom-scrollbar"
+                  className="w-full h-full bg-transparent p-4 sm:p-8 text-sm font-mono text-emerald-100/80 outline-none resize-none selection:bg-accent/20 leading-relaxed custom-scrollbar"
                   spellCheck={false}
                   value={activeSnippet.code}
                   onChange={e => updateSnippet(activeSnippet.id, { code: e.target.value })}

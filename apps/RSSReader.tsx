@@ -97,9 +97,9 @@ export default function RSSReader() {
         </button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         {/* Sidebar */}
-        <div className="w-full sm:w-64 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-64 border-b sm:border-b-0 sm:border-r border-white/5 flex flex-col shrink-0 bg-black/20 max-h-[32%] sm:max-h-none">
           <div className="p-4 border-b border-white/5">
             <form onSubmit={addFeed} className="relative">
               <input 
@@ -125,14 +125,14 @@ export default function RSSReader() {
                   <Newspaper size={14} />
                   <span className="text-xs font-bold truncate">{f.title}</span>
                 </button>
-                <button onClick={() => deleteFeed(f.id)} className="absolute right-2 opacity-0 group-hover:opacity-100 p-1 text-zinc-600 hover:text-red-400 transition-all"><Trash2 size={12}/></button>
+                <button onClick={() => deleteFeed(f.id)} className="absolute right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-zinc-600 hover:text-red-400 transition-all"><Trash2 size={12}/></button>
               </div>
             ))}
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-black/40">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 bg-black/40 min-h-0">
           <div className="max-w-3xl mx-auto space-y-6">
             {loading ? (
               <div className="py-20 flex flex-col items-center gap-4 opacity-40">

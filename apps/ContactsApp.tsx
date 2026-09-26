@@ -75,9 +75,9 @@ export default function ContactsApp() {
         </button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
         {/* Sidebar / Search */}
-        <div className="w-full sm:w-72 border-r border-white/5 flex flex-col shrink-0 bg-black/20">
+        <div className="w-full sm:w-72 border-b sm:border-b-0 sm:border-r border-white/5 flex flex-col shrink-0 bg-black/20 max-h-[38%] sm:max-h-none">
           <div className="p-4 border-b border-white/5">
             <div className="relative group">
               <Search className="absolute left-3 top-2.5 text-zinc-600 group-focus-within:text-accent transition-colors" size={14} />
@@ -110,7 +110,7 @@ export default function ContactsApp() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-10 relative">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-10 relative min-h-0">
           <div className="max-w-2xl mx-auto">
             {showAdd ? (
               <form onSubmit={addContact} className="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 animate-in zoom-in-95 duration-200">

@@ -105,7 +105,7 @@ export default function WeatherApp() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-10 z-10 relative flex flex-col items-center justify-center">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-10 z-10 relative flex flex-col items-center justify-center">
         {loading ? (
           <div className="animate-pulse flex flex-col items-center gap-4">
             <RefreshCw size={48} className="animate-spin text-accent" />

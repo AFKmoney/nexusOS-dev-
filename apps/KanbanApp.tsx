@@ -112,7 +112,7 @@ export default function KanbanApp() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-violet-900/10 via-transparent to-transparent pointer-events-none" />
 
       {/* Header */}
-      <div className="h-12 sm:h-16 px-4 sm:px-6 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl shrink-0 z-10 relative">
+      <div className="h-12 sm:h-16 px-3 sm:px-6 border-b border-white/5 flex items-center justify-between gap-2 bg-black/40 backdrop-blur-xl shrink-0 z-10 relative">
         <div className="flex items-center gap-4">
           <div className="p-2.5 bg-violet-500/20 rounded-xl">
             <Layout size={20} className="text-violet-400" />
@@ -123,19 +123,19 @@ export default function KanbanApp() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={purgeBoard} className="px-4 py-2 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
-            Purge Board
+          <button onClick={purgeBoard} className="px-2 sm:px-4 py-2 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all">
+            Purge
           </button>
-          <button onClick={addColumn} className="flex items-center gap-2 px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:scale-105 active:scale-95">
-            <Plus size={14} /> New Column
+          <button onClick={addColumn} className="flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all">
+            <Plus size={14} /> Col
           </button>
         </div>
       </div>
 
       {/* Board */}
-      <div className="flex-1 flex gap-6 p-6 overflow-x-auto overflow-y-hidden custom-scrollbar relative z-10">
+      <div className="flex-1 flex gap-3 sm:gap-6 p-3 sm:p-6 overflow-x-auto overflow-y-hidden custom-scrollbar relative z-10">
         {columns.map((col, colIdx) => (
-          <div key={col.id} className="w-full sm:w-80 shrink-0 flex flex-col max-h-full">
+          <div key={col.id} className="w-[78vw] max-w-[280px] sm:w-80 sm:max-w-none shrink-0 flex flex-col max-h-full">
             
             {/* Column Header */}
             <div className={`p-4 bg-zinc-900/80 backdrop-blur-md rounded-t-2xl border-t-4 border-x border-white/5 ${col.color} flex items-center justify-between shrink-0 shadow-lg`}>
@@ -163,7 +163,7 @@ export default function KanbanApp() {
                     </div>
                     
                     {/* Controls (visible on hover) */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-950 border border-white/10 p-1 rounded-lg absolute bottom-3 right-3 shadow-lg">
+                    <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-zinc-950 border border-white/10 p-1 rounded-lg absolute bottom-3 right-3 shadow-lg">
                       <button onClick={() => moveTask(col.id, task.id, -1)} disabled={colIdx === 0} className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded disabled:opacity-30 transition-all">←</button>
                       <button onClick={() => moveTask(col.id, task.id, 1)} disabled={colIdx === columns.length - 1} className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded disabled:opacity-30 transition-all">→</button>
                       <div className="w-px h-3 bg-white/10 mx-1" />
