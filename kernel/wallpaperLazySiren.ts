@@ -19,30 +19,48 @@ function init(){
   });
 }
 window.onresize=init;init();
-function mark(cx,cy,s,phase){
-  g.save();
-  g.translate(cx,cy);
-  g.scale(s,s);
+function sirenPath(phase){
+  const w=Math.sin(phase)*5;
+  const k=Math.cos(phase*0.7)*3;
+  return [
+    [0,-38],
+    [16+w,-28, 16+w,-8, -2,2],
+    [-20-k,12, -18-k,26, 2,34],
+    [18+w,40, 20+w,48, 8,54]
+  ];
+}
+function drawSiren(s,phase){
+  const p=sirenPath(phase);
   g.beginPath();
-  const steps=64;
-  for(let i=0;i<=steps;i++){
-    const u=i/steps;
-    const y=(u-0.5)*92;
-    const x=Math.sin(u*Math.PI*2 + phase)*16;
-    if(i===0) g.moveTo(x,y);
-    else g.lineTo(x,y);
-  }
+  g.moveTo(p[0][0],p[0][1]);
+  g.bezierCurveTo(p[1][0],p[1][1],p[1][2],p[1][3],p[1][4],p[1][5]);
+  g.bezierCurveTo(p[2][0],p[2][1],p[2][2],p[2][3],p[2][4],p[2][5]);
+  g.bezierCurveTo(p[3][0],p[3][1],p[3][2],p[3][3],p[3][4],p[3][5]);
   g.strokeStyle='#10b981';
-  g.lineWidth=3.4;
+  g.lineWidth=3.4/Math.max(s,0.001)*s;
   g.lineCap='round';
   g.lineJoin='round';
   g.shadowColor='rgba(16,185,129,0.7)';
   g.shadowBlur=16;
   g.stroke();
-  g.restore();
+}
+function drawWord(text,fs){
+  const gap=fs*0.38;
+  g.font='600 '+fs+'px ui-sans-serif,system-ui,sans-serif';
+  const widths=[...text].map(ch=>g.measureText(ch).width);
+  const total=widths.reduce((a,b)=>a+b,0)+gap*(text.length-1);
+  let x=-total/2;
+  g.textAlign='left';
+  g.textBaseline='top';
+  g.fillStyle='rgba(255,255,255,0.92)';
+  g.shadowBlur=0;
+  for(let i=0;i<text.length;i++){
+    g.fillText(text[i],x,0);
+    x+=widths[i]+gap;
+  }
 }
 function draw(){
-  t+=0.012;
+  t+=0.01;
   const {tiltX,tiltY,impulse:imp,strength:str}=g3();
   const ox=tiltX*28*str, oy=tiltY*22*str;
   g.fillStyle='#050508';
@@ -71,18 +89,15 @@ function draw(){
     g.fillStyle='rgba(110,231,183,0.7)';
     g.beginPath();g.arc(n.x+ox*0.15,n.y+oy*0.15,n.r,0,Math.PI*2);g.fill();
   }
-  const scale=Math.min(W,H)/420;
-  const cx=W*0.5+ox;
-  const cy=H*0.48+oy;
-  mark(cx,cy,scale,t*0.55);
-  g.shadowBlur=0;
-  g.fillStyle='rgba(255,255,255,0.9)';
-  const fs=Math.max(12,Math.min(W,H)*0.028);
-  g.font='600 '+fs+'px ui-sans-serif,system-ui,sans-serif';
-  g.textAlign='center';
-  g.textBaseline='middle';
-  if(g.letterSpacing!==undefined) g.letterSpacing='0.42em';
-  g.fillText('LAZYSIREN',cx,cy);
+  const scale=Math.min(W,H)/460;
+  const pulse=1+Math.sin(t*0.7)*0.03+imp*0.06;
+  g.save();
+  g.translate(W*0.5+ox,H*0.5+oy);
+  g.scale(scale*pulse,scale*pulse);
+  drawSiren(scale*pulse,t*0.45);
+  g.translate(0,66);
+  drawWord('LAZYSIREN',13);
+  g.restore();
   requestAnimationFrame(draw);
 }
 draw();
